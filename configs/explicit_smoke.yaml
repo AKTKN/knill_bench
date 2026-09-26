@@ -1,0 +1,112 @@
+schema_version: 1
+experiment:
+  name: explicit_schedule_smoke
+  master_seed: 12345
+  output_root: results
+  code: rotated_surface
+  distances:
+  - 3
+  bases:
+  - x
+  - z
+  physical_error_rates:
+  - 0.001
+  cycles:
+  - 1
+  replicates: 1
+  initial_boundary:
+    kind: noisy_preparation
+  final_readout: noisy_destructive
+  comparison:
+    kind: equal_time
+    target_time: 400
+noise:
+  profile: explicit
+  multipliers:
+    p1: 1
+    p2: 1
+    reset: 1
+    measurement: 1
+    idle: 0.1
+  durations:
+    p1: 1
+    p2: 2
+    reset: 2
+    measurement: 3
+  time_unit: gate_unit
+  preparation_schedule: serial_wait
+decoders:
+  mwpm:
+    kind: pymatching
+    on_nonmatchable: error
+  lom:
+    kind: lomatching
+    on_nonmatchable: bplsd_global
+    fallback_decoder: global_lsd
+  global_lsd:
+    kind: bplsd_global
+    max_iter: 100
+    bp_method: minimum_sum
+    ms_scaling_factor: 0.75
+    schedule: parallel
+    lsd_method: LSD_0
+    lsd_order: 0
+  hex_native:
+    kind: hex_native_pipeline
+    prior_policy: legacy
+    offline_decoder: pymatching
+    online_decoder: pymatching
+    final_readout_decoder: pymatching
+protocols:
+- id: se_memory
+  decoders:
+  - mwpm
+  - global_lsd
+  prep_rounds: 0
+  post_gate_rounds: 0
+  post_gate_scope: all_active
+- id: knill_hex_dminus2
+  prep_rounds:
+    rule: d_minus_2
+  decoders:
+  - hex_native
+  post_gate_rounds: 0
+  post_gate_scope: all_active
+- id: knill_aft_postgate
+  prep_rounds: 1
+  post_gate_rounds: 1
+  post_gate_scope: all_active
+  decoders:
+  - lom
+  - global_lsd
+- id: knill_aft_prep_only
+  prep_rounds: 1
+  post_gate_rounds: 0
+  decoders:
+  - lom
+  - global_lsd
+  post_gate_scope: all_active
+sampling:
+  workers: 2
+  shots_per_case: 16
+  chunk_size: 8
+  stop_rule: fixed_shots
+  max_pending_chunks_per_worker: 2
+  native_threads_per_worker: 1
+timing:
+  collect_batch_times: true
+  latency_sample_count_per_case: 4
+  latency_sampling: deterministic_uniform
+  warmup_shots: 4
+  isolated_replay_workers: 1
+storage:
+  format: parquet
+  compression: zstd
+  save_shot_results: true
+  save_decoder_calls: true
+  save_all_syndromes: false
+  retained_failure_samples_per_case: 4
+  retained_uniform_samples_per_case: 4
+diagnostics:
+  bp_lsd_stats: sampled
+  structural_metrics: true

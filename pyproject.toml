@@ -1,0 +1,18 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "knill-bench"
+version = "0.1.0"
+requires-python = ">=3.12"
+dependencies = ["numpy==2.5.3", "scipy==1.18.1", "stim==1.16.0", "pymatching==2.4.0", "ldpc==2.4.1", "PyYAML==6.0.3", "pyarrow==25.0.1", "matplotlib==3.11.2", "hex-qec @ git+https://github.com/AKTKN/Hex.git@5de58f2f80791054411ad3c0885a4fe3671ed56a", "lomatching @ git+https://github.com/AKTKN/lomatching.git@b55a7a65969a106a547622287b620f0da2cb5e39", "surface-sim @ git+https://github.com/AKTKN/surface-sim.git@493f800a3b4e9f80a6a569eb92d3c962dd6b09ad"]
+
+[project.scripts]
+knill-bench = "knill_bench.cli:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
