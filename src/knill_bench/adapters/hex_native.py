@@ -1,5 +1,8 @@
 """Native Hex decoding using cached module-local Pauli-frame transitions."""
 from dataclasses import dataclass
+from collections import OrderedDict
+import copy
+import weakref
 from time import perf_counter_ns,process_time_ns
 import re
 import numpy as np
@@ -16,16 +19,25 @@ from knill_bench.codes import Code
 from knill_bench.models import Predictions
 
 PAULI=re.compile(r'([IXYZ])(\d+)')
-TRANSITIONS={}
+TRANSITIONS=OrderedDict()
+MAX_TRANSITIONS=16
+
+
+def _remember_transition(key,value):
+    TRANSITIONS[key]=value
+    TRANSITIONS.move_to_end(key)
+    while len(TRANSITIONS)>MAX_TRANSITIONS: TRANSITIONS.popitem(last=False)
+    return value
 
 class TimedMatching:
-    def __init__(self,owner,backend):self.owner=owner;self.backend=backend
+    def __init__(self,owner_ref,backend):self.owner_ref=owner_ref;self.backend=backend
     def decode_batch(self,syndromes):
         w=perf_counter_ns();c=process_time_ns();result=self.backend.decode_batch(syndromes)
-        if getattr(self.owner,'record_calls',False):
-            self.owner.events.append(dict(phase='backend_'+self.owner.current_role,
+        owner=self.owner_ref()
+        if owner is not None and owner.record_calls:
+            owner.events.append(dict(phase='backend_'+owner.current_role,
                 wall_ns=perf_counter_ns()-w,cpu_ns=process_time_ns()-c,batch_size=len(syndromes),
-                input_size=syndromes.shape[1],module_index=self.owner.current_module))
+                input_size=syndromes.shape[1],module_index=owner.current_module))
         return result
 
 @dataclass(frozen=True)
@@ -75,7 +87,8 @@ def _correction_key(corrections,support):
     return tuple((tuple((p,rel[int(q)]) for p,q in PAULI.findall(s)),loc) for s,loc in corrections)
 
 def _sparse_key(m):
-    m=m.tocsr();return m.shape,tuple(m.indptr),tuple(m.indices),tuple(np.asarray(m.data,dtype=np.uint8)&1)
+    if m.format not in {'csc','csr'}:m=m.tocsc()
+    return m.format,m.shape,tuple(m.indptr),tuple(m.indices),tuple(np.asarray(m.data,dtype=np.uint8)&1)
 
 def _end_frames(circuit,corrections,after):
     n=len(corrections)
@@ -115,13 +128,15 @@ def _transition(module,support):
             nq=module.num_data_qubits;n=module.circuit.num_qubits;data=module.new_support[:nq]
             rx=np.zeros((nq,n),bool);rz=np.zeros((nq,n),bool)
             rx[np.arange(nq),data]=1;rz[np.arange(nq),data]=1
-            TRANSITIONS[key]=_restrict(np.vstack((xx,zx,np.zeros_like(rx),rx)),
-                np.vstack((xz,zz,rz,np.zeros_like(rz))),support)
+            _remember_transition(key,_restrict(np.vstack((xx,zx,np.zeros_like(rx),rx)),
+                np.vstack((xz,zz,rz,np.zeros_like(rz))),support))
+        else:TRANSITIONS.move_to_end(key)
         return TRANSITIONS[key]
     if isinstance(module,measurement_module):
         key=('measurement',_circuit_key(module.circuit,support),_correction_key(module.correction_array,support))
         if key not in TRANSITIONS:
-            TRANSITIONS[key]=_restrict(*_end_frames(module.circuit,module.correction_array,False),support)
+            _remember_transition(key,_restrict(*_end_frames(module.circuit,module.correction_array,False),support))
+        else:TRANSITIONS.move_to_end(key)
         return TRANSITIONS[key]
     return None
 
@@ -130,7 +145,8 @@ class NativeHex:
     def __init__(self,case,compiled):
         code=Code.rotated(case['distance']);blocks=code.blocks(2*case['cycles']+1)
         pcm=code.matrices;p=case['p'];basis=case['basis'];self.events=[];self.record_calls=False
-        def generator(*a,**kw):return TimedMatching(self,pymatching.Matching.from_check_matrix(*a,**kw))
+        owner_ref=weakref.ref(self)
+        def generator(*a,**kw):return TimedMatching(owner_ref,pymatching.Matching.from_check_matrix(*a,**kw))
         modules=[];roles=[];supports=[]
         if case['initial_boundary']['kind']=='ideal_encoded':
             c=stim.Circuit();c.append('R',blocks[0]['data_qubits']);c+=noiseless_unitary_state_prep(pcm,basis,0)
@@ -141,9 +157,21 @@ class NativeHex:
             roles.append('offline_initial');supports.append(s)
         zs=[sum((blocks[2*j+1][k] for k in ('data_qubits','x_ancillas','z_ancillas')),[]) for j in range(case['cycles'])]
         xs=[sum((blocks[2*j+2][k] for k in ('data_qubits','x_ancillas','z_ancillas')),[]) for j in range(case['cycles'])]
-        # Construct each same-shaped decoder/template once, then remap its copies.
-        zm=generate_state_prep_modules(pcm,case['prep_rounds'],'z',p,zs,generator,matchable=True,surface_code=True)
-        xm=generate_state_prep_modules(pcm,case['prep_rounds'],'x',p,xs,generator,matchable=True,surface_code=True)
+        # Hex's set_support replaces only its three circuits, support and
+        # correction-location arrays. Share the local DEMs, sparse maps and
+        # decoder handles from one canonical template for every cycle.
+        def preparation_family(pauli,supports):
+            canonical=list(range(len(supports[0])))
+            template=generate_state_prep_modules(pcm,case['prep_rounds'],pauli,p,[canonical],
+                generator,matchable=True,surface_code=True)[0]
+            family=[]
+            for support in supports:
+                instance=copy.copy(template)
+                instance.set_support(support)
+                family.append(instance)
+            return family
+        zm=preparation_family('z',zs)
+        xm=preparation_family('x',xs)
         for j in range(case['cycles']):
             a,b,d=2*j+1,2*j+2,2*j
             for m,r,s in ((zm[j],'offline_z',zs[j]),(xm[j],'offline_x',xs[j])):modules.append(m);roles.append(r);supports.append(s)
@@ -152,7 +180,9 @@ class NativeHex:
             modules.append(generate_bell_measurement_and_correction_module(pcm,p,*[blocks[q]['data_qubits'] for q in (d,a,b)],generator));roles.append('bell');supports.append(s)
         modules.append(generate_logical_measurement_module(pcm,p,basis,blocks[-1]['data_qubits'],generator));roles.append('final_readout');supports.append(blocks[-1]['data_qubits'])
         self.engine=modularised_circuit(modules);self.roles=roles;self.supports=supports
+        transition_start=perf_counter_ns()
         self.transitions=[_transition(m,s) for m,s in zip(modules,supports)]
+        self.native_transition_construct_ns=perf_counter_ns()-transition_start
         self.converter=self.engine.circuit.compile_m2d_converter();self.observable_records=compiled.observable_records
         self.metadata=dict(prior_policy='legacy',offline_matchable=True,output_kind='logical_observable_flip_predictions',
             frame_semantics='cached_local_numpy_pauli_frame',prior_noise_profile='hex_legacy_at_sweep_p',

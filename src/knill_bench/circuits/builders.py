@@ -4,6 +4,7 @@ A sign is a set of measurement indices, combined by symmetric difference.
 No sampled error or reference-sample sign is used to construct a detector.
 """
 from collections import Counter
+from time import perf_counter_ns
 import stim
 import numpy as np
 from knill_bench.codes import Code
@@ -203,13 +204,15 @@ class Builder:
         assert sorted(r['record'] for r in self.ledger)==list(range(self.c.num_measurements))
         if not self.c.has_flow(stim.Flow(measurements=sorted(self.obs))):
             raise ValueError('terminal observable fails signed stabilizer backpropagation')
+        dem_start=perf_counter_ns()
         dem = self.c.detector_error_model(allow_gauge_detectors=False, approximate_disjoint_errors=False)
+        dem_build_ns=perf_counter_ns()-dem_start
         # Strict extraction independently checks the boundary and all relations.
         counts = Counter()
         for op in self.c.flattened():
             counts[op.name] += len(op.targets_copy()) // (2 if op.name in {'CX','CZ','DEPOLARIZE2'} else 1)
         noise_counts={k:v for k,v in counts.items() if k in {'X_ERROR','Z_ERROR','Y_ERROR','DEPOLARIZE1','DEPOLARIZE2'}}
-        metadata = dict(noise_location_counts=noise_counts,
+        metadata = dict(dem_build_ns=dem_build_ns,noise_location_counts=noise_counts,
                         total_two_qubit_gates=counts.get('CX',0)+counts.get('CZ',0),
                         total_one_qubit_gates=sum(counts.get(k,0) for k in ('H','S','X','Y','Z')),
                         se_counts=dict(self.se_counts), schedule=self.schedule, operation_counts=dict(counts),

@@ -18,7 +18,8 @@ def replay_case(task):
     for sample in samples:
         if 'uniform' not in sample['reason']:continue
         s=np.unpackbits(np.frombuffer(sample['syndrome'],dtype=np.uint8),bitorder='little')[:sample['syndrome_bits']]
-        m=np.unpackbits(np.frombuffer(sample['measurements'],dtype=np.uint8),bitorder='little')[:sample['measurement_bits']]
+        m=(np.unpackbits(np.frombuffer(sample['measurements'],dtype=np.uint8),bitorder='little')[:sample['measurement_bits']]
+           if sample['measurements'] is not None else None)
         for name,decoder in decoders.items():
             for _ in range(cfg['timing']['warmup_shots']):decoder.decode_one(s,m)
             wall=perf_counter_ns();cpu=process_time_ns()

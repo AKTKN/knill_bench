@@ -15,6 +15,7 @@ SCHEMAS={
  'decoder_calls':COMMON+[('case_id',S),('shot_index',I),('phase',S),('cycle',I),('block',I),('sector',S),('input_size',I),('backend',S),('batch_size',I),('timing_mode',S),('wall_ns',I),('cpu_ns',I),('preprocessing_ns',I),('postprocessing_ns',I),('warmup',B),('profiling',B),('concurrent_load',B),('replay',B)],
  'diagnostics':COMMON+[('case_id',S),('shot_index',I),('kind',S),('detectors',I),('faults',I),('observables',I),('h_nnz',I),('l_nnz',I),('hyperedges',I),('residual_weight',I),('bp_converged',B),('bp_iterations',I),('lsd_used',B),('cluster_count',I),('availability',S),('details_json',S)],
  'retained_samples':COMMON+[('shot_index',I),('syndrome',BIN),('measurements',BIN),('actual',BIN),('syndrome_bits',I),('measurement_bits',I),('observable_bits',I),('bit_order',S),('reason',S),('policy',S),('circuit_hash',S),('model_hash',S)],
+ 'paired_chunks':COMMON+[('first_case_id',S),('second_case_id',S),('paired_valid_shots',I),('disagreements',I),('first_only_error',I),('second_only_error',I)],
  'summary':[('case_id',S),('protocol',S),('distance',I),('basis',S),('p',F),('cycles',I),('requested_decoder',S),('effective_decoder',S),('shots',I),('errors',I),('valid',I),('failed',I),('ler',F),('ci_low',F),('ci_high',F),('interval_kind',S),('computational_failure_rate',F),('total_task_failure_rate',F),('decode_wall_seconds',F),('decode_cpu_seconds',F),('throughput_shots_per_second',F),('amortized_wall_ns_per_shot',F),('work_ns_per_cycle',F),('latency_count',I),('latency_mean_ns',F),('latency_std_ns',F),('latency_median_ns',F),('latency_p90_ns',F),('latency_p95_ns',F),('latency_p99_ns',F),('latency_max_ns',F),('peak_live_qubits',I),('elapsed_time',F),('spacetime_volume',F),('timing_scope',S)],
  'paired_disagreements':[('sampling_case_id',S),('first_case_id',S),('second_case_id',S),('paired_valid_shots',I),('disagreements',I),('first_only_error',I),('second_only_error',I)],
  'latency_statistics': [('case_id',S),('backend',S),('replay',B),('concurrent_load',B),('clock',S),('count',I),('mean_ns',F),('std_ns',F),('median_ns',F),('p90_ns',F),('p95_ns',F),('p99_ns',F),('max_ns',F)],
@@ -37,11 +38,48 @@ def atomic_json(path,value):
 
 def write_table(path,name,rows,compression='zstd'):
     path=Path(path);path.parent.mkdir(parents=True,exist_ok=True)
-    table=pa.Table.from_pylist(rows,schema=SCHEMAS[name])
+    table=pa.Table.from_pydict(rows,schema=SCHEMAS[name]) if isinstance(rows,dict) else pa.Table.from_pylist(rows,schema=SCHEMAS[name])
     tmp=path.with_name(path.name+'.tmp')
-    pq.write_table(table,tmp,compression=None if compression=='none' else compression)
+    pq.write_table(table,tmp,compression=None if compression=='none' else compression,
+                   row_group_size=1024 if name=='retained_samples' else None)
     with tmp.open('rb') as f: os.fsync(f.fileno())
     os.replace(tmp,path)
+
+
+def file_sha256(path):
+    import hashlib
+    digest=hashlib.sha256()
+    with open(path,'rb') as f:
+        for block in iter(lambda:f.read(1024*1024),b''): digest.update(block)
+    return digest.hexdigest()
+
+
+def filter_retained_samples(path,available_failures,compression='zstd',batch_size=1024):
+    """Apply the global failure quota without loading an all-syndrome part."""
+    path=Path(path)
+    tmp=path.with_name(path.name+'.filtered.tmp')
+    kept=failures=0
+    try:
+        with pq.ParquetWriter(tmp,SCHEMAS['retained_samples'],
+                              compression=None if compression=='none' else compression) as writer:
+            for batch in pq.ParquetFile(path).iter_batches(batch_size=batch_size):
+                rows=[]
+                for row in batch.to_pylist():
+                    reasons=row['reason'].split('+')
+                    if 'failure' in reasons:
+                        if failures>=available_failures:reasons.remove('failure')
+                        else:failures+=1
+                    if reasons:
+                        row['reason']='+'.join(reasons)
+                        rows.append(row)
+                if rows:
+                    writer.write_table(pa.Table.from_pylist(rows,schema=SCHEMAS['retained_samples']))
+                    kept+=len(rows)
+        with tmp.open('rb') as f:os.fsync(f.fileno())
+        os.replace(tmp,path)
+    finally:
+        tmp.unlink(missing_ok=True)
+    return kept,failures
 
 
 def read_rows(run,name):

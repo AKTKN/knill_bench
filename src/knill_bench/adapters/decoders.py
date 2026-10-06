@@ -13,6 +13,52 @@ class NonmatchableModel(ValueError):
     """Only strict graph decomposition/support failures may trigger fallback."""
 
 
+def describe(compiled,case,cfg):
+    """Resolve decoder identity without constructing a numerical backend."""
+    aliases={};details={};models={};graphs={};lom_subgraph_ns=0
+    for name in case['decoders']:
+        params=cfg['decoders'][name];kind=params['kind'];effective=name;reason=None
+        if kind=='lomatching':
+            indices=np.array([i for i,v in enumerate(compiled.detectors) if v['sector']==case['basis']],dtype=np.int64)
+            try:
+                subgraph_start=perf_counter_ns()
+                sub=get_circuit_subgraph(compiled.circuit,indices)
+                selected=decompose(sub)
+                lom_subgraph_ns+=perf_counter_ns()-subgraph_start
+                graphs[name]=selected
+                models[name]=dict(edge_correlations=False,output_kind='logical_observable_flip_predictions',
+                                  selected_detectors=indices.tolist(),observables=[0],
+                                  region_policy='complete_selected_css_sector_superset',
+                                  decomposition='strict_graphlike_components')
+            except NonmatchableModel as exc:
+                lom_subgraph_ns+=perf_counter_ns()-subgraph_start
+                if params['on_nonmatchable']=='error': raise
+                effective=params['fallback_decoder'];reason=str(exc)
+        elif kind=='pymatching':
+            graphs[name]=decompose(compiled.circuit)
+            models[name]=dict(edge_correlations=False,output_kind='logical_observable_flip_predictions',
+                              selected_detectors=list(range(compiled.dem.num_detectors)),decomposition='strict_graphlike_components')
+        elif kind=='hex_native_pipeline':
+            models[name]=dict(prior_policy='legacy',offline_matchable=True,
+                              output_kind='logical_observable_flip_predictions',requires_raw_measurements=True,
+                              frame_semantics='cached_local_numpy_pauli_frame',prior_noise_profile='hex_legacy_at_sweep_p',
+                              sampling_noise_profile=case['noise']['profile'],
+                              timing_instrumentation='nested backend calls; timestamp overhead included in module/terminal totals',
+                              local_transition_cache=True,global_correction_map=False)
+        if effective!=name:
+            models.setdefault(effective,dict(output_kind='logical_observable_flip_predictions',batch_api=False,
+                       zero_detector_policy='independent_prior_MAP_each_fault_tie_predict_one',
+                       diagnostic_availability=['bp_converged','bp_iterations','residual_weight']))
+        elif kind=='bplsd_global':
+            models[name]=dict(output_kind='logical_observable_flip_predictions',batch_api=False,
+                       zero_detector_policy='independent_prior_MAP_each_fault_tie_predict_one',
+                       diagnostic_availability=['bp_converged','bp_iterations','residual_weight'])
+        aliases[name]=effective
+        details[name]=dict(requested=name,effective=effective,fallback_reason=reason)
+        if reason is not None:details[name]['failure_type']='NonmatchableModel'
+    return aliases,details,models,graphs,dict(lom_subgraph_construct_ns=lom_subgraph_ns or None)
+
+
 def decompose(circuit):
     try:
         dem=circuit.detector_error_model(decompose_errors=True,allow_gauge_detectors=False,approximate_disjoint_errors=False)
@@ -32,12 +78,12 @@ def decompose(circuit):
 
 
 class MatchingAdapter:
-    def __init__(self, compiled, kind):
+    def __init__(self, compiled, kind, graph=None, selected_detectors=None):
         self.kind=kind
         self.metadata={'edge_correlations':False,'output_kind':'logical_observable_flip_predictions'}
         if kind=='pymatching':
-            self.dem=decompose(compiled.circuit)
-            self.decoder=pymatching.Matching.from_detector_error_model(self.dem)
+            if graph is None:graph=decompose(compiled.circuit)
+            self.decoder=pymatching.Matching.from_detector_error_model(graph)
             self.metadata['selected_detectors']=list(range(compiled.dem.num_detectors))
         else:
             # Conservative observing-region superset: every check of the selected
@@ -45,13 +91,18 @@ class MatchingAdapter:
             # constraining the selected logical Pauli, including both Bell branches.
             # It avoids noise-dependent automatic boundary-edge region discovery.
             basis=compiled.metadata['basis']
-            indices=np.array([i for i,v in enumerate(compiled.detectors) if v['sector']==basis],dtype=np.int64)
-            sub=get_circuit_subgraph(compiled.circuit,indices)
-            self.dem=decompose(sub)
-            self.decoder=MoMatching(dem=compiled.dem,dem_subgraphs=[self.dem],det_inds_subgraphs=[indices])
+            indices=(np.asarray(selected_detectors,dtype=np.int64) if selected_detectors is not None else
+                     np.array([i for i,v in enumerate(compiled.detectors) if v['sector']==basis],dtype=np.int64))
+            subgraph_start=perf_counter_ns()
+            if graph is None:
+                sub=get_circuit_subgraph(compiled.circuit,indices)
+                graph=decompose(sub)
+                self.lom_subgraph_construct_ns=perf_counter_ns()-subgraph_start
+            else:
+                self.lom_subgraph_construct_ns=None
+            self.decoder=MoMatching(dem=compiled.dem,dem_subgraphs=[graph],det_inds_subgraphs=[indices])
             self.metadata.update(selected_detectors=indices.tolist(),observables=[0],
-                                 region_policy='complete_selected_css_sector_superset',
-                                 selected_dem=str(self.dem))
+                                 region_policy='complete_selected_css_sector_superset')
         self.metadata['decomposition']='strict_graphlike_components'
 
     def decode_batch(self, syndromes, measurements=None):
@@ -66,19 +117,27 @@ class MatchingAdapter:
 class GlobalBPLSD:
     kind='bplsd_global'
     def __init__(self,dem,params):
-        self.model=convert_dem(dem)
-        model=self.model
-        self.active=np.flatnonzero((np.diff(model.h.indptr)>0)&(model.q>0)&(model.q<1))
-        self.fixed=(model.q>=.5).astype(np.uint8)
-        self.fixed[self.active]=0
-        self.offset_s=np.asarray(model.h@self.fixed%2,dtype=np.uint8)
-        self.offset_l=np.asarray(model.l@self.fixed%2,dtype=np.uint8)
-        self.h=model.h[:,self.active].tocsc(); self.l=model.l[:,self.active].tocsc()
+        model=convert_dem(dem)
+        active=np.flatnonzero((np.diff(model.h.indptr)>0)&(model.q>0)&(model.q<1))
+        fixed=(model.q>=.5).astype(np.uint8)
+        fixed[active]=0
+        self.offset_s=np.asarray(model.h@fixed%2,dtype=np.uint8)
+        self.offset_l=np.asarray(model.l@fixed%2,dtype=np.uint8)
+        if len(active)==model.h.shape[1]:
+            self.h=model.h; self.l=model.l
+        else:
+            self.h=model.h[:,active]; self.l=model.l[:,active]
+        def sparse_bytes(matrix):
+            return matrix.data.nbytes+matrix.indices.nbytes+matrix.indptr.nbytes
+        self.sparse_matrix_bytes=sparse_bytes(self.h)+sparse_bytes(self.l)
         options={k:v for k,v in params.items() if k!='kind'}
-        self.decoder=BpLsdDecoder(self.h,error_channel=model.q[self.active].tolist(),**options) if len(self.active) else None
+        backend_start=perf_counter_ns()
+        self.decoder=BpLsdDecoder(self.h,error_channel=model.q[active].tolist(),**options) if len(active) else None
+        self.bplsd_construct_ns=perf_counter_ns()-backend_start
         self.metadata=dict(output_kind='logical_observable_flip_predictions',batch_api=False,
                            zero_detector_policy='independent_prior_MAP_each_fault_tie_predict_one',
-                           diagnostic_availability=['bp_converged','bp_iterations','residual_weight'],**model.diagnostics())
+                           diagnostic_availability=['bp_converged','bp_iterations','residual_weight'],
+                           active_sparse_matrix_bytes=self.sparse_matrix_bytes,**model.diagnostics())
 
     def decode_one(self,syndrome,measurements=None,stats=False):
         s=np.asarray(syndrome,dtype=np.uint8)^self.offset_s
@@ -124,6 +183,9 @@ class GlobalBPLSD:
 
 def construct(compiled,case,cfg):
     result={};aliases={};details={}
+    artifact_root=compiled.metadata.get('model_artifact_root')
+    prepared_details=compiled.metadata.get('decoder_details',{}) if artifact_root else {}
+    prepared_models=compiled.metadata.get('decoder_models',{}) if artifact_root else {}
     def get(name):
         if name in result: return result[name]
         params=cfg['decoders'][name]
@@ -132,10 +194,31 @@ def construct(compiled,case,cfg):
         elif kind=='hex_native_pipeline':
             from knill_bench.adapters.hex_native import NativeHex
             obj=NativeHex(case,compiled)
-        else: obj=MatchingAdapter(compiled,kind)
+        else:
+            static=prepared_models.get(name,{})
+            artifact=static.get('graph_artifact')
+            graph=None
+            if artifact is not None and artifact_root is not None:
+                from pathlib import Path
+                from knill_bench.data.provenance import sha
+                graph_path=(Path(artifact_root)/artifact).resolve()
+                if graph_path.parent!=Path(artifact_root).resolve():
+                    raise ValueError('prepared graph artifact must be in the model directory')
+                graph_text=graph_path.read_text()
+                if sha(graph_text)!=static['graph_hash']:
+                    raise ValueError(f'prepared graph artifact changed: {graph_path}')
+                graph=stim.DetectorErrorModel(graph_text)
+            obj=MatchingAdapter(compiled,kind,graph=graph,selected_detectors=static.get('selected_detectors'))
         result[name]=obj
         return obj
     for name in case['decoders']:
+        if name in prepared_details and prepared_details[name]['effective']!=name:
+            effective=prepared_details[name]['effective']
+            params=cfg['decoders'][name]
+            if params.get('on_nonmatchable')!='bplsd_global' or params.get('fallback_decoder')!=effective:
+                raise ValueError('prepared fallback conflicts with decoder configuration')
+            get(effective);aliases[name]=effective;details[name]=prepared_details[name]
+            continue
         try:
             get(name); aliases[name]=name
             details[name]={'requested':name,'effective':name,'fallback_reason':None}

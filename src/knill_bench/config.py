@@ -131,8 +131,8 @@ def resolve(raw):
             choice(kind,allowed,f'{pid} decoder')
     if len(set(ids))!=len(ids): raise ValueError('protocol IDs must be unique')
     s=cfg.setdefault('sampling',{})
-    fields(s,'workers shots_per_case chunk_size stop_rule max_pending_chunks_per_worker native_threads_per_worker max_shots target_errors time_budget_seconds reference_decoder','sampling')
-    for k,v in dict(workers=1,shots_per_case=64,chunk_size=32,max_pending_chunks_per_worker=2,native_threads_per_worker=1).items():
+    fields(s,'workers shots_per_case chunk_size stop_rule max_pending_chunks_per_worker model_cache_size native_threads_per_worker max_shots target_errors time_budget_seconds reference_decoder','sampling')
+    for k,v in dict(workers=1,shots_per_case=64,chunk_size=32,max_pending_chunks_per_worker=1,model_cache_size=1,native_threads_per_worker=1).items():
         integer(s.setdefault(k,v),k)
     choice(s.setdefault('stop_rule','fixed_shots'),['fixed_shots','target_errors','time_budget'],'stop_rule')
     if s['stop_rule']!='fixed_shots':

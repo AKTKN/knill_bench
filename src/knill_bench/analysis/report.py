@@ -48,18 +48,11 @@ def analyze(run):
         summary.append(row)
     write_table(run/'summary.parquet','summary',summary,cfg['storage']['compression'])
     disagreement=Counter()
-    for part in sorted((run/'data/shots').glob('*.parquet')):
-        rows=pq.read_table(part).to_pylist()
-        grouped=defaultdict(dict)
-        for r in rows:
-            if r['decoder_status']=='valid': grouped[(r['sampling_case_id'],r['replicate'],r['shot_index'])][r['case_id']]=r
-        for (sid,_,_),preds in grouped.items():
-            for a,b in combinations(sorted(preds),2):
-                ra,rb=preds[a],preds[b];key=(sid,a,b)
-                disagreement[key,'count']+=1
-                disagreement[key,'disagreements']+=int(ra['predicted']!=rb['predicted'])
-                disagreement[key,'first']+=int(ra['logical_failure'] and not rb['logical_failure'])
-                disagreement[key,'second']+=int(rb['logical_failure'] and not ra['logical_failure'])
+    for r in read_rows(run,'paired_chunks'):
+        key=(r['sampling_case_id'],r['first_case_id'],r['second_case_id'])
+        for source,target in (('paired_valid_shots','count'),('disagreements','disagreements'),
+                              ('first_only_error','first'),('second_only_error','second')):
+            disagreement[key,target]+=r[source]
     paired=[]
     for key in sorted({k[0] for k in disagreement}):
         paired.append(dict(sampling_case_id=key[0],first_case_id=key[1],second_case_id=key[2],paired_valid_shots=disagreement[key,'count'],

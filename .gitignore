@@ -1,6 +1,9 @@
 .venv/
+archive
 external/
 results/
 __pycache__/
 *.egg-info/
 .pytest_cache/
+paper
+logs

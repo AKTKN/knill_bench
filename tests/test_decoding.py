@@ -2,8 +2,9 @@ import numpy as np
 import pytest
 import stim
 import pymatching
+import weakref
 from knill_bench.decoding.dem import convert_dem
-from knill_bench.adapters.decoders import GlobalBPLSD,MatchingAdapter,NonmatchableModel,construct
+from knill_bench.adapters.decoders import GlobalBPLSD,MatchingAdapter,NonmatchableModel,construct,describe
 from knill_bench.adapters.hex_native import NativeHex,TRANSITIONS
 from knill_bench.config import load,grid
 from knill_bench.circuits.builders import build
@@ -49,12 +50,19 @@ def test_dem_event_semantics():
 
 def test_undetectable_logical_prior_and_zero_faults():
     decoder=GlobalBPLSD(stim.DetectorErrorModel('error(0.8) L0\ndetector D0'),dict(kind='bplsd_global'))
+    assert not hasattr(decoder,'model')
     r=decoder.decode_batch(np.array([[0],[1]],dtype=np.uint8))
     assert r.logical_flips[:,0].tolist()==[1,1]
     assert r.valid.tolist()==[True,False]
     empty=GlobalBPLSD(stim.DetectorErrorModel('detector D0\nlogical_observable L0'),dict(kind='bplsd_global'))
     r=empty.decode_batch(np.zeros((2,1),dtype=np.uint8))
     assert r.valid.all() and not r.logical_flips.any()
+    assert decoder.sparse_matrix_bytes >= decoder.h.data.nbytes+decoder.l.data.nbytes
+    fixed=GlobalBPLSD(stim.DetectorErrorModel(
+        'error(1) D0 L0\nerror(0) D1 L0\ndetector D1'),dict(kind='bplsd_global'))
+    r=fixed.decode_batch(np.array([[1,0],[0,0]],dtype=np.uint8))
+    assert r.logical_flips[:,0].tolist()==[1,1]
+    assert r.valid.tolist()==[True,False]
 
 
 def test_same_circuit_matching_and_mapping():
@@ -76,6 +84,12 @@ def test_controlled_nonmatchable_fallback_and_no_invalid_circuit_fallback():
     cfg={'decoders':{'lom':{'kind':'lomatching','on_nonmatchable':'bplsd_global','fallback_decoder':'lsd'},'lsd':{'kind':'bplsd_global'}}}
     decs,aliases,details=construct(c,{'decoders':['lom','lsd']},cfg)
     assert len(decs)==1 and aliases['lom']=='lsd' and details['lom']['fallback_reason']
+    prepared_aliases,prepared_details,models,graphs,_=describe(c,{'decoders':['lom','lsd'],'basis':'x'},cfg)
+    assert prepared_aliases==aliases and not graphs
+    c.metadata.update(decoder_details=prepared_details,decoder_models=models,model_artifact_root='.')
+    decs2,aliases2,details2=construct(c,{'decoders':['lom','lsd']},cfg)
+    assert aliases2==aliases and details2==prepared_details and len(decs2)==1
+    c.metadata.pop('model_artifact_root')
     bad=stim.Circuit('RX 0\nM 0\nDETECTOR rec[-1]')
     c.circuit=bad
     with pytest.raises(ValueError,match='non-deterministic'):
@@ -142,8 +156,44 @@ def test_native_uses_local_cached_transitions_across_cycles_and_p():
     # Same-shaped per-cycle modules share the exact immutable transition.
     assert native.transitions[1] is native.transitions[5]
     assert native.transitions[2] is native.transitions[6]
+    modules=native.engine.circuit_modules
+    for field in ('z_dem_check_matrix','x_dem_check_matrix',
+                  'z_dem_correction_to_local_measurement_flips',
+                  'x_dem_correction_to_local_measurement_flips'):
+        assert getattr(modules[1],field) is getattr(modules[5],field)
+        assert getattr(modules[2],field) is getattr(modules[6],field)
     changed=dict(case,p=case['p']*2)
     changed['rates']={k:changed['p']*v for k,v in
                       case['noise'].get('multipliers',dict(p1=0,p2=1,reset=1,measurement=1,idle=0)).items()}
     NativeHex(changed,build(changed))
     assert set(TRANSITIONS)==first_keys
+
+
+def test_native_decoder_callbacks_do_not_retain_owner():
+    cfg=load('configs/smoke.yaml')
+    case=next(c for c in grid(cfg) if c['protocol']=='knill_hex_dminus2')
+    native=NativeHex(case,build(case))
+    ref=weakref.ref(native)
+    del native
+    assert ref() is None
+
+
+def test_transition_cache_is_bounded():
+    from knill_bench.adapters.hex_native import _remember_transition,MAX_TRANSITIONS
+    TRANSITIONS.clear()
+    cfg=load('configs/smoke.yaml')
+    case=next(c for c in grid(cfg) if c['protocol']=='knill_hex_dminus2')
+    compiled=build(case)
+    original=NativeHex(case,compiled)
+    raw=compiled.circuit.compile_sampler(seed=41).sample(8)
+    syndrome=compiled.circuit.compile_m2d_converter().convert(measurements=raw,separate_observables=False)
+    expected=original.decode_batch(syndrome,raw)
+    for i in range(MAX_TRANSITIONS+3):_remember_transition(('test',i),i)
+    assert len(TRANSITIONS)==MAX_TRANSITIONS
+    assert ('test',0) not in TRANSITIONS
+    rebuilt=NativeHex(case,compiled).decode_batch(syndrome,raw)
+    assert np.array_equal(rebuilt.logical_flips,expected.logical_flips)
+    assert np.array_equal(rebuilt.valid,expected.valid)
+    assert rebuilt.residual==expected.residual
+    assert len(TRANSITIONS)<=MAX_TRANSITIONS
+    TRANSITIONS.clear()
