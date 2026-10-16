@@ -1,13 +1,10 @@
 """Fixed eight-cycle Fig.4(d) experiment; point workers stream B0 tables."""
 
-from concurrent.futures import FIRST_COMPLETED, ProcessPoolExecutor, wait
-import multiprocessing
-
 import numpy as np
 
 from knill_bench.data.storage_v2 import PointWriter
+from .execution import execute_points
 from .run_v2 import RunStore
-from .seeds import point_seed
 
 
 def validate_experiment(config):
@@ -34,44 +31,7 @@ def _run_point(path, point, shots, batch_size, seed):
 
 
 def _execute(store):
-    config = store.document.config
-    pending = iter(p for p in config.points() if store.metadata["points"][p.case_id]["status"] != "complete")
-
-    def arguments(point):
-        store.start_point(point)
-        return store.path, point, config.shots, config.batch_size, point_seed(config.master_seed, point)
-
-    if config.workers == 1:
-        for point in pending:
-            result, execution = _run_point(*arguments(point))
-            store.record_complete(result, execution=execution)
-    else:
-        # At most workers whole-point tasks exist at once. Each task retains
-        # one compiled physical model and one batch, regardless of shot count.
-        with ProcessPoolExecutor(max_workers=config.workers,
-                                 mp_context=multiprocessing.get_context("spawn")) as pool:
-            active = {}
-
-            def submit_next():
-                point = next(pending, None)
-                if point is not None:
-                    active[pool.submit(_run_point, *arguments(point))] = point
-
-            for _ in range(config.workers):
-                submit_next()
-            try:
-                while active:
-                    completed, _ = wait(active, return_when=FIRST_COMPLETED)
-                    for future in completed:
-                        active.pop(future)
-                        result, execution = future.result()
-                        store.record_complete(result, execution=execution)
-                        submit_next()
-            except BaseException:
-                for future in active:
-                    future.cancel()
-                raise
-    store.finish()
+    execute_points(store, _run_point)
 
 
 def run(document, *, resume_path=None):

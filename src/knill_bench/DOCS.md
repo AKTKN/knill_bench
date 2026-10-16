@@ -31,4 +31,16 @@ with bounded point workers and parent-owned completion. `analysis.fig4d`
 validates saved labels/counts and plots 95% Agresti-Coull intervals without
 resimulation. V1 numerical sources and Hex remain unchanged. See
 [the B1 guide](../../docs/fig4d.md) for APIs/commands/cache/seed semantics and
-tested versus unmeasured production limits. Factory remains B2.
+tested versus unmeasured production limits. Factory execution is documented below.
+
+## B2 logical-zero factory
+
+`experiments.logical_zero_factory` builds the actual Hex H5 factory/compiled
+decoder once per point and streams aligned logical_error/logical_gaps tables.
+It preserves noisy teleportation readout and the sole terminal ideal oracle,
+two-block role swapping, finite Hamming or supported projected gaps and fixed
+full trajectories independent of theta. `experiments.execution` now shares
+the bounded whole-point scheduler with B1. Existing simulation/circuit/decoder/
+storage numerical implementations and all dependencies remain unchanged.
+See [the B2 guide](../../docs/logical_zero_factory.md) for APIs, commands,
+score units, zero-noise policy, causal tests and remaining B3 work.

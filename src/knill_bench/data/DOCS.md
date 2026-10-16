@@ -21,3 +21,13 @@ zero and preserving completed points. Locks enforce one writer/parent;
 metadata updates reject non-owner PIDs. Contracts, nullable-gap semantics,
 seed/policy identity, filesystem limits and public APIs are in
 [the B0 guide](../../../docs/auxiliary_v2.md). B0 performs no science sampling.
+
+## B2 use of paired storage
+
+The factory runner now streams actual Hex final bool labels and per-stage
+float64 gaps through these unchanged B0 writers. Both tables have identical
+contiguous IDs and one writer per point/table across all chunks. B2 requires
+all gaps to be finite/nonnegative/present, despite the nullable infrastructure
+schema. Both files are removed on a chunk failure; the parent completion
+marker and whole-point resume rules remain unchanged. No B3 analysis table
+is introduced. See [the factory guide](../../../docs/logical_zero_factory.md).

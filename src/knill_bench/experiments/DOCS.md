@@ -10,9 +10,8 @@
 - `run_v2.py`: parent-owned `RunStore.create/resume/start_point/record_complete/
   finish/fail/close`. Atomic single metadata file, collision-free UTC run
   directories, exact YAML bytes, clean full-point restart and completion marker.
-- `dispatcher.py`: lazy kind dispatch to `run(document)`; Fig.4(d) is B1,
-  factory still raises before output creation until B2. Missing dependencies
-  within an installed runner propagate.
+- `dispatcher.py`: lazy kind dispatch to `run(document)` for B1 Fig.4(d) and
+  B2 factory. Missing dependencies within an installed runner propagate.
 - `cli.py`: separate `knill-bench-v2 validate-config/prepare/run/resume/plot-fig4d`;
   v1 CLI and schemas are unchanged. `prepare` writes pending infrastructure only.
 
@@ -34,8 +33,26 @@ PointResult/execution descriptors return to the parent. `record_complete`
 accepts optional nested JSON execution metadata, copied/validated before the
 completion marker. No B0 schema/filename or v1 numerical API changes.
 
-Dispatcher now executes Fig.4(d), while factory remains an explicit B2 error.
+Dispatcher executes Fig.4(d), with factory execution added in B2 below.
 `dispatcher.resume(path)` loads the saved document and uses B0 exact-environment
 restart checks. CLI adds `resume RUN` and `plot-fig4d RUN --output FILE`.
 Preparation still samples nothing. See [the B1 guide](../../../docs/fig4d.md)
 for precise physical, seed, failure, metadata and unmeasured production limits.
+
+## B2 execution
+
+`logical_zero_factory.compile_point(point, seed=..., create_codecapacity_dem=False)`
+returns the native Hex bundle and CompiledFactory. `run(document, resume_path=None)`
+uses one model per point and B0's paired writer, stores every final error and
+per-stage float64 gap, and records compact role/size/policy/model metadata.
+No physics is reimplemented here. False uses finite unit-Hamming gaps even at
+p0; supported True uses log_weight projected gaps. Hex support errors propagate;
+missing/nonfinite/negative gaps or unresolved frames fail paired output.
+
+`execution.execute_points(store, worker, **worker_options)` now supplies the
+common B1/B2 bounded spawn scheduler, point-seeded arguments, parent-only
+completion and resume skipping. Native objects remain local to a whole-point
+task, not per chunk. Theta is absent from factory compilation/worker options;
+all fixed-T trajectories are sampled and saved. No cuts/retries/costs are
+computed. See [the B2 guide](../../../docs/logical_zero_factory.md) for exact
+shapes, terminal/operational boundaries, policy restrictions and tested limits.

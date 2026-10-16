@@ -112,3 +112,53 @@ are not established. No factory execution or acceptance/cost analysis is
 implemented in B1. See docs/fig4d.md for exact APIs, conventions and commands.
 This phase ends with the single scoped B1 commit/push on auxiliary-system;
 the final handoff reports its actual SHA and push result. Do not start B2.
+
+## B2 — batched logical-zero factory (2026-10-16)
+
+The user authorized B2 after B1. Added configs/logical_zero_factory.yaml,
+scripts/run_logical_zero_factory.sh and experiments/logical_zero_factory.py.
+The default experiment is T1, d3/5, depths d/d, p=.001/.003/.005 and False
+Hamming priors; the existing small example now executes T2. Positive T>1
+uses Hex's existing two-support swapping, without any bench physics rewrite.
+
+Each whole-point worker builds the actual Hex bundle/CompiledFactory once,
+samples fixed full trajectories in chunks and decodes recorded arrays offline.
+The new experiments/execution.py shares B1's bounded spawn scheduler; native
+objects stay local and processes are not initialized per chunk. Factory uses
+noisy CNOT(plus -> zero)/consumed-block Z readout and a single terminal ideal
+evaluation oracle. Terminal truth/future records do not affect earlier gaps.
+
+Both B0 point-level tables stream aligned contiguous uint64 IDs, bool errors
+and per-stage float64 gaps, with one writer each. Every shot is saved regardless
+of theta; prior/theta/workers do not affect physical seed identity. Metadata
+records T/depths, two-block roles/sizes, readout/oracle, units/policy, circuit
+and projected model/configuration hashes. False retains finite unit-Hamming
+scores at p0; supported True uses Hex's causal projected log-weight gaps.
+UnsupportedProjectedModel propagates with no fallback/null-score substitution;
+True at p0 fails explicitly. Invalid/missing gaps or unresolved frames fail
+paired output. Resume restarts an unfinished pair with the original seed and
+preserves complete pairs.
+
+Validation: **182 passed, 592 warnings, 138.24 s** full bench; all v1/B0/B1
+regressions plus 20 B2 cases pass. The initial focused gate had **115 passed**.
+Existing read-only Hex circuit/batch/surface-gap gate had **112 passed,
+204 warnings, 14.50 s**, including signed flows, legacy-map frame equivalence,
+fault boundaries and exhaustive d3 sector costs. No B2 test command failed.
+New physical fixtures are d3/5 and <=7 shots at T1/2/3; no production sweep.
+Pip check, compilation, shell syntax, whitespace, 66 local links and source/
+dependency/user-file preservation checks pass. Installed outside-repository
+CLI/shell smoke also passed tiny T3 Hamming and T2 projected prepare/resume
+runs with exact paired files/units/counts and real H5 provenance.
+
+Limits: no production resource/runtime measurement, calibration, threshold,
+fault-tolerance or projected-prior improvement claim. Projected scores retain
+Hex's fixed-reference first-order/context restrictions and are not posterior
+probabilities; Hamming/log-weight cuts are not interchangeable. No B3
+acceptance/first-rejection/retry-cost analysis is implemented. See
+docs/logical_zero_factory.md for exact APIs, conventions and commands.
+
+Hex/other dependency sources remain clean/unchanged, main and all v1 numerical
+sources/tests remain intact, B0 table schemas are unchanged, and the incoming
+user .gitignore is preserved and excluded from staging. This phase ends with
+one scoped B2 commit/push to auxiliary-system; final handoff reports actual
+SHA/push status. Stop before B3 until explicitly requested.

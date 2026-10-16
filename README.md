@@ -4,9 +4,10 @@ Reproducible physical Stim memory experiments comparing repeated surface-code sy
 
 The `auxiliary-system` branch also supplies independent **schema-v2
 experiments**: strict d/p-only configurations, compact provenance, streamed
-point-level Parquet output and the **B1 eight-cycle Fig.4(d) runner**.
-See [the v2 contract](docs/auxiliary_v2.md) and [the Fig.4(d) guide](docs/fig4d.md).
-Factory execution remains B2. Existing commands below retain schema-v1 behavior.
+point-level Parquet output, the **B1 eight-cycle Fig.4(d) runner** and the
+**B2 two-block logical-zero factory runner**. See [the v2 contract](docs/auxiliary_v2.md),
+[Fig.4(d) guide](docs/fig4d.md) and [factory guide](docs/logical_zero_factory.md).
+Existing commands below retain schema-v1 behavior.
 
 ```bash
 bash scripts/bootstrap.sh
@@ -54,6 +55,9 @@ Terminal full-history memory decoding does not by itself establish an online bou
 bash scripts/run_fig4d.sh configs/fig4d.yaml
 .venv/bin/knill-bench-v2 resume results/<fig4d-run>
 .venv/bin/knill-bench-v2 plot-fig4d results/<fig4d-run> --output fig4d.png
+# Deliberate factory experiment; use the small v2 example for a smoke run:
+bash scripts/run_logical_zero_factory.sh configs/logical_zero_factory.yaml
+.venv/bin/knill-bench-v2 resume results/<factory-run>
 ```
 
 `prepare` creates `{UTC-timestamp}_{experiment-name}/config.yaml` and one
@@ -61,8 +65,11 @@ bash scripts/run_fig4d.sh configs/fig4d.yaml
 uses d preparation rounds on both resources, eight full Knill stages and
 noisy final readout. It streams one logical-error Parquet file per d/p and
 records actual shot/error counts. The explicit production p grid is approximate;
-the saved-data plot uses 95% Agresti-Coull intervals. Factory `run` reports
-the B2 boundary before output creation. Parent metadata marks complete points.
+the saved-data plot uses 95% Agresti-Coull intervals. Factory `run` uses Hex's
+compiled one-bit stages with two reused supports and one terminal ideal
+evaluation oracle. It writes aligned error/gap tables for all trajectories;
+theta never controls sampling. Parent metadata marks complete points. Factory
+acceptance and first-rejection cost analysis remain B3.
 
 Hex is pinned to completed H5 `4278d29`; its source/version is untouched.
 See [TEST.md](TEST.md) for regression results and

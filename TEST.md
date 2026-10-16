@@ -155,3 +155,77 @@ All original v1 Python/test bytes remain identical to the base, all three
 dependency worktrees are clean, Hex is still H5 4278d29, main remains b3cc72a,
 and requirements.lock, dependency pins/bootstrap and incoming .gitignore bytes
 are unchanged. Only intended B1 bench files are staged; .gitignore is excluded.
+
+## B2 — batched logical-zero factory runner (2026-10-16)
+
+Same isolated exact-lock .venv and read-only editable H5/fork checkouts.
+No dependency install/update or source changes were needed. Initial focused gate:
+
+```bash
+.venv/bin/python -m pytest -q tests/test_logical_zero_factory.py tests/test_fig4d.py tests/test_v2_config.py tests/test_v2_storage.py
+```
+
+**115 passed, 144 warnings, 35.76 s.** This covered the initial 18 B2 cases
+and existing v2 regressions, including both now-available kind dispatches.
+Added two further B2 cases for default-config/kind guards and real mid-chunk
+paired restart, and strengthened the cache check to forbid Stim Circuit
+construction during chunks. Final full bench gate:
+
+```bash
+.venv/bin/python -m pytest -q
+```
+
+**182 passed, 592 warnings, 138.24 s**: all 65 v1 cases, 74 B0 cases, 23 B1
+cases and 20 B2 cases. No skips/deselections. Warnings are 588 inherited
+Hex/SciPy Matrix Market migration notices and four existing v1 empty-legend
+warnings. No test command failed in B2; expected failure-injection/unsupported
+model tests passed without suppressing actual runtime errors.
+
+B2 tests use real Hex factories at d3/5, T1/2/3, p0 and small positive p,
+with <=7-shot fixtures. They cover finite unit-Hamming p0 gaps, projected
+log-weight gaps/model hashes, exactly two supports with alternating roles,
+noisy consumed-block measurement and single terminal noiseless oracle,
+per-stage shapes/units/finite scores, exact paired IDs/types/counts/join,
+one writer per table across exact partial chunks, same-seed repeatability,
+theta-independent raw records, identical Hamming/projected physical samples,
+oracle-label and future-record isolation, cached samplers/maps/matchings,
+serial/spawn equivalence, invalid-gap cleanup and late-chunk restart that
+preserves completed pairs and exactly reproduces the original seed stream.
+No B3 cuts, abort probabilities or cost analysis are implemented/tested.
+
+Existing Hex parity/frame/sector validation was rerun read-only:
+
+```bash
+.venv/bin/python -m pytest -q external/Hex/tests/test_factory_circuit.py external/Hex/tests/test_factory_batch.py external/Hex/tests/test_surface_gap.py
+```
+
+**112 passed, 204 warnings, 14.50 s.** This delegates signed flows, random
+preparation signs, two-support reset/frame boundaries, legacy correction-map
+equivalence, injected fault persistence, terminal label isolation and exhaustive
+d3 both-sector minimum weights to their source tests. These inherited physical
+fixtures use d3/5 and <=128-shot batches; exhaustive 512-pattern d3 enumeration
+is a deterministic classical oracle, not a large Monte Carlo experiment.
+
+Additional checks passed:
+
+```bash
+.venv/bin/python -m pip check
+.venv/bin/python -m compileall -q src tests
+bash -n scripts/run_logical_zero_factory.sh scripts/run_fig4d.sh scripts/bootstrap.sh
+git diff --check
+```
+
+Installed CLI/shell smoke ran from a temporary outside-repository directory.
+It parsed six default config cases without simulating the default sweep, then
+ran two separate 3-shot d3 cases: T3 p0 Hamming via the new shell wrapper and
+T2 p=.001 projected via prepare/resume. Both produced only config/metadata/
+two aligned files, with exact IDs/counts/join, correct T/units/readout/oracle,
+two live blocks and actual imported H5 provenance. All temporary artifacts
+were removed. No production sweep, d21 construction or performance test ran.
+
+All 66 local Markdown links in checked guides/package docs resolve. Original
+v1 Python/test bytes are identical to the historical base; B0 storage, B1's
+physical adapter, dependency pins/bootstrap/lock and incoming .gitignore bytes
+are unchanged. B1 only delegates its existing point scheduling to a shared
+v2 helper. All three dependency worktrees are clean, Hex remains H5 4278d29,
+main remains b3cc72a and user .gitignore stays excluded from the B2 commit.

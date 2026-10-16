@@ -1,9 +1,10 @@
-# Schema-v2 auxiliary experiments: B0 foundation and B1 Fig.4(d)
+# Schema-v2 auxiliary experiments: B0 foundation, B1 Fig.4(d), B2 factory
 
 B1 now implements the Fig.4(d) runner, bounded point workers, resume and
 saved-data Agresti-Coull plotting. See [the B1 guide](fig4d.md) for scientific
 constraints, commands, actual seed use and validation. The foundation below
-records the B0 contract; factory execution and acceptance/cost remain B2/B3.
+records the B0 contract. B2 adds the [two-block factory runner](logical_zero_factory.md)
+with aligned per-shot error/gap output. Acceptance/cost analysis remains B3.
 
 B0 supplies schema-v2 configuration, point identities/seeds, run directories,
 compact provenance/metadata and streamed point-level Parquet storage.
@@ -30,7 +31,8 @@ bash scripts/bootstrap.sh
 
 `prepare` writes `config.yaml` and `metadata.json` and leaves an incomplete
 run with pending points and `status="running"`. It samples nothing. `run`
-executes Fig.4(d); factory execution is unavailable until B2.
+executes Fig.4(d) or the logical-zero factory; `resume` executes prepared or
+unfinished runs under the same source/config/environment checks.
 The equivalent module command is `python -m knill_bench.experiments.cli`.
 The old `knill-bench` / `knill_bench.cli` continue to accept schema 1 only.
 
@@ -103,6 +105,10 @@ advances over batches; reproducibility requires the same library/platform and
 chunk partition. Deriving chunk seeds does not authorize recompiling a sampler
 or decoder per chunk/shot.
 
+B2 consumes the same continuing point-seeded sampler policy. Prior mode and
+theta do not enter the physical seed/circuit, and no chunks are skipped when
+scores fall below a cut. Actual full-trajectory data are saved in both tables.
+
 `provenance.collect_environment()` stores actual Python/OS/CPU info, relevant
 dependency versions, and Git commit/branch/dirty/import path/source-resource
 hash for the imported bench and Hex packages. Hashes cover Python and checked-
@@ -144,6 +150,11 @@ must not convert an unsupported Hex model/error into null gaps silently.
 True gaps use `log_weight`, False factory gaps use `hamming_weight`; neither
 is an exact posterior probability. Full Knill has no gap table in this schema.
 
+B2 requires present, finite, nonnegative gaps at every stage and raises for
+unavailable/nonfinite results rather than storing null. False at p=0 uses
+Hex's explicit finite unit-Hamming rule; True at p=0 is unsupported. The
+nullable Arrow schema remains unchanged for infrastructure compatibility.
+
 Example infrastructure use (labels/gaps must come from real decoding):
 
 ```python
@@ -181,6 +192,12 @@ actual module roles, preparation counts, physical/readout noise, prior/decoder
 conventions, circuit record/qubit counts and actual sampling-stream policy.
 `RunStore.record_complete(result, execution=JSON_mapping)` validates and
 copies this optional descriptor before updating the completion marker.
+
+B2 uses that same nested descriptor for two-block sizes/alternating roles,
+T/depths, noisy teleportation readout and terminal ideal-oracle convention,
+actual gap units/policy, circuit and stage projected-model/configuration hashes.
+It adds no mandatory artifacts or per-chunk metadata. Both scientific runners
+use the bounded whole-point scheduler in experiments/execution.py.
 
 Point files stay hidden as `.<public-name>.incomplete` until their full
 expected shot counts are reached. BOTH writers close, fsync and pass schema/

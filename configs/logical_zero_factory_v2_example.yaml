@@ -1,4 +1,4 @@
-# Infrastructure example only. The scientific runner is phase B2.
+# Small B2 two-stage execution example; theta is for later offline analysis.
 schema_version: 2
 kind: logical_zero_factory
 name: factory_v2_example

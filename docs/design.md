@@ -5,7 +5,10 @@ The original schema-v1 design below remains unchanged. B1 adds an independent
 d preparation rounds on each resource and noisy final readout. It shares the
 native adapter's local frame helpers, not the v1 d-2 physical builder. Saved
 labels use B0 streaming output and 95% Agresti-Coull analysis; no factory
-execution or statistical paper validation is included in B1.
+execution or statistical paper validation is included in B1. B2 adds a separate
+[factory runner](logical_zero_factory.md) using Hex's tested two-support
+role-swapping, noisy one-bit readout, sole ideal evaluation oracle and MWPM
+gap interfaces. Theta does not change sampling; acceptance/cost remain B3.
 
 ## Geometry, primitives, and boundaries
 

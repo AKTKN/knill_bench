@@ -87,7 +87,7 @@ decoding, I/O and coordinator wait; it is not decoder latency. Failed points
 are not complete data. Resume validates the unchanged source/config/environment,
 retains completed files, and restarts unfinished points from shot zero with
 their original seeds. The CLI can also execute a B0 `prepare`d Fig.4(d) run
-using `resume`. Factory dispatch still stops at B2.
+using `resume`. B2 now adds separate factory execution through the same CLI.
 
 ## Saved-data statistics and limits
 
@@ -117,4 +117,5 @@ These checks establish implementation fidelity at tested sizes. The production
 sweep, large-distance runtime/memory and statistical agreement with the paper
 have not been measured. They do not establish a threshold, general fault
 tolerance, or new decoder accuracy/performance. Hex and v1 numerical sources
-remain unchanged; factory execution and acceptance/cost analysis await B2/B3.
+remain unchanged. See [B2](logical_zero_factory.md) for the separate factory;
+acceptance/cost analysis still awaits B3.

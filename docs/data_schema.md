@@ -6,6 +6,13 @@ actual shot/error counts and a nested execution descriptor in the existing
 metadata.json. Saved-data analysis validates every shot ID and label count;
 the optional Agresti-Coull plot requires no new analysis tables or simulation.
 
+B2's [factory runner](logical_zero_factory.md) streams both B0 tables with
+identical contiguous shot IDs. Every stage has a finite nonnegative float64
+gap (hamming_weight for False, log_weight for supported True). Nullable types
+are retained, but B2 rejects unavailable/nonfinite scores. T/depths, oracle,
+roles, policies and compact model hashes enter the existing execution metadata;
+there are no mandatory additional tables or first-rejection/cost outputs.
+
 `src/knill_bench/data/storage.py` is the authoritative Arrow schema. Every table has schema-version and table-name metadata, explicit scalar types, and nullable fields. Counts/times/indices use int64, physical seeds uint64, rates/statistics float64, flags bool, packed bits binary, and IDs string. Bits are little-endian within each byte. Unknown diagnostics are null, not zero.
 
 | Table | Observation and key | Semantics |

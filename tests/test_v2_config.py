@@ -117,19 +117,17 @@ def test_filename_rules_precision_and_seed_independence():
         points[0].filename("other")
 
 
-@pytest.mark.parametrize("filename", ["logical_zero_factory_v2_example.yaml"])
-def test_dispatch_stops_before_future_phase_or_output_creation(tmp_path, filename, monkeypatch):
+@pytest.mark.parametrize("filename", ["fig4d_v2_example.yaml", "logical_zero_factory_v2_example.yaml"])
+def test_dispatch_selects_runner_without_changing_document(tmp_path, filename, monkeypatch):
     cfg = yaml.safe_load((ROOT / "configs" / filename).read_bytes())
     cfg["output_root"] = str(tmp_path / "output")
     path = tmp_path / "input.yaml"
     path.write_text(yaml.safe_dump(cfg))
-    with pytest.raises(NotImplementedError, match="belongs to B2"):
-        dispatcher.dispatch(path)
-    assert not (tmp_path / "output").exists()
     seen = []
     monkeypatch.setattr(dispatcher, "import_module", lambda name: SimpleNamespace(run=lambda doc: seen.append((name, doc))))
     dispatcher.dispatch(path)
     assert seen[0][0].endswith(cfg["kind"]) and seen[0][1].contents == path.read_bytes()
+    assert not (tmp_path / "output").exists()
 
 
 def test_dispatch_does_not_hide_a_runner_dependency_failure(monkeypatch):

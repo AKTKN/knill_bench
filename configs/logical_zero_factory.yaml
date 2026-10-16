@@ -1,0 +1,21 @@
+# Deliberate fixed-shot factory experiment; tests/bootstrap do not launch it.
+# Start with T_tel=1. Longer runs use the same two supports with roles swapped.
+schema_version: 2
+kind: logical_zero_factory
+name: logical_zero_factory
+output_root: results
+code: rotated_surface
+noise: hex_uniform
+sweep:
+  d: [3, 5]
+  p: [0.001, 0.003, 0.005]
+r_0: d
+r_plus: d
+T_tel: 1
+theta: null  # Offline analysis only; all trajectories and gaps are saved.
+create_codecapacity_dem: false
+decoder: mwpm
+shots: 10000
+batch_size: 128
+workers: 1
+master_seed: 12345

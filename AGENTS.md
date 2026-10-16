@@ -92,3 +92,33 @@ sweep or statistical paper-agreement claim is part of this phase.
 B1 full gate: `.venv/bin/python -m pytest -q` — 161 passed, 488 inherited
 warnings, 119.95 s. TEST.md records the corrected missing-file check, focused
 results, installed CLI/shell smoke and unchanged v1/dependency/user-file scope.
+
+## B2 handoff (supersedes the historical B1 stop above)
+
+The user explicitly authorized B2. Implement/commit/push only this phase to
+bench auxiliary-system; stop before B3. Read [the factory guide](docs/logical_zero_factory.md).
+Use Hex's actual FactoryCircuitBuilder/CompiledFactory and gap interfaces,
+with exactly two reused supports, CNOT(fresh plus -> memory), noisy consumed
+Z readout and one noiseless terminal evaluation oracle. No new quantum physics
+implementation or dependency edit belongs in bench. V1 and the B1 physical
+adapter stay unchanged; B1/B2 share the bounded whole-point scheduler.
+
+Build/cache one factory per case/worker, sample fixed full T trajectories in
+chunks, decode offline and stream both B0 point files with identical IDs.
+Theta never enters compilation, worker arguments, sampling or trajectory
+selection. Hamming/projected policies use the same physical circuit/seed;
+prior mode changes inference only. Save actual T/depths/units/oracle and
+compact model hashes. Reject missing/nonfinite/negative gaps instead of
+silently producing null. False at p0 uses finite unit-Hamming scores; True
+must pass Hex's structural checks, and p0 True raises without fallback.
+
+New physical tests use d3/5 and <=7-shot fixtures at T=1/2/3, not production
+sweeps. Retain all existing tests. Validate paired joins/counts, two-support
+reuse, oracle/future isolation, native caching, theta/prior seed independence,
+serial/spawn equality and failed-chunk restart. Delegate stronger parity/frame
+checks to existing read-only Hex tests; record results in TEST.md. B3 cuts,
+first-rejection/retry costs and performance/threshold claims remain out of scope.
+
+B2 final gates: 182 bench tests passed (592 inherited warnings, 138.24 s) and
+112 existing Hex circuit/batch/gap tests passed read-only. TEST.md records
+commands, coverage, tiny installed CLI/shell smoke and unchanged file scope.
