@@ -1,5 +1,26 @@
 # Dependencies and reproducible installation
 
+## Current Conda/cluster workflow
+
+The user requested migration to **knill_system**, replacing the project .venv.
+`bash scripts/bootstrap.sh` now creates/updates environments.yaml and installs
+the pinned forks/bench editable. All numerical versions in requirements.lock
+are preserved; requirements-research.lock adds pinned notebook, analysis,
+plotting, parallel-work and build tools. pyproject.toml supplies research/dev
+extras and exact fork-source records under tool.knill-bench.sources. Numeric
+wheel dependency metadata enables offline resolution; runtime provenance still
+rejects an unverified Hex installation. See [the cluster guide](cluster_setup.md).
+
+The cluster builder stages copies without modifying dependency repositories,
+includes Hex's 72 .mtx resources, tags four wheels with source commit/hash/
+dirty information and verifies Python/matrix hashes after building. Installed
+v1/v2 provenance accepts those verified wheel manifests without Git. The
+separate numerical circuit/decoder implementations are unchanged.
+
+## Historical source-checkout setup
+
+The following records the original v1/B0 setup; current commands use Conda.
+
 The workspace originally contained only the implementation prompt. Existing clean checkouts were found in `../temporal_confidence/external_libs`. Their working branches were preserved. Three local `knill-bench-integration` worktrees were created under this project's `external/` directory.
 
 | Package | Upstream | User fork | Integration revision |

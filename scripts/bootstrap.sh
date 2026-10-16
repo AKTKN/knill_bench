@@ -20,13 +20,14 @@ checkout() {
 checkout Hex https://github.com/AKTKN/Hex.git 4278d2900626f1d120d611f209340b20a9370f91
 checkout lomatching "${KNILL_LOMATCHING_URL:-https://github.com/AKTKN/lomatching.git}" b55a7a65969a106a547622287b620f0da2cb5e39
 checkout surface-sim "${KNILL_SURFACE_SIM_URL:-https://github.com/AKTKN/surface-sim.git}" 493f800a3b4e9f80a6a569eb92d3c962dd6b09ad
-if command -v uv >/dev/null 2>&1; then
-    [[ -d .venv ]] || uv venv --python 3.12 .venv
-    uv pip install --python .venv/bin/python -r requirements.lock -e external/Hex -e external/lomatching -e external/surface-sim
-    uv pip install --python .venv/bin/python --no-deps -e .
+# Conda owns Python/pip; all scientific and notebook packages use pip locks.
+command -v conda >/dev/null || { echo "Install Anaconda/Miniconda first." >&2; exit 1; }
+if conda run -n knill_system python -c 'import sys' >/dev/null 2>&1; then
+    conda env update -n knill_system -f environments.yaml
 else
-    [[ -d .venv ]] || python3 -m venv .venv
-    .venv/bin/python -m pip install -r requirements.lock -e external/Hex -e external/lomatching -e external/surface-sim
-    .venv/bin/python -m pip install --no-deps -e .
+    conda env create -f environments.yaml
 fi
-.venv/bin/python -m knill_bench.cli validate-config configs/smoke.yaml >/dev/null
+conda run --no-capture-output -n knill_system python -m pip install --no-deps --no-build-isolation \
+    -e external/Hex -e external/lomatching -e external/surface-sim -e '.[research,dev]'
+conda run --no-capture-output -n knill_system python -m pip check
+conda run --no-capture-output -n knill_system python -m knill_bench.cli validate-config configs/smoke.yaml >/dev/null

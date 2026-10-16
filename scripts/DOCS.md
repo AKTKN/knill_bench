@@ -1,5 +1,25 @@
 # Scripts and entry points
 
+## Current Conda and cluster commands
+
+`bootstrap.sh` now uses environments.yaml to create/update Conda knill_system,
+checks the same fork revisions and installs all four packages editable. Numeric
+dependencies remain pinned; requirements-research.lock adds the research and
+build environment. Existing checkout mismatches are preserved/refused.
+`python.sh` selects KNILL_PYTHON when supplied, otherwise the active named
+Conda environment or `conda run -n knill_system`. Both experiment wrappers,
+v1 simulation and latency wrapper use it; no wrapper depends on .venv.
+
+`build_cluster_bundle.py [--download-deps] [--output NEW_DIRECTORY]` builds
+four wheels from temporary copies. It verifies exact clean dependency pins,
+includes Hex matrices and source manifests, checks resource hashes in the
+wheels and optionally builds/downloads all pip dependencies as wheels. The
+bundle's install.py verifies checksums and supports offline pip installation;
+Conda Python itself is provisioned separately. Fork repositories are unchanged.
+The source-checkout development bootstrap and target installed-wheel workflow
+are documented in [cluster setup](../docs/cluster_setup.md). Historical .venv
+notes below describe the earlier B0-B3 setup.
+
 `bootstrap.sh` safely verifies the designated dependency worktree revisions,
 installs `requirements.lock` plus the three editable forks and bench into
 `.venv`, then validates the original smoke config. B0 updates only the Hex pin

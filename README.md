@@ -2,6 +2,10 @@
 
 Reproducible physical Stim memory experiments comparing repeated surface-code syndrome extraction with three Knill strategies. The package uses the requested Hex checkout and user-owned LOM/surface-sim forks. It keeps circuit identity, decoder choice, classical work, and live hardware resources separate.
 
+The research environment is now **Conda `knill_system`**. Run bootstrap below
+or see [Conda/cluster setup](docs/cluster_setup.md) for environments.yaml,
+locked notebook/analysis tools and resource-complete offline wheel bundles.
+
 The `auxiliary-system` branch also supplies independent **schema-v2
 experiments**: strict d/p-only configurations, compact provenance, streamed
 point-level Parquet output, the **B1 eight-cycle Fig.4(d) runner** and the
@@ -16,7 +20,7 @@ Existing commands below retain schema-v1 behavior.
 
 ```bash
 bash scripts/bootstrap.sh
-source .venv/bin/activate
+conda activate knill_system
 bash scripts/run_simulation.sh configs/smoke.yaml
 python -m knill_bench.cli analyze results/<run-directory>
 python -m knill_bench.cli benchmark-latency results/<run-directory> --workers 1
@@ -53,17 +57,17 @@ Terminal full-history memory decoding does not by itself establish an online bou
 ## Schema-v2 experiments
 
 ```bash
-.venv/bin/knill-bench-v2 validate-config configs/fig4d_v2_example.yaml
-.venv/bin/knill-bench-v2 validate-config configs/logical_zero_factory_v2_example.yaml
-.venv/bin/knill-bench-v2 prepare configs/logical_zero_factory_v2_example.yaml
+knill-bench-v2 validate-config configs/fig4d_v2_example.yaml
+knill-bench-v2 validate-config configs/logical_zero_factory_v2_example.yaml
+knill-bench-v2 prepare configs/logical_zero_factory_v2_example.yaml
 # Deliberate production sweep; not a smoke test:
 bash scripts/run_fig4d.sh configs/fig4d.yaml
-.venv/bin/knill-bench-v2 resume results/<fig4d-run>
-.venv/bin/knill-bench-v2 plot-fig4d results/<fig4d-run> --output fig4d.png
+knill-bench-v2 resume results/<fig4d-run>
+knill-bench-v2 plot-fig4d results/<fig4d-run> --output fig4d.png
 # Deliberate factory experiment; use the small v2 example for a smoke run:
 bash scripts/run_logical_zero_factory.sh configs/logical_zero_factory.yaml
-.venv/bin/knill-bench-v2 resume results/<factory-run>
-.venv/bin/knill-bench-v2 analyze-factory results/<factory-run> --settings configs/templates/factory_analysis.yaml --output factory_report.md
+knill-bench-v2 resume results/<factory-run>
+knill-bench-v2 analyze-factory results/<factory-run> --settings configs/templates/factory_analysis.yaml --output factory_report.md
 ```
 
 `prepare` creates `{UTC-timestamp}_{experiment-name}/config.yaml` and one
@@ -79,6 +83,8 @@ acceptance and first-rejection costs are computed from saved files by
 [the separate B3 helper](docs/factory_analysis.md), with no resimulation.
 
 Hex is pinned to completed H5 `4278d29`; its source/version is untouched.
+The cluster builder adds matrix resources and build provenance in temporary
+packaging copies; installed wheels can run without Git checkouts.
 See [TEST.md](TEST.md) for regression results and
 [the package map](src/knill_bench/DOCS.md) and [v2 contract](docs/auxiliary_v2.md)
 for APIs, exact schemas, seeds, provenance, crash recovery and limits.

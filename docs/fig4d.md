@@ -56,13 +56,13 @@ bash scripts/run_fig4d.sh configs/fig4d.yaml
 # Smaller eight-cycle example (d=3/5, 64 shots); not paper validation.
 bash scripts/run_fig4d.sh configs/fig4d_v2_example.yaml
 
-.venv/bin/knill-bench-v2 resume results/<fig4d-run>
-.venv/bin/knill-bench-v2 plot-fig4d results/<fig4d-run> --output fig4d.png
+knill-bench-v2 resume results/<fig4d-run>
+knill-bench-v2 plot-fig4d results/<fig4d-run> --output fig4d.png
 ```
 
 The shell wrapper accepts one optional config path. Relative output_root is
 relative to the invocation working directory. KNILL_PYTHON may override the
-default repository `.venv/bin/python`. No sweep is launched by bootstrap.
+active `knill_system` Conda Python. No sweep is launched by bootstrap.
 
 `experiments.fig4d_reproduction.run(document)` uses the B0 RunStore and
 PointWriter contracts. Workers > 1 use a spawn pool with at most `workers`

@@ -36,15 +36,16 @@ def source_hash():
 def environment(run=None):
     packages={x.metadata['Name']:x.version for x in importlib.metadata.distributions()}
     deps=[]
+    from knill_bench.experiments.provenance import source_info
     for name,upstream in [('hex_qec','https://github.com/ewanmurphy/Hex'),('lomatching','https://github.com/MarcSerraPeralta/lomatching'),('surface_sim','https://github.com/MarcSerraPeralta/surface-sim')]:
         module=importlib.import_module(name);path=Path(module.__file__).resolve()
-        root=git(path.parent,'rev-parse','--show-toplevel')
-        if root is None: raise RuntimeError(f'{name} must import from a development checkout, got {path}')
-        status=git(root,'status','--porcelain')
+        source=source_info(module)
+        root=source['checkout']
+        status=git(root,'status','--porcelain') if root is not None else ''
         dep=dict(module=name,import_path=str(path),checkout=root,upstream_url=upstream,
-                 origin_url=git(root,'remote','get-url','origin'),branch=git(root,'branch','--show-current'),
-                 commit=git(root,'rev-parse','HEAD'),dirty=bool(status))
-        dep['fork_url']=dep['origin_url'] if name=='hex_qec' else (git(root,'remote','get-url','knill-bench-fork') or (dep['origin_url'] if 'AKTKN' in dep['origin_url'] else None))
+                 origin_url=git(root,'remote','get-url','origin') if root else source['origin_url'],
+                 branch=source['branch'], commit=source['commit'],dirty=source['dirty'])
+        dep['fork_url']=dep['origin_url'] if name=='hex_qec' else ((git(root,'remote','get-url','knill-bench-fork') if root else None) or (dep['origin_url'] if 'AKTKN' in (dep['origin_url'] or '') else None))
         if status and run:
             patch=git(root,'diff','--binary','HEAD') or ''
             target=Path(run)/'provenance'/f'{name}.patch';target.parent.mkdir(exist_ok=True)

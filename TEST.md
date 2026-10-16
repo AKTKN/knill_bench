@@ -298,3 +298,101 @@ are unchanged. All dependency worktrees are clean, Hex remains H5 4278d29,
 and main remains b3cc72a. Only intended B3 code/tests/docs/templates are staged;
 the user .gitignore is excluded. Full paper agreement, production performance,
 calibrated optimal cuts, queue costs and general fault tolerance are unmeasured.
+
+## Conda knill_system / cluster packaging migration (2026-10-16)
+
+The user requested a new named Anaconda environment, pip-installed research
+tools, reproducible cluster packaging/configuration, and deletion of .venv.
+Created /home/quantum_teresheys/anaconda3/envs/knill_system with Conda-forge
+Python 3.12.15 and pip 26.2.1. Existing numerical requirements.lock is unchanged.
+Installed its 34 pins plus 120 pinned research/build/transitive distributions
+and the four editable project/fork packages. Jupyter kernel knill_system is
+registered inside this environment. Base and other Conda environments were
+not modified. environments.yaml, requirements-research.lock and the Linux
+Conda explicit lock now describe the setup without a personal env prefix.
+
+Installation/bootstrap commands exercised:
+
+```bash
+conda create -n knill_system python=3.12 pip -y --override-channels -c conda-forge
+# Initial research install was resolved against the unchanged requirements.lock;
+# its exact resolved versions are now requirements-research.lock.
+conda run --no-capture-output -n knill_system python -m pip install --no-deps --no-build-isolation -e external/Hex -e external/lomatching -e external/surface-sim -e '.[research,dev]'
+bash scripts/bootstrap.sh
+conda run --no-capture-output -n knill_system python -m pip check
+```
+
+Bootstrap successfully reapplied environments.yaml to the new environment,
+verified source pins, reinstalled editable packages and validated v1 config.
+All 154 pip lock entries match installed versions; pip check passes.
+Key versions: Stim 1.16.0, LDPC 2.4.1, PyMatching 2.4.0, NumPy 2.5.3,
+SciPy 1.18.1, JupyterLab 4.6.4, ipykernel 7.4.0, seaborn 0.13.2 and Plotly 7.1.0.
+
+The new Conda interpreter first passed all existing tests: **203 passed,
+608 warnings, 162.27 s**. New installed-wheel provenance tests separately
+passed **4 tests, 1.48 s**, including no-Git operation, resource/source tamper
+rejection and H5 revision enforcement. After offline validation succeeded,
+deleted the requested project .venv and ran the complete gate through the new
+Conda-selecting launcher:
+
+```bash
+bash scripts/python.sh -m pytest -q
+```
+
+**207 passed, 608 warnings, 147.48 s**. No skips/deselections. Warnings are
+the same inherited SciPy Matrix Market notices and old v1 legend warnings.
+No unit test failed during this migration. Scripts' bash syntax, Python
+compilation, YAML/TOML, local documentation links and diff whitespace pass.
+
+Packaging audit: building unmodified Hex H5 with pip produced 28 Python files
+and **zero matrix resources**. The cluster builder now stages packaging-only
+overlays (without editing forks), includes **all 72 .mtx resources**, adds
+source manifests and verifies every packaged Python/matrix hash. Numeric
+wheel dependencies replace Git URL requirements in distribution metadata;
+exact fork refs remain in tool.knill-bench.sources and runtime validation.
+
+```bash
+conda run --no-capture-output -n knill_system python scripts/build_cluster_bundle.py --download-deps
+```
+
+The initial binary-only dependency download failed because sinter 1.16.0 has
+no published binary wheel in the index. Changed the build-side collection to
+pip wheel (sdists are built on the build machine); no version was downgraded
+or omitted. The final bundle succeeds: **158 wheels, approximately 315 MB**,
+including the four projects and all 154 locked pip packages. All dependency
+wheel hashes and scientific source hashes match the validated bundle after
+the final docs/packaging refresh. The bundle includes install.py, checksums,
+locks, configs and guides under ignored results/cluster_bundle.
+
+Independent deployment test: created a temporary isolated Python environment,
+installed the bundle with --no-index using local wheels only, and passed pip
+check. With Git and Conda removed from PATH, verified v1/v2 provenance, Hex
+resource loading, two three-shot d3 v2 protocols (factory T2/full Knill T8),
+saved analysis and resume. A separate three-shot v1 SE-memory run committed
+both chunks successfully. No source checkout was imported in this test, and
+the temporary validation environment was removed. This is a local cluster-
+style deployment check, not an experiment on a real cluster or a production sweep.
+
+Hex/lomatching/surface-sim source repositories remain clean at their original
+pins. Circuit, decoder, sampler, seed and table semantics are unchanged; only
+bench packaging/provenance and launch/setup paths changed. The incoming user
+.gitignore bytes are preserved. The project .venv is absent. Full setup and
+platform limits (Linux x86_64, CPython 3.12, glibc >=2.28 for this wheel set)
+are documented in docs/cluster_setup.md.
+
+## Pre-commit verification and local experiment handoff (2026-10-16)
+
+At the user's request to commit/push the environment and packaging work,
+reran `bash scripts/python.sh -m pytest -q`: **207 passed, 608 inherited
+warnings, 160.63 s**, with no skips or deselections. `bash scripts/python.sh
+-m pip check` reports no broken requirements. Both v2 example YAML files pass
+the installed CLI's validate-config command; shell syntax and
+`git diff --check` pass. The three dependency repositories remain clean and
+.venv remains absent. The existing numerical requirements.lock is unchanged.
+
+The local handoff uses configs/fig4d_v2_example.yaml (eight full Knill stages)
+and configs/logical_zero_factory_v2_example.yaml (two factory stages). Both
+have d3/5, p0/.001, 64 shots per point, batch size 32 and one worker. Commands
+cover sampling, saved Fig.4(d) plotting and factory acceptance/error analysis.
+No additional production experiment was launched. The incoming user .gitignore
+edit and ignored experiment/bundle artifacts are excluded from the commit.

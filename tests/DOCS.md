@@ -59,3 +59,13 @@ installed CLI and no Hex/Stim/PyMatching import are checked. Tiny d3/5 three-sho
 smokes run both complete v2 experiments and saved analysis. Existing B1/B2 and
 read-only Hex constructor counters test cached inference without wall-time
 assertions. No production sweep or new large-shot test is introduced.
+
+## Conda / cluster package validation
+
+Run `conda run --no-capture-output -n knill_system python -m pytest -q`.
+`test_cluster_packaging.py` verifies wheel provenance without Git, resource/
+source tamper rejection and retained H5 revision enforcement. Full existing
+science/run/analysis regressions run in the new Conda interpreter. Separate
+installed-wheel integration builds/installs all four packages and pip locks
+into an isolated temporary target, removes Git/Conda from PATH, then runs
+small v1/v2 experiments, analysis and resume. See TEST.md for exact results.

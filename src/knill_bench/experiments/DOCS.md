@@ -67,3 +67,13 @@ sweep axes. `--theta=-inf` provides the no-cut identity. The CLI also reports
 filesystem errors clearly. Runners, seeds, samplers and paired storage are
 unchanged. See [B3](../../../docs/factory_analysis.md) and
 [getting started](../../../GETTING_STARTED.md) for exact reproduce commands.
+
+## Conda and installed-wheel provenance
+
+The active research interpreter is Conda knill_system (Python 3.12.15), not
+.venv. `provenance.source_info` preserves checkout provenance and additionally
+accepts the cluster builder's _build_info.json after hashing every installed
+Python/matrix resource. Wheel mode records checkout:null and install_kind:wheel.
+Hex wheel mode requires the exact pinned H5 commit and verified H5 marker plus
+existing API checks; ordinary unstamped wheels are not silently trusted.
+Source resume hashes remain strict. See [cluster setup](../../../docs/cluster_setup.md).

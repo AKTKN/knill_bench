@@ -5,8 +5,23 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "knill-bench"
 version = "0.1.0"
+description = "Reproducible Knill QEC and logical-zero factory research experiments"
+readme = "README.md"
 requires-python = ">=3.12"
-dependencies = ["numpy==2.5.3", "scipy==1.18.1", "stim==1.16.0", "pymatching==2.4.0", "ldpc==2.4.1", "PyYAML==6.0.3", "pyarrow==25.0.1", "matplotlib==3.11.2", "hex-qec @ git+https://github.com/AKTKN/Hex.git@4278d2900626f1d120d611f209340b20a9370f91", "lomatching @ git+https://github.com/AKTKN/lomatching.git@b55a7a65969a106a547622287b620f0da2cb5e39", "surface-sim @ git+https://github.com/AKTKN/surface-sim.git@493f800a3b4e9f80a6a569eb92d3c962dd6b09ad"]
+dependencies = [
+    "numpy==2.5.3", "scipy==1.18.1", "stim==1.16.0", "pymatching==2.4.0",
+    "ldpc==2.4.1", "PyYAML==6.0.3", "pyarrow==25.0.1", "matplotlib==3.11.2",
+    "hex-qec==0.1.0", "lomatching==0.3.0", "surface-sim==0.11.0",
+]
+
+[project.optional-dependencies]
+research = [
+    "pandas==3.0.6", "xarray==2026.7.0", "netCDF4==1.7.4", "h5py==3.16.0",
+    "jupyterlab==4.6.4", "ipykernel==7.4.0", "ipywidgets==8.1.9",
+    "seaborn==0.13.2", "plotly==7.1.0", "statsmodels==0.15.0", "sympy==1.14.0",
+    "joblib==1.6.0", "dask[distributed]==2026.8.0", "psutil==7.2.2", "rich==15.0.0",
+]
+dev = ["pytest==9.1.1", "pytest-cov==7.1.0", "build==1.6.1", "wheel==0.48.0"]
 
 [project.scripts]
 knill-bench = "knill_bench.cli:main"
@@ -14,6 +29,35 @@ knill-bench-v2 = "knill_bench.experiments.cli:main"
 
 [tool.setuptools.packages.find]
 where = ["src"]
+
+[tool.setuptools.package-data]
+knill_bench = ["_build_info.json"]
+
+# Numeric wheel dependencies above allow offline installation. These exact
+# fork sources remain mandatory and are verified by bootstrap/bundle tooling.
+[tool.knill-bench.sources.hex]
+distribution = "hex-qec"
+module = "hex_qec"
+path = "external/Hex"
+package-dir = "src/hex_qec"
+url = "https://github.com/AKTKN/Hex.git"
+revision = "4278d2900626f1d120d611f209340b20a9370f91"
+
+[tool.knill-bench.sources.lomatching]
+distribution = "lomatching"
+module = "lomatching"
+path = "external/lomatching"
+package-dir = "lomatching"
+url = "https://github.com/AKTKN/lomatching.git"
+revision = "b55a7a65969a106a547622287b620f0da2cb5e39"
+
+[tool.knill-bench.sources.surface-sim]
+distribution = "surface-sim"
+module = "surface_sim"
+path = "external/surface-sim"
+package-dir = "surface_sim"
+url = "https://github.com/AKTKN/surface-sim.git"
+revision = "493f800a3b4e9f80a6a569eb92d3c962dd6b09ad"
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

@@ -56,3 +56,13 @@ User entry points are [GETTING_STARTED.md](../../GETTING_STARTED.md), the
 [templates](../../configs/templates/factory_analysis.yaml) and
 [B3 equations/limits](../../docs/factory_analysis.md). Production agreement,
 queues, runtime/speedup and general fault-tolerance claims remain unestablished.
+
+## Research environment and distribution
+
+Conda knill_system replaces .venv. pyproject.toml now exposes pinned research/
+dev extras, numeric wheel dependencies and an explicit table of pinned fork
+sources. The staging-only cluster builder includes all Hex matrices and source
+manifests, without modifying fork source. Both provenance implementations
+support checksum-verified installed wheels as well as source checkouts.
+Scientific builders/decoders/storage remain unchanged. See
+[cluster setup](../../docs/cluster_setup.md) and [getting started](../../GETTING_STARTED.md).

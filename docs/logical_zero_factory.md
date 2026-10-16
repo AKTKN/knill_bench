@@ -8,17 +8,17 @@ adapter remain separate; full Knill keeps its noisy final readout.
 ## Commands and configuration
 
 ```bash
-.venv/bin/knill-bench-v2 validate-config configs/logical_zero_factory.yaml
+knill-bench-v2 validate-config configs/logical_zero_factory.yaml
 # Deliberate 10,000-shot/point experiment, not run by tests/bootstrap:
 bash scripts/run_logical_zero_factory.sh configs/logical_zero_factory.yaml
 
 # Smaller multi-stage example: d=3/5, T=2, 64 shots per point.
 bash scripts/run_logical_zero_factory.sh configs/logical_zero_factory_v2_example.yaml
-.venv/bin/knill-bench-v2 resume results/<factory-run>
+knill-bench-v2 resume results/<factory-run>
 ```
 
 The wrapper accepts one optional config path, defaulting to the new factory
-config. It uses repository .venv/bin/python, with KNILL_PYTHON override.
+config. It uses the knill_system Conda environment, with KNILL_PYTHON override.
 Relative output_root remains relative to the invocation working directory.
 The default config uses d=3/5, p=.001/.003/.005, T_tel=1, r_0=r_plus=d,
 uniform Hex noise, MWPM and create_codecapacity_dem=False. Only d/p sweep.

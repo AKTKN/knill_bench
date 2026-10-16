@@ -1,0 +1,12 @@
+name: knill_system
+channels:
+  - conda-forge
+  - nodefaults
+dependencies:
+  - python=3.12.15
+  - pip=26.2.1
+  - pip:
+      - -r requirements.lock
+      - -r requirements-research.lock
+# Run from the repository root. scripts/bootstrap.sh also installs the three
+# pinned editable forks and knill-bench; cluster wheels use the same locks.

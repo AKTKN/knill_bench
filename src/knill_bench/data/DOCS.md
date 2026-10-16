@@ -37,3 +37,12 @@ including differently partitioned row groups, non-null finite scores, exact
 ID order and counts. Optional analysis reports are separate requested artifacts;
 they do not alter point files or metadata. See
 [B3](../../../docs/factory_analysis.md) for the conditional estimand and cost model.
+
+## Installed distributions
+
+`provenance.environment` retains v1 fields/archives for checkout execution and
+now also records verified cluster-wheel source metadata when no Git checkout
+is present. Patch capture remains checkout-only. B0/v1 table schemas and all
+physical data semantics are unchanged. Shared source validation hashes Python/
+matrix resources and rejects changed wheel content. See
+[cluster setup](../../../docs/cluster_setup.md) for build/install/validation.

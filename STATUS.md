@@ -210,3 +210,54 @@ calibration, general fault-tolerance or projected-prior accuracy claim. All
 four bench phases are now implemented with the documented assumptions and
 tested sizes. One scoped B3 commit/push goes to auxiliary-system; the final
 handoff reports its actual SHA and push status. No production jobs are launched.
+
+## Conda research environment and cluster distribution (2026-10-16)
+
+Created the user-requested Anaconda environment **knill_system**, Python
+3.12.15/pip 26.2.1, and installed all numerical requirements plus notebook,
+analysis, plotting, data/parallel-work and development tools through pip.
+Registered its environment-local Jupyter kernel. New environments.yaml,
+requirements-research.lock and conda-linux-64.explicit.txt reproduce the
+environment; pyproject.toml adds research/dev extras and explicit pinned fork
+source records. Existing numerical requirements.lock stays byte-identical.
+Bootstrap and all shell launchers now select Conda. The requested .venv
+directory was deleted after new-environment and isolated-wheel validation.
+
+Hex's ordinary H5 wheel omitted its matrices. Added a bench-owned staging
+builder that creates resource-complete Hex/LOM/surface-sim/bench wheels without
+editing dependency repositories, records source SHA/dirty/hash provenance and
+checks packaged code/resources. V1/v2 provenance supports these verified wheels
+without Git while preserving H5 and resource-integrity checks. No physics,
+decoder or data-schema changes were made. Numeric wheel requirements support
+offline pip; source provenance remains pinned and validated separately.
+
+The cluster distribution in results/cluster_bundle has **158 wheels (~315 MB)**,
+including 72 Hex .mtx resources, a checksum-verifying installer, both pip locks,
+Conda definitions, configs and guides. An initial binary-only download could
+not find a sinter 1.16.0 wheel; building that wheel on the build machine fixed
+the issue without changing versions. The target only consumes wheels.
+
+Validation: all 154 pip lock entries match installed versions; pip check and
+bootstrap recreation/update pass. Initial Conda regression gate: 203 passed;
+new wheel-provenance cases: 4 passed. Complete post-.venv-deletion gate:
+**207 passed, 608 inherited warnings, 147.48 s**. Fully offline installation
+into an isolated target passed both small v2 protocols, analysis/resume and a
+small v1 run with Git/Conda absent from PATH. Temporary test environments were
+removed. Syntax/config/link/whitespace and user-file preservation checks pass.
+
+Updated getting-started/package/script/test guides; docs/cluster_setup.md
+provides Japanese local/cluster setup and batch-job commands. This wheel set
+targets Linux x86_64/CPython 3.12 (glibc >=2.28); Conda Python is provisioned
+separately and other platforms require matching builds. Real cluster resource
+performance and production experiments were not run. Dependency source refs
+remain unchanged/clean and the user's .gitignore edit is preserved.
+
+## Environment/packaging commit handoff (2026-10-16)
+
+The user explicitly requested commit/push of the current environment and
+cluster-packaging changes to auxiliary-system, plus local Fig.4(d)/factory
+execution instructions. Pre-commit regression: **207 passed, 608 inherited
+warnings, 160.63 s**; pip check and both small example config checks pass.
+The source/dependency scope and production-experiment boundary are unchanged.
+The existing user .gitignore edit remains outside this commit. The handoff
+reports the resulting commit SHA and remote push status.

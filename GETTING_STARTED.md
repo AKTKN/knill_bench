@@ -13,18 +13,21 @@ been established. Start with the small templates below.
 
 ## 1. Set up the pinned environment
 
-From the repository root, using the tested Python 3.12 environment:
+From the repository root, create/update the Conda research environment:
 
 ```bash
 bash scripts/bootstrap.sh
-.venv/bin/python -m pip check
+conda activate knill_system
+python -m pip check
 ```
 
-Bootstrap installs requirements.lock and the designated editable forks. It
-preserves existing checkouts and stops if their revisions differ. This
-workspace already has the validated .venv; reuse it. The base Anaconda Python
-is not the validated environment. See [dependency setup](docs/dependencies.md)
-and [TEST.md](TEST.md) for the isolated-install fallback and tested versions.
+The environment uses Python 3.12.15 and pip-installed locked numerical,
+analysis, plotting and notebook tools. Bootstrap preserves existing fork
+checkouts, verifies exact revisions, and installs the forks/bench editable.
+`.venv` is no longer used. In batch jobs use `conda run --no-capture-output -n
+knill_system ...`; the shell wrappers select this environment automatically.
+See [the cluster/Conda guide](docs/cluster_setup.md) for `environments.yaml`,
+research locks, resource-complete wheels and offline cluster installation.
 
 Hex is pinned to H5 `4278d2900626f1d120d611f209340b20a9370f91`.
 LOM is pinned to `b55a7a65969a106a547622287b620f0da2cb5e39`, surface-sim to
@@ -39,8 +42,8 @@ Use `git rev-parse HEAD` for the current bench revision.
 cp configs/templates/logical_zero_factory.yaml my_factory.yaml
 cp configs/templates/fig4d.yaml my_fig4d.yaml
 cp configs/templates/factory_analysis.yaml my_analysis.yaml
-.venv/bin/knill-bench-v2 validate-config my_factory.yaml
-.venv/bin/knill-bench-v2 validate-config my_fig4d.yaml
+knill-bench-v2 validate-config my_factory.yaml
+knill-bench-v2 validate-config my_fig4d.yaml
 ```
 
 The simulation templates have d3/5, p0/.001, 64 shots per point, batches of 32
@@ -62,18 +65,18 @@ Hamming and log-weight gap cuts use different units.
 ## 3. Run the small factory and analyze saved data
 
 ```bash
-FACTORY_RUN=$(.venv/bin/knill-bench-v2 run my_factory.yaml)
+FACTORY_RUN=$(knill-bench-v2 run my_factory.yaml)
 echo "$FACTORY_RUN"
-.venv/bin/knill-bench-v2 analyze-factory "$FACTORY_RUN" --settings my_analysis.yaml
+knill-bench-v2 analyze-factory "$FACTORY_RUN" --settings my_analysis.yaml
 ```
 
 The last command prints JSON only. Optional output can be requested as JSON,
 CSV or Markdown without resimulation:
 
 ```bash
-.venv/bin/knill-bench-v2 analyze-factory "$FACTORY_RUN" --settings my_analysis.yaml --output factory_report.md
-.venv/bin/knill-bench-v2 analyze-factory "$FACTORY_RUN" --theta=-inf --theta=1 --theta=2 --theta=inf --output factory_report.csv
-.venv/bin/knill-bench-v2 analyze-factory "$FACTORY_RUN" --theta-grid 0 5 11 --iid-restarts --output factory_cost.json
+knill-bench-v2 analyze-factory "$FACTORY_RUN" --settings my_analysis.yaml --output factory_report.md
+knill-bench-v2 analyze-factory "$FACTORY_RUN" --theta=-inf --theta=1 --theta=2 --theta=inf --output factory_report.csv
+knill-bench-v2 analyze-factory "$FACTORY_RUN" --theta-grid 0 5 11 --iid-restarts --output factory_cost.json
 ```
 
 Acceptance requires every stage gap>=theta. Negative infinity retains all
@@ -98,8 +101,8 @@ accounting model; no retry, queue or dynamic schedule was simulated. See
 ## 4. Run and plot the small full-Knill experiment
 
 ```bash
-FIG4D_RUN=$(.venv/bin/knill-bench-v2 run my_fig4d.yaml)
-.venv/bin/knill-bench-v2 plot-fig4d "$FIG4D_RUN" --output fig4d_smoke.png
+FIG4D_RUN=$(knill-bench-v2 run my_fig4d.yaml)
+knill-bench-v2 plot-fig4d "$FIG4D_RUN" --output fig4d_smoke.png
 ```
 
 This checks the eight-stage execution path at small distances. The plot reads
@@ -133,10 +136,10 @@ and imported source hashes. Completed metadata is the publication marker.
 Analysis verifies schemas, IDs and actual counts before producing a report.
 
 ```bash
-.venv/bin/knill-bench-v2 resume "$FACTORY_RUN"
+knill-bench-v2 resume "$FACTORY_RUN"
 # Alternatively: prepare without sampling, then execute that prepared run.
-PREPARED_RUN=$(.venv/bin/knill-bench-v2 prepare my_factory.yaml)
-.venv/bin/knill-bench-v2 resume "$PREPARED_RUN"
+PREPARED_RUN=$(knill-bench-v2 prepare my_factory.yaml)
+knill-bench-v2 resume "$PREPARED_RUN"
 ```
 
 Resume retains completed point files and restarts unfinished points at zero
@@ -156,7 +159,7 @@ require today's environment to match the simulation environment.
 - `analysis.fig4d.summarize_saved(path)` / `plot_saved(path, output)` -> saved full-Knill statistics/figure.
 
 ```bash
-.venv/bin/python -m pytest -q
+python -m pytest -q
 ```
 
 [TEST.md](TEST.md) records actual results, corrected failures and read-only Hex

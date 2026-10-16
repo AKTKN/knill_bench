@@ -153,3 +153,30 @@ CLI/examples and strict parser consistent. Preserve user .gitignore/dependency
 sources and existing v1 APIs/tests. Full bench gate: 203 passed, 608 warnings,
 137.58 s; targeted read-only Hex gate: 128 passed, 320 warnings, 49.97 s.
 TEST.md records the corrected float-test assertion and exact commands.
+
+## Current research environment: Conda knill_system
+
+The user explicitly requested a post-B3 migration to Anaconda/Conda, package
+distribution for clusters and deletion of .venv. This supersedes historical
+.venv commands above. Use `conda run --no-capture-output -n knill_system python`
+or activate knill_system. Python is 3.12.15; numerical pins remain unchanged.
+Do not recreate .venv. environments.yaml plus requirements.lock and
+requirements-research.lock define the environment; bootstrap verifies the same
+fork refs and installs four editable packages. Shell wrappers use python.sh.
+
+Cluster packaging is staging-only: scripts/build_cluster_bundle.py makes four
+wheels with source manifests and all Hex matrix resources without changing
+dependency repositories. Optional dependency wheels enable offline pip setup;
+Conda Python itself is provisioned separately. V1/v2 provenance must support
+verified installed wheels without requiring Git, retaining strict Python/
+matrix hashes and pinned H5 checks. Do not change circuit/decoder physics.
+
+See [cluster setup](docs/cluster_setup.md) for the tested target and reproduce
+commands. Installed artifacts belong under ignored results/cluster_bundle,
+not Git. Preserve the existing user .gitignore edit. This environment task
+does not authorize production experiments or changes to other Conda envs.
+
+Migration gate after removing .venv: 207 passed, 608 inherited warnings,
+147.48 s. Offline installed-wheel smoke also passed v1/v2 experiments, saved
+analysis and resume with Git absent. TEST.md records the missing-sinter-wheel
+build correction and resource audit. All fork source checkouts remain clean.

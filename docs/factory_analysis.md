@@ -94,10 +94,10 @@ simulation schema or new sweep axis. Duplicate/unknown keys, NaN cuts,
 unsupported fields or invalid durations fail.
 
 ```bash
-.venv/bin/knill-bench-v2 analyze-factory "$FACTORY_RUN" --settings configs/templates/factory_analysis.yaml
-.venv/bin/knill-bench-v2 analyze-factory "$FACTORY_RUN" --theta=-inf --theta=2 --theta=inf --iid-restarts --output report.json
-.venv/bin/knill-bench-v2 analyze-factory "$FACTORY_RUN" --theta-grid 0 5 11 --output report.csv
-.venv/bin/knill-bench-v2 analyze-factory "$FACTORY_RUN" --settings my_analysis.yaml --output report.md
+knill-bench-v2 analyze-factory "$FACTORY_RUN" --settings configs/templates/factory_analysis.yaml
+knill-bench-v2 analyze-factory "$FACTORY_RUN" --theta=-inf --theta=2 --theta=inf --iid-restarts --output report.json
+knill-bench-v2 analyze-factory "$FACTORY_RUN" --theta-grid 0 5 11 --output report.csv
+knill-bench-v2 analyze-factory "$FACTORY_RUN" --settings my_analysis.yaml --output report.md
 ```
 
 Without output, CLI prints JSON. JSON/CSV/Markdown are optional analysis
