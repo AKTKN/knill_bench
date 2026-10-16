@@ -1,0 +1,20 @@
+# Infrastructure example only. The scientific runner is phase B2.
+schema_version: 2
+kind: logical_zero_factory
+name: factory_v2_example
+output_root: results
+code: rotated_surface
+noise: hex_uniform
+sweep:
+  d: [3, 5]
+  p: [0.0, 0.001]
+r_0: 2
+r_plus: 2
+T_tel: 2
+theta: 1.0  # Saved analysis cut; never controls sampling or selects truth.
+create_codecapacity_dem: false
+decoder: mwpm
+shots: 64
+batch_size: 32
+workers: 1
+master_seed: 12345

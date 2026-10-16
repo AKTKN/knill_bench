@@ -72,3 +72,20 @@ Single-fault auditing enumerates all relevant d=3 physical-Pauli **detector/logi
 Both matching projection/decomposition and BP-LSD are approximate. LOM uses a documented complete selected-sector observing-region superset rather than claiming the paper's minimal automatic region on this custom geometry. Native Hex's legacy prior is retained even in the explicit-noise example and is labeled accordingly. Timing from the two-worker smoke is concurrent-load timing; isolated replay has its own observations and strata. There is no streaming/windowed decoder or realtime feedforward implementation.
 
 Final data verification read all authoritative-run Parquet datasets, including 14,168 physical-fault audit rows and the supplemental CPU/diagnostic/native/model summary tables; schemas and checkpoint row counts matched. The authoritative source and environment compatibility checks passed with the recorded native thread limits. The fault audit was reused from the immediately preceding run only after checking byte-identical circuit/DEM and scientific-source artifacts; its explicit evidence-reuse record is `logs/fault_audit_reuse.json`. See the implementation report for exact counterexample counts.
+
+
+## B0 auxiliary-system infrastructure validation
+
+The complete bench test suite passes **139 tests** (65 existing v1 and 74 new
+v2) in **115.21 s**, with 432 existing SciPy/plotting warnings. New tests perform
+no physical sampling: synthetic <=7-row streams exercise typed schemas,
+aligned IDs, one writer/table, footer-before-promotion, append/rename/metadata
+failures, clean restart, unchanged completed files, collision-safe directories,
+seed identities, strict configs and read-only H5 API validation.
+
+All runtime dependency versions match requirements.lock, `pip check` passes,
+and Hex remains clean at H5 4278d29. The initial base-environment setup and one
+corrected NumPy-scalar test-fixture failure are recorded transparently in
+[TEST.md](../TEST.md). This validates B0 infrastructure/v1 preservation, not
+Fig.4(d), a factory science run or acceptance/cost analysis. Those remain B1-B3.
+[The B0 guide](auxiliary_v2.md) gives scope, public APIs and recovery limits.

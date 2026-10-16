@@ -51,3 +51,21 @@ Fixed shots is primary. Target-error stopping uses the explicitly named referenc
 Native Hex requires raw measurements and samples through `compile_sampler` plus the measurement-to-detector converter. PyMatching, MoMatching, and global BP-LSD require detectors/observables only and use `compile_detector_sampler`, avoiding the raw measurement matrix. The same fixed seed produced matching detector/observable arrays for tested Stim circuits; no cross-Stim-version equivalence is claimed. Throughput timers enclose actual batch adapter calls after sampling and warm-up. Individual latency timers enclose separate actual `decode_one` calls on a deterministic uniform subset, selected across all replicates. Raw-record conversion is separately timed; detector sampling performs conversion internally. Native backend calls, inclusive module totals, and frame propagation are nested records; do not sum parent and child timings. Instrumentation overhead is included in enclosing native timings and disclosed. Summed service work is not a parallel critical path. Additional one-worker replay uses retained uniform samples and labels replay/load status separately from production observations.
 
 Failure retention is bounded across all replicates of a sampling case. Uniform retention is independently selected across the full fixed maximum workload. Native retained samples include raw measurements; detector-only retained samples have null raw measurements and retain the detector/observable bits needed for decoder replay. Optional all-syndrome storage is incremental Parquet; the parent filters its staged part in bounded Arrow batches, including when every syndrome is saved. Worker replay and retention loops visit only selected shot indices unless all-syndrome storage is requested. Shot rows are built columnwise; `save_shot_results=false` omits them and stores paired decoder counts in `paired_chunks`, so aggregate analysis still works. `sampling.chunk_size` is user-controlled and validated as at least one; chunk array memory scales approximately as `chunk_size × per-shot record bytes`. No automatic resizing occurs. For d=7/N=7 Native Hex, measured per-shot raw and detector arrays have 4,095 and 3,384 Boolean bytes. The corrected-record copy adds another 4,095 bytes, so those three arrays alone need about 23.7 MB at chunk size 2,048 or 47.4 MB at 4,096, before decoder scratch, outputs, and Arrow buffers. These are advisory lower bounds, not a capacity guarantee. The main remaining native hotspot is the full corrected measurement-record copy used for residual verification. Stim's converter requires the complete corrected Boolean measurement array. A packed local-delta, in-place correction and restore prototype used less extra buffer space but was slower in the measured d=7/N=7, 16-shot case; the production path keeps the simple copy and never mutates caller records. Case/model metadata and batch/timing tables are read into memory during analysis; they scale with cases/chunks, not total physical-shot vectors.
+
+
+## Independent auxiliary schema-v2 infrastructure (B0)
+
+The design above remains the unchanged schema-v1 implementation. B0 adds
+`experiments/config_v2.py`, `seeds.py`, `provenance.py`, `run_v2.py`,
+`dispatcher.py`, `cli.py` and `data/storage_v2.py`. Only d/p sweep; preparations,
+T, prior, theta, workers, batch/shot counts and seed are fixed per run.
+No new physical circuit/decoder/worker pool or science analysis is implemented.
+
+Each point uses one writer per public table, temporary files, aligned uint64
+shot IDs and a parent-owned completion marker in one metadata file. Restart
+clears unfinished whole points; it preserves completed points and rejects
+changed config/source/resources/dependency versions. Native Hex exports and
+H5 ancestry are inspected at the actual imported checkout without constructing
+scientific objects. Existing v1 APIs/tables/tests stay separate.
+[The B0 guide](auxiliary_v2.md) specifies interfaces, shapes, physical/readout
+conventions, seed hashing, ownership, publication limits and future boundaries.

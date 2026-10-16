@@ -43,3 +43,27 @@ Workers write per-chunk staged parts and return path, row count, SHA-256, status
 Latency statistics use only actual terminal single-shot invocations, excluding warm-up, sampling, I/O and model initialization. Batch time/shot is named amortized work. Concurrent and isolated replay timing distributions are separate. Native child-backend events are nested under module and terminal timings; sum only one chosen hierarchy level.
 
 Analysis also writes `latency_statistics` (per effective case, replay/load stratum and wall/CPU clock), `decoder_diagnostics_summary` (split by logical success/failure), `native_cost_summary` (explicit timing hierarchy), and `model_cost` (fault/hyperedge/selected-subgraph sizes against amortized work). These are normalized Parquet tables, not values read off plots. Figures include BP convergence, LSD use, sampled cluster counts, hyperedge/subgraph cost, and elapsed-time/spacetime comparisons when time is defined.
+
+
+## Independent schema version 2 (B0)
+
+V1 schemas/layout and APIs above remain unchanged. New `storage_v2.py`
+creates exactly one `logical_error__code=...,d=...,p=...,noisemodel=...,T=...,r_0=...,r_+=....parquet`
+per point, containing non-null shot_id:uint64 and logical_error:bool. Factory
+also has `logical_gaps__...parquet` with identical row IDs and nullable float64
+`gap_t001..gap_tT`. Float p retains full binary64 identity and the literal plus
+in `r_+` is preserved. No v1 diagnostics/timing/checkpoint tables are required.
+
+Run root: exact original `config.yaml`, ONE compact `metadata.json`, and the
+one/two Parquet files per completed point. Run names are unique UTC timestamps
+plus safe experiment names. Both streamed file footers close/fsync/validate
+before individual atomic renames; parent metadata marks pair completion.
+An unfinished point is never treated as committed data, and clean restart
+removes its public/temporary files and begins at shot zero with the same seed.
+
+Metadata includes actual Git/import/resource/dependency provenance, run and
+point status/times/counts, master/point seeds, derivation version, input/config
+hashes, prior policy, final-readout convention and score units. Only d/p vary
+within a run; prior/kind/theta differences get unique run directories. Read
+[the B0 guide](auxiliary_v2.md) for exact schema, nullable-gap meaning, ownership,
+crash windows and public APIs. B0 provides infrastructure, not science runners.

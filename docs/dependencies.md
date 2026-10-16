@@ -2,9 +2,9 @@
 
 The workspace originally contained only the implementation prompt. Existing clean checkouts were found in `../temporal_confidence/external_libs`. Their working branches were preserved. Three local `knill-bench-integration` worktrees were created under this project's `external/` directory.
 
-| Package | Upstream | User fork | Exact base revision |
+| Package | Upstream | User fork | Integration revision |
 |---|---|---|---|
-| Hex | https://github.com/ewanmurphy/Hex | https://github.com/AKTKN/Hex | `5de58f2f80791054411ad3c0885a4fe3671ed56a` (`hex-adaptive`) |
+| Hex | https://github.com/ewanmurphy/Hex | https://github.com/AKTKN/Hex | `4278d2900626f1d120d611f209340b20a9370f91` (`auxiliary-system`, H5) |
 | lomatching | https://github.com/MarcSerraPeralta/lomatching | https://github.com/AKTKN/lomatching | `b55a7a65969a106a547622287b620f0da2cb5e39` |
 | surface-sim | https://github.com/MarcSerraPeralta/surface-sim | https://github.com/AKTKN/surface-sim | `493f800a3b4e9f80a6a569eb92d3c962dd6b09ad` |
 
@@ -30,3 +30,24 @@ Dependency repositories retain their license files unchanged. Copies are in `doc
 * Gidney, Stim; Higgott and Gidney, PyMatching; Roffe et al., LDPC/BP-LSD. Consult each installed project's citation guidance for publications using generated data.
 
 The papers motivate the comparison and decoding choices; they do not certify the particular circuit, detector projection, approximate decoder, or schedule implemented here.
+
+
+## Auxiliary-system B0 dependency update
+
+The earlier worktree setup is historical. The active Hex checkout completed
+H0-H5 on its own auxiliary-system branch; bench now pins H5 `4278d29` in
+pyproject.toml and bootstrap.sh. Its historical hex-adaptive base remains
+5de58f2f80791054411ad3c0885a4fe3671ed56a. B0 modifies no dependency source,
+version or working branch. Both other dependency refs and requirements.lock
+remain unchanged. The bootstrap still refuses to reset an existing checkout.
+
+B0 validation uses an isolated `.venv` containing the exact runtime lock,
+plus the three editable forks and bench. `pip check` passes. Initial attempts
+to share the base Anaconda environment exposed old setuptools/packaging,
+missing galois and NumPy-1.x/LOM incompatibility. Those setup problems were
+resolved within `.venv`; no compatibility shim or dependency-source patch was
+introduced. [TEST.md](../TEST.md) records commands and versions.
+
+V2 stores a compact allowlist of relevant dependency versions and actual bench/
+Hex source provenance in one metadata file. It does not reuse v1 environment
+archives, source tarballs or extra tables; see [the B0 guide](auxiliary_v2.md).
