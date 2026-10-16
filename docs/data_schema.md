@@ -1,5 +1,11 @@
 # Output and schema version 1
 
+B1 retains this v1 layout and the B0 v2 table types below. Its independent
+[Fig.4(d) runner](fig4d.md) writes only one logical_error table per point,
+actual shot/error counts and a nested execution descriptor in the existing
+metadata.json. Saved-data analysis validates every shot ID and label count;
+the optional Agresti-Coull plot requires no new analysis tables or simulation.
+
 `src/knill_bench/data/storage.py` is the authoritative Arrow schema. Every table has schema-version and table-name metadata, explicit scalar types, and nullable fields. Counts/times/indices use int64, physical seeds uint64, rates/statistics float64, flags bool, packed bits binary, and IDs string. Bits are little-endian within each byte. Unknown diagnostics are null, not zero.
 
 | Table | Observation and key | Semantics |

@@ -1,4 +1,9 @@
-# B0 auxiliary experiment infrastructure
+# Schema-v2 auxiliary experiments: B0 foundation and B1 Fig.4(d)
+
+B1 now implements the Fig.4(d) runner, bounded point workers, resume and
+saved-data Agresti-Coull plotting. See [the B1 guide](fig4d.md) for scientific
+constraints, commands, actual seed use and validation. The foundation below
+records the B0 contract; factory execution and acceptance/cost remain B2/B3.
 
 B0 supplies schema-v2 configuration, point identities/seeds, run directories,
 compact provenance/metadata and streamed point-level Parquet storage.
@@ -25,7 +30,7 @@ bash scripts/bootstrap.sh
 
 `prepare` writes `config.yaml` and `metadata.json` and leaves an incomplete
 run with pending points and `status="running"`. It samples nothing. `run`
-is deliberately unavailable until the corresponding B1/B2 runner exists.
+executes Fig.4(d); factory execution is unavailable until B2.
 The equivalent module command is `python -m knill_bench.experiments.cli`.
 The old `knill-bench` / `knill_bench.cli` continue to accept schema 1 only.
 
@@ -55,7 +60,8 @@ forbidden sweeps, nonfinite values, expression strings such as `d-2`, and
 Python object tags fail. Only a duplicate-checking SafeLoader is used; no
 expression evaluation or environment interpolation occurs. Parsing alone
 does not certify that Hex supplies matrices/graphs for every requested case.
-Later runners must apply their scientific constraints and Hex validity checks.
+The Fig.4(d) runner additionally requires T=8, both resolved preparation depths
+equal d, no theta and False prior mode, before creating any output.
 
 `load_config(path)` returns frozen `ConfigDocument(config,contents,source_path)`.
 `parse_config(mapping)` returns frozen `ExperimentConfig`; `as_dict()` gives
@@ -88,7 +94,9 @@ identity. Different prior choices can therefore compare shared physical records.
 
 Metadata stores master and per-point seeds, fixed batch size and derivation
 version; chunk seeds can be reconstructed without storing a long chunk list.
-B0 does not claim to have consumed either seed stream. Later runners must
+B0 does not claim to have consumed either seed stream. B1 uses the point seed
+once to compile its continuing sampler, with fixed batch partition and no
+chunk-seed consumption. Other runners must
 record/use their actual stream and keep samplers/graphs cached once per case/
 worker. A continuing Stim sampler normally uses the point seed once and
 advances over batches; reproducibility requires the same library/platform and
@@ -136,7 +144,7 @@ must not convert an unsupported Hex model/error into null gaps silently.
 True gaps use `log_weight`, False factory gaps use `hamming_weight`; neither
 is an exact posterior probability. Full Knill has no gap table in this schema.
 
-Example infrastructure use (labels/gaps must come from a later real runner):
+Example infrastructure use (labels/gaps must come from real decoding):
 
 ```python
 from knill_bench.experiments import load_config
@@ -154,8 +162,9 @@ with RunStore.create(load_config(config_path)) as run:
     run.finish()                              # only after every point completed
 ```
 
-The B0 dispatcher does not implement `real_decoded_batches` or invoke this
-example. `workers` is a validated future-runner setting, not a B0 process pool.
+The B0 dispatcher did not implement `real_decoded_batches` or invoke this
+example. B1's Fig.4(d) worker supplies real sampled/decoded batches and a
+bounded spawn pool when workers > 1.
 
 ## Metadata ownership, publication and crashes
 
@@ -166,6 +175,12 @@ Only its owning parent PID may update it. Metadata is written via fsynced
 `.metadata.json.tmp` and `os.replace`. There are no per-chunk public files or
 transaction databases. Per-point counts represent committed output, not
 partially attempted or unobserved shots.
+
+B1 adds a compact nested `points[case_id].execution` descriptor at completion:
+actual module roles, preparation counts, physical/readout noise, prior/decoder
+conventions, circuit record/qubit counts and actual sampling-stream policy.
+`RunStore.record_complete(result, execution=JSON_mapping)` validates and
+copies this optional descriptor before updating the completion marker.
 
 Point files stay hidden as `.<public-name>.incomplete` until their full
 expected shot counts are reached. BOTH writers close, fsync and pass schema/

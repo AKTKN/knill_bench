@@ -64,3 +64,31 @@ and read-only Hex export checks; inherited v1 256-shot fixtures are retained.
 No new large Monte Carlo or benchmark is permitted in unit tests. Record all
 failures/fixes and exact commands in TEST.md. Initial setup issues were resolved
 inside .venv without dependency source patches; pip check passes.
+
+## B1 handoff (supersedes the historical B0 stop above)
+
+The user explicitly authorized B1 after B0. B1 adds the independent eight-cycle
+Fig.4(d) runner and saved-data Agresti-Coull plot; stop here until B2 is requested.
+Commit/push this phase only to bench auxiliary-system. Hex H5 stays read-only,
+v1 numerical sources stay unchanged, and the user's .gitignore stays unstaged.
+
+Read [the B1 guide](docs/fig4d.md) before changing the adapter/runner. Production
+YAML has d=9/11/15/21, T=8 and an explicitly approximate p grid .004–.010.
+Both Bell resources require d noisy SE rounds, ideal encoded initial data,
+uniform Hex noise, MWPM and original Hamming online weights, noisy final Z.
+Do not substitute the v1 d-2 builder or factory ideal oracle. The adapter uses
+actual Hex callbacks and cached local Pauli transitions; do not introduce a
+different protocol or mutate the dependency to gain per-shot labels.
+
+Run small physical fixtures only (new batches <=128 shots, d=3/5); T=1 is a
+separate adapter fixture, while scientific runner execution requires T=8.
+Production configs are parsed in tests without constructing large circuits.
+Cache native objects per point/worker, stream one B0 file, use the point seed
+once with a continuing sampler/fixed batch partition. Parent alone publishes
+counts and compact execution metadata. Resume restarts unfinished points;
+analysis must validate saved IDs/counts and never simulate. No production
+sweep or statistical paper-agreement claim is part of this phase.
+
+B1 full gate: `.venv/bin/python -m pytest -q` — 161 passed, 488 inherited
+warnings, 119.95 s. TEST.md records the corrected missing-file check, focused
+results, installed CLI/shell smoke and unchanged v1/dependency/user-file scope.

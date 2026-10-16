@@ -117,13 +117,13 @@ def test_filename_rules_precision_and_seed_independence():
         points[0].filename("other")
 
 
-@pytest.mark.parametrize("filename", ["fig4d_v2_example.yaml", "logical_zero_factory_v2_example.yaml"])
+@pytest.mark.parametrize("filename", ["logical_zero_factory_v2_example.yaml"])
 def test_dispatch_stops_before_future_phase_or_output_creation(tmp_path, filename, monkeypatch):
     cfg = yaml.safe_load((ROOT / "configs" / filename).read_bytes())
     cfg["output_root"] = str(tmp_path / "output")
     path = tmp_path / "input.yaml"
     path.write_text(yaml.safe_dump(cfg))
-    with pytest.raises(NotImplementedError, match="B0 supplies infrastructure only"):
+    with pytest.raises(NotImplementedError, match="belongs to B2"):
         dispatcher.dispatch(path)
     assert not (tmp_path / "output").exists()
     seen = []

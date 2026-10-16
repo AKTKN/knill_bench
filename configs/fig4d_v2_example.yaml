@@ -1,4 +1,4 @@
-# Infrastructure example only. The scientific runner is phase B1.
+# Small B1 eight-cycle example; not the Fig.4(d) production grid.
 schema_version: 2
 kind: fig4d_reproduction
 name: fig4d_v2_example

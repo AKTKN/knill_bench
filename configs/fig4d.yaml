@@ -1,0 +1,20 @@
+# Deliberate production sweep: never launched by tests or bootstrap.
+# Approximate explicit p grid, NOT unpublished exact paper sample locations.
+schema_version: 2
+kind: fig4d_reproduction
+name: fig4d
+output_root: results
+code: rotated_surface
+noise: hex_uniform
+sweep:
+  d: [9, 11, 15, 21]
+  p: [0.004, 0.005, 0.006, 0.007, 0.008, 0.009, 0.010]
+r_0: d
+r_plus: d
+T_tel: 8
+create_codecapacity_dem: false
+decoder: mwpm
+shots: 100000
+batch_size: 128
+workers: 1
+master_seed: 12345

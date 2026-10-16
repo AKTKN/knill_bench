@@ -3,10 +3,10 @@
 Reproducible physical Stim memory experiments comparing repeated surface-code syndrome extraction with three Knill strategies. The package uses the requested Hex checkout and user-owned LOM/surface-sim forks. It keeps circuit identity, decoder choice, classical work, and live hardware resources separate.
 
 The `auxiliary-system` branch also supplies independent **schema-v2
-infrastructure (B0)**: strict d/p-only configurations, compact provenance and
-streamed point-level Parquet output. See [the B0 guide](docs/auxiliary_v2.md).
-Use `knill-bench-v2 validate-config` or `prepare`; scientific Fig.4(d)/factory
-execution is reserved for B1/B2. Existing commands below retain schema-v1 behavior.
+experiments**: strict d/p-only configurations, compact provenance, streamed
+point-level Parquet output and the **B1 eight-cycle Fig.4(d) runner**.
+See [the v2 contract](docs/auxiliary_v2.md) and [the Fig.4(d) guide](docs/fig4d.md).
+Factory execution remains B2. Existing commands below retain schema-v1 behavior.
 
 ```bash
 bash scripts/bootstrap.sh
@@ -44,22 +44,27 @@ See [design](docs/design.md), [dependency provenance](docs/dependencies.md), [sc
 Terminal full-history memory decoding does not by itself establish an online bounded-latency QEC architecture. The preparation length d−2 is an experimental choice, not a guarantee of gadget fault tolerance. Small smoke runs cannot establish thresholds or asymptotic exponents.
 
 
-## Schema-v2 infrastructure
+## Schema-v2 experiments
 
 ```bash
 .venv/bin/knill-bench-v2 validate-config configs/fig4d_v2_example.yaml
 .venv/bin/knill-bench-v2 validate-config configs/logical_zero_factory_v2_example.yaml
 .venv/bin/knill-bench-v2 prepare configs/logical_zero_factory_v2_example.yaml
+# Deliberate production sweep; not a smoke test:
+bash scripts/run_fig4d.sh configs/fig4d.yaml
+.venv/bin/knill-bench-v2 resume results/<fig4d-run>
+.venv/bin/knill-bench-v2 plot-fig4d results/<fig4d-run> --output fig4d.png
 ```
 
 `prepare` creates `{UTC-timestamp}_{experiment-name}/config.yaml` and one
-`metadata.json`, with pending points and no physical sampling. Future point
-runners stream exactly one logical-error Parquet file per d/p; factory also
-writes an aligned logical-gap file. Both table footers must complete before
-publication, and parent metadata is the completion marker. `run` currently
-reports the missing B1/B2 runner before creating outputs.
+`metadata.json`, with pending points and no physical sampling. Fig.4(d) `run`
+uses d preparation rounds on both resources, eight full Knill stages and
+noisy final readout. It streams one logical-error Parquet file per d/p and
+records actual shot/error counts. The explicit production p grid is approximate;
+the saved-data plot uses 95% Agresti-Coull intervals. Factory `run` reports
+the B2 boundary before output creation. Parent metadata marks complete points.
 
 Hex is pinned to completed H5 `4278d29`; its source/version is untouched.
-The full suite passes 139 tests (65 v1, 74 v2). See [TEST.md](TEST.md),
-[the package map](src/knill_bench/DOCS.md) and [the complete v2 contract](docs/auxiliary_v2.md)
+See [TEST.md](TEST.md) for regression results and
+[the package map](src/knill_bench/DOCS.md) and [v2 contract](docs/auxiliary_v2.md)
 for APIs, exact schemas, seeds, provenance, crash recovery and limits.

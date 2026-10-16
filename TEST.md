@@ -86,3 +86,72 @@ The B0 diff contains 33 intended code/tests/docs/config/packaging files;
 .gitignore is deliberately excluded from staging. No experiment output is
 committed. The complete exact-lock editable installation command above was
 also rerun successfully after environment setup, with no version/source changes.
+
+## B1 — eight-cycle Fig.4(d) runner (2026-10-16)
+
+Used the same isolated exact-lock .venv and editable H5/fork checkouts as B0.
+No dependency install/update or source modification was needed.
+
+Initial focused command:
+
+```bash
+.venv/bin/python -m pytest -q tests/test_fig4d.py tests/test_v2_config.py tests/test_v2_storage.py
+```
+
+**94 passed, 48 warnings, 13.63 s** (21 initial B1 cases plus the 73 remaining
+B0 cases; the now-available Fig.4(d) dispatch boundary case was replaced by
+real execution coverage). Two additional adapter/file-integrity cases brought
+B1 to 23 cases. The next focused `pytest -q tests/test_fig4d.py` had **1 failed,
+22 passed, 56 warnings, 11.93 s**: a deliberately missing complete-point file
+raised PyArrow's FileNotFoundError instead of the reader's clear ValueError.
+Added an explicit missing-file check in saved analysis; no storage/Hex source
+change or test suppression was used. The full gate below includes that case.
+
+```bash
+.venv/bin/python -m pytest -q
+```
+
+**161 passed, 488 warnings, 119.95 s**: all 65 original v1 tests, 73 B0 cases
+and 23 B1 cases. No skips/deselections. Warnings are 484 inherited Hex/SciPy
+Matrix Market migration notices and four existing v1 empty-legend warnings.
+
+B1 validates exact eight-stage physical circuit equality against Hex at d=3,
+exact d-prep measurement counts on both resources, ideal initial data, uniform
+Hex noise and noisy final readout; manual supplied/saved bool records at T=2
+match legacy global correction-map processing bit for bit, including final
+labels and all corrected records. T=1 zero-noise fixtures use d=3/5, with
+3/8-shot batches and cached native handles. New physical test fixtures have
+at most 11 shots, not the inherited 256-shot legacy fixtures. No d21 circuit
+or production sweep was run; only production YAML axes/constraints are parsed.
+
+Tiny d3/T8 execution tests validate exact final partial chunks, one writer/
+file per point, schema/IDs/row/error counts, exact input bytes, compact circuit
+metadata, deterministic same-partition replay, serial/spawn equality, failed
+worker status and restart preserving completed data. Saved-data plot/CLI
+tests forbid simulation, verify Agresti-Coull numerical fixtures and reject
+invalid counts, incomplete runs, missing/truncated/shuffled-ID/count-tampered
+files. No paper agreement, threshold or performance claim is made.
+
+Additional completed checks:
+
+```bash
+.venv/bin/python -m pip check
+.venv/bin/python -m compileall -q src tests
+bash -n scripts/run_fig4d.sh scripts/bootstrap.sh
+git diff --check
+```
+
+All pass. Installed console/shell smoke from a temporary directory parsed all
+28 production cases without constructing them, ran two separate **3-shot,
+d3, T8, p0** cases (B0 prepare followed by CLI resume; shell run), and plotted
+saved labels via installed CLI. Both runs had exactly 3 shots, zero errors,
+real imported H5 provenance and only config/metadata/one point file. Factory
+run still exited 2 at the B2 boundary without a new output directory. Temporary
+smoke artifacts were removed. The production wrapper itself was not launched
+with the production YAML.
+
+All 53 local Markdown links in the checked guides/package docs resolve.
+All original v1 Python/test bytes remain identical to the base, all three
+dependency worktrees are clean, Hex is still H5 4278d29, main remains b3cc72a,
+and requirements.lock, dependency pins/bootstrap and incoming .gitignore bytes
+are unchanged. Only intended B1 bench files are staged; .gitignore is excluded.

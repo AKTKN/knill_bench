@@ -11,7 +11,16 @@ unit tests do not launch benchmark sweeps.
 
 The separate new `knill-bench-v2` console script (or
 `python -m knill_bench.experiments.cli`) validates/prepares B0 configurations.
-No B1/B2 shell runner is added yet, and its `run` command fails explicitly until
-a scientific runner exists. See [the B0 guide](../docs/auxiliary_v2.md) for
+The B1 shell runner is described below; factory execution still stops at B2.
+See [the B0 guide](../docs/auxiliary_v2.md) for
 commands, exact outputs and the phase boundary. Source-module documentation
 lives in [experiments](../src/knill_bench/experiments/DOCS.md).
+
+## B1
+
+`run_fig4d.sh [CONFIG]` invokes the independent v2 `run` command using the
+repository .venv, with KNILL_PYTHON override supported. Its default is the
+deliberate production `configs/fig4d.yaml`; tests/bootstrap do not launch it.
+One optional config path is accepted. Relative output_root follows invocation
+working directory. Resume and optional saved-data plot commands are in
+[the B1 guide](../docs/fig4d.md). Factory execution is still B2.

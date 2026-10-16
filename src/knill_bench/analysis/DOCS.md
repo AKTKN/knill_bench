@@ -11,3 +11,15 @@ metadata, described in [the v2 guide](../../../docs/auxiliary_v2.md). Fig.4(d)
 Agresti-Coull plotting belongs to B1; factory acceptance/first-rejection/cost
 analysis belongs to B3. No v1 Wilson result or old d-2 protocol is advertised
 as a Fig.4(d) reproduction. Truth may label errors, never select confidence.
+
+## B1 saved-data Fig.4(d)
+
+`fig4d.agresti_coull(errors, shots)` returns clipped two-sided 95% bounds using
+the adjusted-Wald formula. `summarize_saved(run)` checks complete metadata,
+unchanged YAML/config hashes, physical identities, schemas, saved IDs and row/
+error counts; it streams Parquet and returns d/p/count/LER/lower/upper mappings.
+`plot_saved(run, output)` writes only an optional headless figure with grouped
+distance curves. No simulator or runner is imported. Every Fig.4(d) shot is
+retained, so conditional LER is errors/shots over eight stages, without a
+per-round transform. No paper agreement follows from tiny regression fixtures.
+See [the B1 guide](../../../docs/fig4d.md) for equations and commands.

@@ -31,7 +31,7 @@ def _compatibility(environment):
 class RunStore:
     """A single parent owns metadata; workers own their point-level writers.
 
-    create/prepare never simulate. Point runners are supplied by later phases.
+    create/prepare never simulate. Point runners own physical execution.
     Metadata 'complete' for a point is its publication marker. A context exit
     releases ownership; callers explicitly finish after all points complete.
     """
@@ -170,7 +170,7 @@ class RunStore:
         self._point_starts[point.case_id] = time.monotonic()
         self._save()
 
-    def record_complete(self, result: PointResult):
+    def record_complete(self, result: PointResult, *, execution=None):
         self._check_owner()
         config = self.document.config
         point = next((p for p in config.points() if p.case_id == result.case_id), None)
@@ -182,7 +182,15 @@ class RunStore:
                 or result.files != tuple(point.filename(t) for t in point.tables)):
             raise ValueError("invalid point result identity/counts")
         validate_point_files(self.path, point, config.shots)
+        if execution is not None:
+            if not isinstance(execution, dict):
+                raise ValueError("execution metadata must be a JSON mapping")
+            # Validate/copy before mutating the completion marker; keep runner
+            # details nested so they cannot overwrite identities/counts/status.
+            execution = json.loads(json.dumps(execution, allow_nan=False))
         value = self._metadata["points"][point.case_id]
+        if execution is not None:
+            value["execution"] = execution
         value.update(status="complete", shots=result.shots, logical_errors=result.logical_errors,
                      wall_seconds=time.monotonic() - self._point_starts[point.case_id],
                      ended_at=utc_now().isoformat())

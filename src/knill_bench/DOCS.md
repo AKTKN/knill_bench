@@ -21,3 +21,14 @@ the ideal terminal factory oracle remain distinct experiments. No oracle truth
 may enter decoding, confidence, cuts or selection of physical trajectories.
 Testing commands/results live in [TEST.md](../../TEST.md). All package
 subdirectories containing Python modules maintain DOCS.md.
+
+## B1 Fig.4(d)
+
+`adapters.hex_full_knill` now supplies per-shot full Knill labels from actual
+Hex modules, separate from the old d-2 builder. `experiments.fig4d_reproduction`
+enforces eight stages/d resource prep/noisy final readout and streams B0 data
+with bounded point workers and parent-owned completion. `analysis.fig4d`
+validates saved labels/counts and plots 95% Agresti-Coull intervals without
+resimulation. V1 numerical sources and Hex remain unchanged. See
+[the B1 guide](../../docs/fig4d.md) for APIs/commands/cache/seed semantics and
+tested versus unmeasured production limits. Factory remains B2.

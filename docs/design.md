@@ -1,5 +1,12 @@
 # Design and scientific conventions
 
+The original schema-v1 design below remains unchanged. B1 adds an independent
+[eight-cycle Fig.4(d) experiment](fig4d.md) using actual Hex full Knill modules,
+d preparation rounds on each resource and noisy final readout. It shares the
+native adapter's local frame helpers, not the v1 d-2 physical builder. Saved
+labels use B0 streaming output and 95% Agresti-Coull analysis; no factory
+execution or statistical paper validation is included in B1.
+
 ## Geometry, primitives, and boundaries
 
 `codes.Code` loads the four matrices from the designated Hex checkout. Qubit indices and all check/logical rows are preserved. It checks binary CSS commutation, logical anticommutation, and GF(2) rank giving one encoded qubit. Distances must be odd integers >=3 and have matrices in that checkout. Coordinates are row-major `(i % d, i // d)`; check supports in H_X/H_Z define the boundaries. surface-sim is used for an independent reference, not as a different geometry in one comparison arm.

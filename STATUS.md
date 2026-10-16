@@ -65,3 +65,50 @@ explicit B2 dispatch stop, compilation/shell syntax/links, pip check and scope.
 All tracked v1 Python/tests and lock bytes remain unchanged; all three
 read-only dependency worktrees are clean. The user .gitignore edit is preserved
 and excluded from the 33-file B0 commit.
+
+## B1 — eight-cycle Fig.4(d) implementation (2026-10-16)
+
+The user authorized B1 after B0. Added the dedicated production config and
+shell runner, bench-side per-shot Hex full Knill adapter, bounded point-worker
+execution/resume, compact execution metadata and optional saved-data plot.
+Production settings are d=9/11/15/21, eight stages, d noisy SE rounds on EACH
+zero/plus resource, ideal encoded initial data, original Hex uniform noise,
+offline/online PyMatching MWPM with create_codecapacity_dem=False and noisy
+final Z. The explicit .004–.010 p grid is approximate, not unpublished exact
+paper points. The old d-2 protocol is untouched.
+
+Actual Hex physical fragments/callbacks and existing bench cached local Pauli
+transitions provide the protocol and frame semantics. A point seeds/compiles
+one sampler, then samples/decodes/streams exact bounded chunks including the
+last partial batch. Canonical preparation templates share cached native
+maps/converters/decoders across stages. A bounded spawn pool handles workers>1;
+only the parent publishes metadata. One B0 boolean-error file per point and
+actual shot/error counts are saved. No new mandatory data/diagnostic artifacts.
+
+Saved analysis validates complete metadata, exact config, schema, IDs and
+label counts, then plots conditional errors/shots with 95% Agresti-Coull
+intervals without simulation. All shots are retained and rates cover the full
+eight-stage experiment. Resume preserves completed files and restarts whole
+unfinished points with original seeds under B0 provenance checks.
+
+Validation: **161 passed, 488 warnings, 119.95 s**, including 65 unchanged v1
+tests and 23 B1 cases. Exact d3/T8 circuit equality and manual T2 record/label
+equality against legacy Hex passed, as did d3/5 T1 zero-noise checks, exact
+counts, deterministic serial/spawn streams, failure/restart, interval fixtures
+and saved-file integrity/plots. An added missing-file case initially exposed
+a raw FileNotFoundError; saved analysis now raises a clear ValueError and the
+full gate passes. TEST.md records both focused runs and the final gate.
+
+Installed CLI/shell temporary smoke also passed: production config parse only,
+two tiny d3/T8/3-shot zero-noise cases, prepare/resume, saved plot and B2 stop.
+Pip check, compilation, shell syntax, diff whitespace, documentation links and
+source/dependency scope checks pass. Hex/other dependencies are clean and
+unchanged, all original v1 numerical/test bytes are intact, main is unchanged,
+and the user's .gitignore is preserved and excluded from staging.
+
+Limits: production sweep and large-distance memory/runtime were not measured;
+statistical agreement with Fig.4(d), thresholds and general fault tolerance
+are not established. No factory execution or acceptance/cost analysis is
+implemented in B1. See docs/fig4d.md for exact APIs, conventions and commands.
+This phase ends with the single scoped B1 commit/push on auxiliary-system;
+the final handoff reports its actual SHA and push result. Do not start B2.
