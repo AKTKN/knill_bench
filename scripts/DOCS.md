@@ -34,3 +34,11 @@ Tests/bootstrap do not launch the default sweep. KNILL_PYTHON, optional path
 and relative output behavior match run_fig4d.sh. See
 [the B2 guide](../docs/logical_zero_factory.md) for resume, physical and gap
 conventions and the B3 analysis boundary.
+
+## B3 commands and starter templates
+
+The installed v2 CLI adds saved-only analyze-factory; no new shell/performance
+sweep is run automatically. Optional report settings and both small simulation
+templates are in configs/templates. [Getting started](../GETTING_STARTED.md)
+provides setup/copy/run/resume/plot/analyze commands, public APIs and exact
+dependency refs. Large Fig.4(d)/factory jobs remain the explicit wrappers above.

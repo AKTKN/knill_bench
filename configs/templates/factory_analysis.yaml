@@ -1,0 +1,18 @@
+# Separate saved-data analysis settings, NOT a simulation config or sweep.
+analysis_version: 1
+thresholds: [-.inf, 0.0, 1.0, 2.0, 3.0, .inf]  # AND over gap_t001..gap_tT.
+# Alternatively replace thresholds with:
+# threshold_grid: {start: 0.0, stop: 5.0, count: 11}
+iid_restarts: false    # Opt in only for independent identically distributed fresh attempts.
+batch_size: 65536      # Read-batch bound; does not affect saved shots or sampling.
+cost:
+  unit: SE_equivalent # Use e.g. microsecond only with externally supplied durations.
+  initial_preparation: serial # parallel assumes both full prep/decode paths overlap.
+  se_round: 1.0       # Includes an SE round's internal check-ancilla resets.
+  reset: 0.0          # Per data-block preparation; initial two blocks + refreshes.
+  preparation_decode: 0.0 # Per preparation, on the assumed critical path.
+  teleportation: 0.0  # Coupling + consumed-block noisy readout per stage.
+  online_decode: 0.0  # Per stage decision latency.
+  restart: 0.0        # Cleanup after a rejected attempt, beyond next prep resets.
+# Defaults count SE work only. Zero overheads are assumptions, not measurements.
+# Terminal evaluation oracle is excluded from operational resource cost.

@@ -92,7 +92,7 @@ measurement array offline. It does not resample or stop when a gap is small.
 `theta` is recorded only in the run config; it is absent from worker arguments
 and compilation. All trajectories/gaps are saved, including ones below theta.
 There is no retry/early-abort branch. Acceptance, first rejection and production
-cost calculations remain B3.
+cost calculations are provided by [the separate B3 analysis](factory_analysis.md).
 
 Physical seeds exclude prior policy, theta, workers and requested shots.
 Hamming and projected modes on the same physical point use identical circuits
@@ -140,5 +140,5 @@ spawn equality, failure/restart and unsupported projected models. Existing
 Hex tests separately validate signed parity/frame boundaries, native-map
 equivalence, injected faults and exhaustive d3 sector weights. No physics
 implementation was copied into bench. See [TEST.md](../TEST.md) for commands,
-results and any failures. No B3 acceptance/cost analysis or production Monte
-Carlo was run as part of these checks.
+results and any failures. B2 checks do not run production Monte Carlo; B3 now
+adds separate saved-data analysis and a [getting-started guide](../GETTING_STARTED.md).

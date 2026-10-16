@@ -43,4 +43,16 @@ full trajectories independent of theta. `experiments.execution` now shares
 the bounded whole-point scheduler with B1. Existing simulation/circuit/decoder/
 storage numerical implementations and all dependencies remain unchanged.
 See [the B2 guide](../../docs/logical_zero_factory.md) for APIs, commands,
-score units, zero-noise policy, causal tests and remaining B3 work.
+score units, zero-noise policy and causal tests.
+
+## B3 completion and user entry points
+
+`analysis.factory` streams saved pairs for gap-only acceptance, pointwise
+conditional oracle-error intervals, first rejection and explicitly assumed
+costs. `analysis.factory_cost` isolates the timing/renewal assumptions. CLI
+adds analyze-factory with optional JSON/CSV/Markdown output and separate
+analysis settings. No circuit/decoder/worker/storage implementation changes.
+User entry points are [GETTING_STARTED.md](../../GETTING_STARTED.md), the
+[templates](../../configs/templates/factory_analysis.yaml) and
+[B3 equations/limits](../../docs/factory_analysis.md). Production agreement,
+queues, runtime/speedup and general fault-tolerance claims remain unestablished.

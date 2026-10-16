@@ -31,3 +31,9 @@ all gaps to be finite/nonnegative/present, despite the nullable infrastructure
 schema. Both files are removed on a chunk failure; the parent completion
 marker and whole-point resume rules remain unchanged. No B3 analysis table
 is introduced. See [the factory guide](../../../docs/logical_zero_factory.md).
+
+B3 now validates/streams these unchanged paired schemas without simulation,
+including differently partitioned row groups, non-null finite scores, exact
+ID order and counts. Optional analysis reports are separate requested artifacts;
+they do not alter point files or metadata. See
+[B3](../../../docs/factory_analysis.md) for the conditional estimand and cost model.

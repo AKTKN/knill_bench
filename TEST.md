@@ -229,3 +229,72 @@ physical adapter, dependency pins/bootstrap/lock and incoming .gitignore bytes
 are unchanged. B1 only delegates its existing point scheduling to a shared
 v2 helper. All three dependency worktrees are clean, Hex remains H5 4278d29,
 main remains b3cc72a and user .gitignore stays excluded from the B2 commit.
+
+## B3 — saved factory acceptance/cost and starter documentation (2026-10-16)
+
+Used the unchanged isolated exact-lock .venv and read-only editable forks.
+Initial targeted command:
+
+```bash
+.venv/bin/python -m pytest -q tests/test_factory_analysis.py
+```
+
+**1 failed, 20 passed, 16 warnings, 10.40 s.** A test compared two equivalent
+floating-point cost means with exact equality: histogram-weighted aggregation
+gave 53.83333333333333, direct per-shot mean gave 53.833333333333336. Corrected
+mean/ratio assertions to use numerical tolerance; exact counts/IDs/masks remain
+exact comparisons. Added single-sample SE coverage and strict integer-histogram
+validation. No physical/decoder behavior or test selection was changed.
+
+```bash
+.venv/bin/python -m pytest -q
+```
+
+**203 passed, 608 warnings, 137.58 s**: all 65 original v1, 74 B0, 23 B1,
+20 B2 and 21 B3 cases. No skips/deselections. Warnings are 604 inherited Hex/
+SciPy Matrix Market migration notices and four existing v1 empty-legend notices.
+
+B3 synthetic six-row fixtures validate exact AND cuts, equality at threshold,
+-infinity/no-abort/raw-LER identity, monotone accepted counts, zero acceptance,
+first-rejection prefix isolation, label-independent selection/costs, serial/
+parallel initial overlap, prep/reset/decode/teleport/restart costs, one final
+resource per T-stage attempt, explicit iid renewal gate and paired delta
+uncertainty. They check streaming independent of read/row-group partitions,
+schema/ID/null/nonfinite/negative/count/status/unit failures, strict analysis
+YAML/list/grid, all three runnable templates, optional JSON/CSV/Markdown and
+installed CLI. A separate process verifies saved analysis imports none of
+Hex/Stim/PyMatching. Analysis leaves simulation bytes untouched.
+
+Complete new v2 smokes use d3/5, p0 and three shots per point for both factory
+T3 and full Knill T8, followed by saved analysis. Existing B1/B2 constructor
+counters and forbidden-construction guards still pass, verifying cached
+sampling/graphs/maps/inference across chunks without timing assertions. No new
+large shots or d21 construction, benchmark/production sweep or queue is run.
+
+Targeted Hex integration command, read-only:
+
+```bash
+.venv/bin/python -m pytest -q external/Hex/tests/test_factory_circuit.py external/Hex/tests/test_factory_batch.py external/Hex/tests/test_surface_gap.py external/Hex/tests/test_codecapacity_public.py
+```
+
+**128 passed, 320 warnings, 49.97 s.** Includes prior circuit/frame/sector
+checks, public False/True preservation, causal projected contexts, oracle/
+future isolation, structural unsupported cases and cached native objects.
+Exhaustive d3 error-pattern checks are deterministic, not Monte Carlo.
+
+Also passed pip check, compileall, bash -n for bootstrap/both wrappers and
+git diff --check. Installed outside-repository CLI smoke validated the starter
+templates, ran separate three-shot d3 factory T3 and full Knill T8 cases,
+checked no/zero acceptance and iid SE-equivalent cost, list/grid/settings,
+all report formats and Fig.4(d) plot. Simulation bytes remained identical
+after analysis; all temporary artifacts were removed.
+
+The getting-started guide documents pinned setup, template copy/edit/run,
+resume, plotting, saved analysis, public APIs, optional outputs, current Git
+refs and statistical/cost/projected-model limits. Local documentation links
+resolve. All original v1 Python/test bytes, B0 storage, B1/B2 scientific runners/
+worker scheduler, dependency refs/lock/bootstrap and incoming .gitignore bytes
+are unchanged. All dependency worktrees are clean, Hex remains H5 4278d29,
+and main remains b3cc72a. Only intended B3 code/tests/docs/templates are staged;
+the user .gitignore is excluded. Full paper agreement, production performance,
+calibrated optimal cuts, queue costs and general fault tolerance are unmeasured.

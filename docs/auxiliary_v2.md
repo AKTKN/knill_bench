@@ -1,10 +1,12 @@
-# Schema-v2 auxiliary experiments: B0 foundation, B1 Fig.4(d), B2 factory
+# Schema-v2 auxiliary experiments: B0–B3
 
 B1 now implements the Fig.4(d) runner, bounded point workers, resume and
 saved-data Agresti-Coull plotting. See [the B1 guide](fig4d.md) for scientific
 constraints, commands, actual seed use and validation. The foundation below
 records the B0 contract. B2 adds the [two-block factory runner](logical_zero_factory.md)
-with aligned per-shot error/gap output. Acceptance/cost analysis remains B3.
+with aligned per-shot error/gap output. B3 now supplies
+[saved factory acceptance/oracle-quality/cost analysis](factory_analysis.md).
+See [getting started](../GETTING_STARTED.md) and [configuration templates](../configs/templates/factory_analysis.yaml).
 
 B0 supplies schema-v2 configuration, point identities/seeds, run directories,
 compact provenance/metadata and streamed point-level Parquet storage.
@@ -84,7 +86,7 @@ A point's canonical physical identity includes kind, code, noise, d, p,
 resolved r_0/r_plus, T and the final-readout/basis convention. SHA256 gives its
 case ID. The initial v2 memories are Z basis. Factory terminal readout is
 `noiseless_terminal_Z_factory_oracle`; full Knill is `noisy_destructive_Z`.
-The consumed one-bit measurement remains noisy in future factory execution.
+The consumed one-bit measurement remains noisy in factory execution.
 
 `point_seed(master,point)` and `chunk_seed(master,point,j,stream="chunk")`
 derive uint64 from the first eight SHA256 bytes, little endian, over canonical

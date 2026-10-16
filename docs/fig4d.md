@@ -118,4 +118,4 @@ sweep, large-distance runtime/memory and statistical agreement with the paper
 have not been measured. They do not establish a threshold, general fault
 tolerance, or new decoder accuracy/performance. Hex and v1 numerical sources
 remain unchanged. See [B2](logical_zero_factory.md) for the separate factory;
-acceptance/cost analysis still awaits B3.
+[B3](factory_analysis.md) analyzes saved factory acceptance/costs separately.

@@ -23,3 +23,29 @@ distance curves. No simulator or runner is imported. Every Fig.4(d) shot is
 retained, so conditional LER is errors/shots over eight stages, without a
 per-round transform. No paper agreement follows from tiny regression fixtures.
 See [the B1 guide](../../../docs/fig4d.md) for equations and commands.
+
+## B3 saved factory analysis
+
+`factory.AnalysisSettings`, `load_settings(path)` and `threshold_grid` define
+gap-only cuts, a read-batch bound and explicit FactoryCostModel/iid assumptions.
+`analyze_saved(run, settings=None)` verifies complete metadata, exact config,
+schema, IDs/counts and finite paired gaps, then streams one row per point/cut
+with counts, acceptance/abort, conditional terminal factory-oracle error,
+pointwise 95% Agresti-Coull intervals, first-rejection histogram and cost
+statistics. No simulation package or native backend is imported. Read-batch
+boundaries need not match Parquet row groups. All cut masks use gaps only.
+
+`factory_cost.first_rejected_stage` returns 0 accepted or stage 1..T.
+`FactoryCostModel.prefix_costs` declares initial serial/parallel overlap,
+refresh prep/reset, teleport/readout and decode costs. `summarize_cost` computes
+attempt moments and only under explicit iid restarts, mean cost/acceptance
+with paired delta-method SE. One accepted T-stage trajectory yields one resource;
+the evaluation oracle is excluded from operational cost. No accepted samples
+leaves conditional LER and restart ratios null. Default costs are assumed
+SE-equivalent work, not measured hardware latency.
+
+`write_report(report, output)` writes optional .json/.csv/.md only on request;
+CLI defaults to stdout JSON. Simulation files and v1 analysis remain unchanged.
+See [B3 details](../../../docs/factory_analysis.md),
+[getting started](../../../GETTING_STARTED.md) and the
+[analysis template](../../../configs/templates/factory_analysis.yaml).

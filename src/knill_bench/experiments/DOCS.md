@@ -12,7 +12,7 @@
   directories, exact YAML bytes, clean full-point restart and completion marker.
 - `dispatcher.py`: lazy kind dispatch to `run(document)` for B1 Fig.4(d) and
   B2 factory. Missing dependencies within an installed runner propagate.
-- `cli.py`: separate `knill-bench-v2 validate-config/prepare/run/resume/plot-fig4d`;
+- `cli.py`: separate `knill-bench-v2 validate-config/prepare/run/resume/plot-fig4d/analyze-factory`;
   v1 CLI and schemas are unchanged. `prepare` writes pending infrastructure only.
 
 See [the complete B0 specification](../../../docs/auxiliary_v2.md) for YAML
@@ -56,3 +56,14 @@ task, not per chunk. Theta is absent from factory compilation/worker options;
 all fixed-T trajectories are sampled and saved. No cuts/retries/costs are
 computed. See [the B2 guide](../../../docs/logical_zero_factory.md) for exact
 shapes, terminal/operational boundaries, policy restrictions and tested limits.
+
+## B3 CLI
+
+`analyze-factory RUN [--settings FILE] [--theta VALUE ... | --theta-grid START STOP COUNT]`
+reads saved pairs only. `--iid-restarts` explicitly enables renewal accounting;
+`--output FILE` optionally writes .json/.csv/.md, otherwise prints JSON. Cost
+assumptions live in a separate strict analysis YAML, never new simulation
+sweep axes. `--theta=-inf` provides the no-cut identity. The CLI also reports
+filesystem errors clearly. Runners, seeds, samplers and paired storage are
+unchanged. See [B3](../../../docs/factory_analysis.md) and
+[getting started](../../../GETTING_STARTED.md) for exact reproduce commands.

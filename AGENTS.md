@@ -122,3 +122,34 @@ first-rejection/retry costs and performance/threshold claims remain out of scope
 B2 final gates: 182 bench tests passed (592 inherited warnings, 138.24 s) and
 112 existing Hex circuit/batch/gap tests passed read-only. TEST.md records
 commands, coverage, tiny installed CLI/shell smoke and unchanged file scope.
+
+## B3 handoff (supersedes the historical B2 stop above)
+
+The user explicitly authorized B3 and a getting-started document/configuration
+templates. All four bench phases are implemented after this scoped commit/push
+on auxiliary-system. Do not launch production sweeps without a separate request.
+See [getting started](GETTING_STARTED.md) and [B3 equations](docs/factory_analysis.md).
+
+B3 is pure saved-data analysis: validate paired schemas/IDs/counts and finite
+scores, select using AND of gap>=theta only, then score terminal factory-oracle
+labels. Never call that conditional label online data-Knill LER. Negative
+infinity is no cut; zero accepted shots means undefined/null conditional LER.
+Pointwise 95% Agresti-Coull intervals are descriptive per fixed cut, with no
+simultaneous/data-selected-threshold coverage claim.
+
+Keep cost accounting separate from circuits. Declare serial/parallel initial
+prep, per-refresh prep/reset/decode, teleport/readout/online-decode and rejection
+cleanup assumptions. Default SE-equivalent costs are assumed, not measured.
+One T-stage trajectory produces one final resource. E[attempt cost]/P(accept)
+and its paired delta SE require explicit iid fresh restarts; zero acceptance
+leaves ratios null. No dynamic retry, alternate timing/noise, queue or multi-
+factory schedule is simulated. Simulation table schemas/runners are unchanged.
+
+Use separate analysis YAML (analysis_version:1), never new simulation sweep
+axes. Optional JSON/CSV/Markdown reports are requested outputs; no extra
+mandatory simulation artifact. User templates in configs/templates are small
+runnable examples for both experiments plus analysis settings. Keep the guide,
+CLI/examples and strict parser consistent. Preserve user .gitignore/dependency
+sources and existing v1 APIs/tests. Full bench gate: 203 passed, 608 warnings,
+137.58 s; targeted read-only Hex gate: 128 passed, 320 warnings, 49.97 s.
+TEST.md records the corrected float-test assertion and exact commands.

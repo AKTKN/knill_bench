@@ -1,6 +1,7 @@
 """Independent v2 CLI; the original knill-bench commands remain schema-v1."""
 
 import argparse
+from dataclasses import replace
 import json
 
 from .config_v2 import load_config
@@ -15,6 +16,14 @@ def main(argv=None):
     plot = sub.add_parser("plot-fig4d")
     plot.add_argument("run")
     plot.add_argument("--output", required=True)
+    analysis = sub.add_parser("analyze-factory")
+    analysis.add_argument("run")
+    analysis.add_argument("--settings")
+    cuts = analysis.add_mutually_exclusive_group()
+    cuts.add_argument("--theta", action="append", type=float, help="Repeat for a list; use --theta=-inf for no cut")
+    cuts.add_argument("--theta-grid", nargs=3, metavar=("START", "STOP", "COUNT"))
+    analysis.add_argument("--iid-restarts", action="store_true", default=None)
+    analysis.add_argument("--output", help="Optional .json, .csv or .md; default prints JSON")
     args = parser.parse_args(argv)
     try:
         if args.command == "validate-config":
@@ -32,10 +41,27 @@ def main(argv=None):
         elif args.command == "resume":
             from .dispatcher import resume
             print(resume(args.run))
-        else:
+        elif args.command == "plot-fig4d":
             from knill_bench.analysis.fig4d import plot_saved
             print(plot_saved(args.run, args.output))
-    except (ValueError, RuntimeError, NotImplementedError) as error:
+        else:
+            from knill_bench.analysis.factory import (
+                AnalysisSettings, analyze_saved, load_settings, threshold_grid, write_report,
+            )
+            settings = load_settings(args.settings) if args.settings else AnalysisSettings()
+            if args.theta is not None:
+                settings = replace(settings, thresholds=tuple(args.theta))
+            elif args.theta_grid is not None:
+                start, stop, count = args.theta_grid
+                settings = replace(settings, thresholds=threshold_grid(float(start), float(stop), int(count)))
+            if args.iid_restarts:
+                settings = replace(settings, iid_restarts=True)
+            report = analyze_saved(args.run, settings)
+            if args.output:
+                print(write_report(report, args.output))
+            else:
+                print(json.dumps(report, indent=2, allow_nan=False))
+    except (ValueError, RuntimeError, NotImplementedError, OSError) as error:
         parser.exit(2, f"{error}\n")
     return 0
 

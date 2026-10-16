@@ -7,6 +7,11 @@ experiments**: strict d/p-only configurations, compact provenance, streamed
 point-level Parquet output, the **B1 eight-cycle Fig.4(d) runner** and the
 **B2 two-block logical-zero factory runner**. See [the v2 contract](docs/auxiliary_v2.md),
 [Fig.4(d) guide](docs/fig4d.md) and [factory guide](docs/logical_zero_factory.md).
+**B3** adds saved-data acceptance, conditional oracle-error and explicitly
+assumed attempt/restart-cost analysis. Start with [GETTING_STARTED.md](GETTING_STARTED.md)
+and the runnable [factory](configs/templates/logical_zero_factory.yaml),
+[Fig.4(d)](configs/templates/fig4d.yaml) and
+[analysis](configs/templates/factory_analysis.yaml) templates.
 Existing commands below retain schema-v1 behavior.
 
 ```bash
@@ -58,6 +63,7 @@ bash scripts/run_fig4d.sh configs/fig4d.yaml
 # Deliberate factory experiment; use the small v2 example for a smoke run:
 bash scripts/run_logical_zero_factory.sh configs/logical_zero_factory.yaml
 .venv/bin/knill-bench-v2 resume results/<factory-run>
+.venv/bin/knill-bench-v2 analyze-factory results/<factory-run> --settings configs/templates/factory_analysis.yaml --output factory_report.md
 ```
 
 `prepare` creates `{UTC-timestamp}_{experiment-name}/config.yaml` and one
@@ -69,7 +75,8 @@ the saved-data plot uses 95% Agresti-Coull intervals. Factory `run` uses Hex's
 compiled one-bit stages with two reused supports and one terminal ideal
 evaluation oracle. It writes aligned error/gap tables for all trajectories;
 theta never controls sampling. Parent metadata marks complete points. Factory
-acceptance and first-rejection cost analysis remain B3.
+acceptance and first-rejection costs are computed from saved files by
+[the separate B3 helper](docs/factory_analysis.md), with no resimulation.
 
 Hex is pinned to completed H5 `4278d29`; its source/version is untouched.
 See [TEST.md](TEST.md) for regression results and

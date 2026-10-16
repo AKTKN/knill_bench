@@ -162,3 +162,51 @@ sources/tests remain intact, B0 table schemas are unchanged, and the incoming
 user .gitignore is preserved and excluded from staging. This phase ends with
 one scoped B2 commit/push to auxiliary-system; final handoff reports actual
 SHA/push status. Stop before B3 until explicitly requested.
+
+## B3 — saved acceptance/quality/cost analysis and getting started (2026-10-16)
+
+The user authorized B3 plus a getting-started document and configuration
+templates. Added analysis/factory.py and factory_cost.py, analyze-factory CLI,
+GETTING_STARTED.md, docs/factory_analysis.md and three runnable commented
+templates in configs/templates for factory, Fig.4(d) and separate analysis.
+Public APIs, outputs, pinned refs and reproduction commands are documented.
+
+Saved analysis streams/validates unchanged paired tables, complete metadata,
+exact config/IDs/counts/units and finite scores. Gap-only AND cuts yield
+acceptance/abort, accepted counts, conditional terminal factory-oracle LER,
+pointwise 95% Agresti-Coull intervals and descriptive uncertainty. Empty
+acceptance gives null conditional values; no shot is selected by true error.
+First rejection uses causal gap prefixes. Report formats JSON/CSV/Markdown
+are optional; no mandatory simulation storage or resimulation is introduced.
+
+Explicit cost models cover serial/parallel initial preparation, refresh prep,
+reset, preparation/online decoding, teleport/readout and rejected-attempt
+cleanup. Defaults count assumed SE-equivalent work. One full T attempt yields
+one final resource. Cost-to-first-accepted and expected attempts require
+explicit iid fresh restarts, use mean attempt cost/P(accept), and retain paired
+delta-method uncertainty. Zero observed acceptance leaves ratios undefined.
+No dynamic retry, actual alternate timing/noise, multi-factory queue, hardware
+latency or production scheduling is simulated.
+
+Validation: **203 bench tests passed, 608 inherited warnings, 137.58 s**,
+including all v1/B0/B1/B2 tests and 21 B3 cases. Initial targeted run had one
+overly strict float-equality assertion (one rounding bit); corrected it to
+numerical tolerance and retained exact discrete checks. Targeted read-only
+Hex circuit/batch/gap/public-policy suite: **128 passed, 320 warnings,
+49.97 s**. New v2 smoke covers both experiments at d3/5 with three shots per
+point. Existing constructor counters confirm cached inference across chunks.
+TEST.md records exact commands, coverage and the corrected failed assertion.
+
+Installed outside-repository CLI smoke passed template validation, both tiny
+experiments, saved plots, settings/list/grid cuts, optional report formats,
+iid/zero-acceptance handling and unchanged simulation bytes. Pip check,
+compilation, shell syntax, whitespace and documentation/source scope checks
+pass. All dependencies are clean/unchanged; v1 numerical/test bytes, B0 schemas,
+B1/B2 scientific runners/scheduler, lock/pins/bootstrap and user .gitignore are
+preserved. The B3 commit excludes .gitignore and includes no run artifacts.
+
+Limits: no full Fig.4(d) agreement, production runtime/speedup, optimal-cut
+calibration, general fault-tolerance or projected-prior accuracy claim. All
+four bench phases are now implemented with the documented assumptions and
+tested sizes. One scoped B3 commit/push goes to auxiliary-system; the final
+handoff reports its actual SHA and push status. No production jobs are launched.

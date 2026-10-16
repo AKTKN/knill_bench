@@ -45,3 +45,17 @@ pairs and reproducing the original seed stream. No B3 cuts or costs are added.
 Existing read-only Hex circuit/batch/surface-gap tests separately validate
 signed flows, parity/frame boundaries, legacy-map equivalence, injected faults
 and exhaustive d3 sector costs. Commands/results are recorded in TEST.md.
+
+## B3 analysis and integration
+
+`test_factory_analysis.py` uses six-row synthetic paired data to check AND
+cuts, monotone acceptance, -infinity/raw-LER identity, zero acceptance, equality
+at the cut, gap-only first rejection and label-independent selection/costs.
+It verifies serial/parallel/reset/decode/restart accounting, the iid renewal
+gate, paired cost-ratio uncertainty, and one resource per full T trajectory.
+It rejects broken IDs, missing/null/nonfinite/negative scores, changed counts,
+incomplete status and unit mismatch. Templates/grid/strict YAML, optional reports,
+installed CLI and no Hex/Stim/PyMatching import are checked. Tiny d3/5 three-shot
+smokes run both complete v2 experiments and saved analysis. Existing B1/B2 and
+read-only Hex constructor counters test cached inference without wall-time
+assertions. No production sweep or new large-shot test is introduced.

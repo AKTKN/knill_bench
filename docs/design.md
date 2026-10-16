@@ -8,7 +8,10 @@ labels use B0 streaming output and 95% Agresti-Coull analysis; no factory
 execution or statistical paper validation is included in B1. B2 adds a separate
 [factory runner](logical_zero_factory.md) using Hex's tested two-support
 role-swapping, noisy one-bit readout, sole ideal evaluation oracle and MWPM
-gap interfaces. Theta does not change sampling; acceptance/cost remain B3.
+gap interfaces. Theta does not change sampling. [B3](factory_analysis.md)
+computes saved-data acceptance/oracle quality, first rejection and explicit
+single-factory attempt costs; iid restart estimates require an explicit flag.
+It does not simulate queues, feedback or alternate physical timing/noise.
 
 ## Geometry, primitives, and boundaries
 

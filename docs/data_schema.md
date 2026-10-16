@@ -13,6 +13,14 @@ are retained, but B2 rejects unavailable/nonfinite scores. T/depths, oracle,
 roles, policies and compact model hashes enter the existing execution metadata;
 there are no mandatory additional tables or first-rejection/cost outputs.
 
+B3 reads those same files and optionally emits a separate JSON/CSV/Markdown
+report on request. Per-cut rows include counts, acceptance/abort and 95%
+pointwise Agresti-Coull intervals, terminal factory-oracle LER/conditional
+uncertainty, first-rejection counts, assumed attempt costs and explicitly
+enabled iid restart estimates. Undefined conditional/ratio values are null
+(blank CSV). No mandatory simulation storage/schema is added. See
+[the B3 guide](factory_analysis.md) for fields, equations and limitations.
+
 `src/knill_bench/data/storage.py` is the authoritative Arrow schema. Every table has schema-version and table-name metadata, explicit scalar types, and nullable fields. Counts/times/indices use int64, physical seeds uint64, rates/statistics float64, flags bool, packed bits binary, and IDs string. Bits are little-endian within each byte. Unknown diagnostics are null, not zero.
 
 | Table | Observation and key | Semantics |
