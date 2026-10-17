@@ -6,15 +6,15 @@ output_root: results
 code: rotated_surface
 noise: hex_uniform
 sweep:
-  d: [3, 5]
-  p: [0.0, 0.001]
-r_0: 2
-r_plus: 2
+  d: [3, 5, 7]
+  p: [0.005, 0.003,0.001]
+r_0: d
+r_plus: d
 T_tel: 2
 theta: 1.0  # Saved analysis cut; never controls sampling or selects truth.
-create_codecapacity_dem: false
+create_codecapacity_dem: true
 decoder: mwpm
-shots: 64
-batch_size: 32
-workers: 1
+shots: 100
+batch_size: 100
+workers: 6
 master_seed: 12345

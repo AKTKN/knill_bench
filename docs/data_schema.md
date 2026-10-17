@@ -76,8 +76,12 @@ also has `logical_gaps__...parquet` with identical row IDs and nullable float64
 in `r_+` is preserved. No v1 diagnostics/timing/checkpoint tables are required.
 
 Run root: exact original `config.yaml`, ONE compact `metadata.json`, and the
-one/two Parquet files per completed point. Run names are unique UTC timestamps
-plus safe experiment names. Both streamed file footers close/fsync/validate
+one/two Parquet files per completed point. New v2 run names are
+`YYYYMMDDHHMMSS_<config_hash8>_<safe-experiment-name>` using Asia/Tokyo time
+and the first eight hex digits of the canonical simulation-config SHA256.
+Collisions advance the directory timestamp one second; metadata keeps the
+actual ISO UTC times and full config hash. Old directory names still load.
+Both streamed file footers close/fsync/validate
 before individual atomic renames; parent metadata marks pair completion.
 An unfinished point is never treated as committed data, and clean restart
 removes its public/temporary files and begins at shot zero with the same seed.
@@ -88,3 +92,23 @@ hashes, prior policy, final-readout convention and score units. Only d/p vary
 within a run; prior/kind/theta differences get unique run directories. Read
 [the B0 guide](auxiliary_v2.md) for exact schema, nullable-gap meaning, ownership,
 crash windows and public APIs. B0 provides infrastructure, not science runners.
+
+## Factory local-prior metadata revision
+
+Current True runs declare prior_policy=module_local_stim_dem and
+projected_approximation=preparation_and_earlier_stage_residual_errors_excluded_v1.
+The existing per-stage projected_prior_sha256/projected_model_sha256 fields
+identify local model configuration and Stim DEM text. Execution adds
+local_module_sha256, local_analysis_sha256, prior_scope, boundary_noise and
+preparation_residual_errors_in_prior/earlier_stage_residual_errors_in_prior=false.
+Hashes may repeat across stages. Point tables, seeds and filenames are unchanged.
+Old projected data remain analyzable with their saved policy label; changed
+policy/source cannot be resumed. See [factory guide](logical_zero_factory.md).
+
+Factory execution now also records skip_circuit_validation (boolean),
+circuit_validation (full_native/skipped_by_configuration), and
+preparation_frame_implementation (factory_packed_preparation_frames_v1).
+Missing fields in historical results do not imply skipped validation. The
+default false flag is omitted from canonical config JSON to preserve old
+config hashes; true is included. Neither setting changes point IDs/seeds or
+per-shot table schemas. Exact input YAML remains archived without modification.

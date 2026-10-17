@@ -261,3 +261,177 @@ warnings, 160.63 s**; pip check and both small example config checks pass.
 The source/dependency scope and production-experiment boundary are unchanged.
 The existing user .gitignore edit remains outside this commit. The handoff
 reports the resulting commit SHA and remote push status.
+
+## V2 round multipliers and Fig.4(d) axis label (2026-10-16)
+
+Implemented the user's requested `logical error rate` vertical label and
+positive d-multiple preparation rules for both v2 experiments. Integer/d rules
+remain supported; `"2*d"`, `"2/3*d"` and decimal coefficients use exact rational
+arithmetic, flooring independently at each distance. Config validation rejects
+zero denominators, arbitrary expressions, and resolved depths outside positive
+signed int64 before run creation. Physical identities/seeds/filenames continue
+to use resolved integer depths, preserving equivalent-rule point seeds.
+
+The full Knill adapter now passes actual r_0/r_plus to Hex for every Bell
+resource and records those depths. Its runner and saved reader accept depth
+variants; standard paper settings still use d/d, with T=8, False priors, no
+theta and noisy final readout. Factory uses its existing native PreparationPlan.
+No dependency source, v1 numerical implementation or table schema changes.
+
+Updated schema, getting-started, scientific/package guides and template comments.
+Existing edits to both v2 example YAML files and .gitignore are preserved;
+no user experiment budget or production sweep was run. Tests include exact
+fractional flooring, invalid/zero/overflow rules, equivalent seeds, actual
+full-Knill/factory depths and metadata, and saved plotting.
+
+Final regression gate: **242 passed, 620 existing-category warnings, 136.34 s**.
+The first full gate exposed a new config-loop variable collision overwriting
+the experiment name; it was fixed and name preservation is covered explicitly.
+All dependency repositories and both locks remain unchanged; incoming user
+files match their initial hashes. TEST.md records focused/failure/final checks.
+
+## V2 directory naming and run/analysis clarification (2026-10-16)
+
+The reported commands both invoke saved-data analyze-factory, not simulation.
+Read-only inspection of the referenced run confirms complete status and
+resume_count=0. Analysis reads that run's saved config/data and overwrites the
+explicit report output; an edited external simulation config only takes effect
+after `run CONFIG` creates a new run and the shell run-path variable is updated.
+No automatic run deduplication or implicit resume exists.
+
+New v2 directories use YYYYMMDDHHMMSS_<config_hash8>_<name> in Asia/Tokyo time.
+The hash is the canonical simulation config SHA256 prefix. Atomic exclusive
+directory creation and one-second collision increments preserve fresh-run
+behavior, including identical configs in the same second. Metadata retains
+actual UTC timestamps/full hashes; existing output directories are not renamed
+and legacy names remain loadable under the usual resume checks. CLI help and
+getting-started/schema/package guides clarify simulation versus analysis.
+No circuit, decoder, physical seed, table schema, dependency source or v1 API
+changes belong to this naming update.
+
+Validation: focused config/storage gate **109 passed, 3.86 s**; complete gate
+**243 passed, 620 inherited warnings, 169.15 s**. No test failures. CLI help,
+local documentation links, diff whitespace and incoming-user-file integrity
+checks pass. No production experiment was launched.
+
+## Factory wall-time bottleneck investigation (2026-10-16)
+
+The user requested measured phase wall times for the edited True-prior example.
+The latest recorded job was already interrupted: 1373.85 seconds overall,
+d3 points ~15.7 seconds, d5 ~303–309 seconds, d7 ~1358 seconds without committed
+shots. No user process was stopped or resumed. Added an opt-in, bounded
+single-point profile script with nested wall/CPU timers, fault/group counts,
+source/BLAS/RSS records, optional cProfile and validation-line tracing. Only
+temporary physical files are sampled; timing artifacts live in ignored results/.
+
+Measured the real unchanged worker at p=.003: d3 True/100 shots takes 9.651 s,
+including 8.535 s in projected models and 8.021 s in repeated event-ID merging;
+physical sampling is .000242 s and decoding .008989 s. d5 True hits its 240 s
+limit with 230.594 s in merging before sampling. d7 True was bounded at 60 s
+in stage0 setup. The duplicate signature groups cause repeated growing-tuple
+sort/set/type validation, approximately quadratic in group size. Hamming-only
+comparison points d3/5/7 take .937/3.738/16.539 s, with d7 bundle validation
+13.412 s; separate line tracing attributes ~91.4% of validation to repeated
+has_all_flows. Thread limiting did not materially improve d3, and 7 versus
+100 physical shots leaves total runtime almost unchanged.
+
+docs/factory_performance_report.md records methods, raw artifacts, censoring,
+profiling overhead, policy/parallelism limits and suggested fixes. No numerical
+or dependency source optimization was applied. Two deterministic timing tests
+verify exclusive accounting and patch restoration. Full gate: **245 passed,
+620 inherited warnings, 163.25 s**. Both example configs and .gitignore are
+preserved; fork checkouts stay clean. No production sweep was launched.
+
+## 2026-10-16: module-local Stim factory prior and timing revision
+
+Implemented the user-requested True policy as module_local_stim_dem in the
+bench adapter, with ideal +1 analysis input and Pauli logical boundaries around
+native coupling/readout only. Preparation/earlier-stage residual errors are
+explicitly excluded from the PRIOR, retained in physical simulation. Actual
+Hex frame/decode methods, two supports, noisy readout and oracle isolation are
+unchanged; Hex H5 stays read-only. Local DEM/gap caching is bounded per worker,
+reuses identical stages/configurations, and never shares sampler RNG state.
+Complete native bundle validation runs once per fresh True compilation.
+Saved metadata records new scope/hashes; old saved analysis retains its label
+and mixed-policy/source resume is rejected.
+
+255 bench tests passed (688 warnings, 164.62 s); 128 read-only Hex tests passed
+(320 warnings, 55.76 s). Isolated p=.003, T=2, r0=rplus=d, seven-shot cold
+points completed in .875 / 2.507 / 10.830 s at d3/5/7. Legacy d3 replay took
+10.480 s; new code calls the old single-fault projection/merge zero times.
+Same-process second attempts rebuild no local DEM. Remaining d7 cost is native
+validation (7.522 s). Model change and measurement limits are explicit in
+docs/factory_performance_report.md; full evidence/commands in TEST.md.
+No production sweep, dependency patch, user config edit, staging or push.
+
+## 2026-10-16: fixed-distance runtime versus T
+
+Completed the requested d=7, p=.003, r0=rplus=7, True-prior timing experiment
+at T=1/2/4/8: 1,024 shots with batch 128 per attempt, four attempts per T,
+separate serial processes, one native/BLAS thread. All 16 attempts completed.
+Warm sampling+decode medians are .193/.289/.510/.893 ms/shot; setup/I/O-inclusive
+amortized medians are 5.861/10.008/18.475/43.290 ms/shot. T8 bundle validation
+is 39.270 s (~89% of point time). DEM is generated once per process, never on
+warm repeats; prior hash agrees across T, and legacy projection/merge remain
+absent. Repeated output hashes agree within each T.
+
+Added docs/factory_T_scaling_report.md with two graphs, first/warm timing
+distinctions, ranges, measured setup costs and reproducibility/interpretation
+limits. CSV/JSON, exact YAMLs, scripts and PNG/SVG/PDF figures are ignored
+under results/factory_T_scaling_d7. Simulation/dependency sources and user
+configs were unchanged for this follow-up; previous test gates retained.
+
+## 2026-10-17: T=3 runtime versus code distance through d11
+
+Completed the later user-authorized diagnostic at d=3/5/7/9/11, T=3,
+p=.003, r0=rplus=d and True local priors. Each distance used a separate
+serial process with 1,024 shots/batch 128, first attempt plus three warm
+repeats. All 20 attempts completed within the explicit per-distance bounds.
+Warm processing medians are .130/.213/.396/.757/1.388 ms/shot; full-point
+amortized medians are .608/2.968/14.186/48.493/145.194 ms/shot. d11 bundle
+validation takes 127.267 s (~86% of the point), versus .384 s for the first
+local prior including .00150 s of Stim extraction. The d7 processing range
+is unusually wide (.156–.429 ms/shot); it is retained and not causally
+attributed to caching or used to fit a complexity exponent.
+
+All distances build one local DEM, with zero warm rebuilds or legacy
+projection/merge calls; cache miss=1/hit=11. Repeated paired file hashes
+match within each distance. Added docs/factory_distance_scaling_report.md
+with graphs, phase tables, preparation-depth/record-size interpretation and
+separate startup/steady-processing conclusions. Raw JSON/CSV, exact config,
+host details, measurement/plot scripts and PNG/SVG/PDF exports remain ignored
+under results/factory_distance_scaling_T3. No simulation/dependency source,
+user config, existing run, unit-test budget, staging or push was changed.
+
+## 2026-10-17: factory validation option and packed preparation arithmetic
+
+Implemented skip_circuit_validation with the user's clarified semantics:
+True skips full bundle validation, False/default runs it once. The flag is
+factory-only, fixed per run, propagated through serial/spawn workers and
+recorded in execution metadata. Physical point identity/seeds are independent;
+default canonical config hashes remain compatible. No validated-circuit disk
+cache is implied. Construction/runtime/model/gap/storage checks remain.
+
+Both factory prior modes now compute only final stabilizer corrections and
+exit X/Z frames using precomposed packed GF(2) lookup maps. Removed runtime
+whole-history correction, large correction concatenation and CSR/dense-history
+conversion. All four native matching decisions, pure-error representatives,
+causal stage updates and the prior model are retained. Native public full-history
+plans stay available; private optimized plans share maps per support template.
+H5's exact physical builder is invoked with a private temporary bundle-type
+binding when validation is skipped; returned bundles retain explicit validate().
+No Hex source/global monkeypatch or copied physical protocol was introduced.
+
+Full bench gate: 272 passed, 744 existing-category warnings, 168.27 s. d3/5
+<=7-shot tests match every native frame/decode field and both validation modes'
+circuit/raw data, with serial/spawn and metadata coverage. In an isolated d7,
+T=3, p=.003, r=d, 1,024-shot comparison, all decoded fields match exactly.
+Median setup falls 14.179799 to 3.212478 s when full validation is skipped.
+Packed arithmetic reduces preparation decode/frame .280835 to .222392 s
+(20.8%) and whole decode .348699 to .289702 s (16.9%); tables cost 2.615 MiB.
+These are batch throughput measurements, not hardware real-time guarantees.
+Report: docs/factory_frame_optimization.md; raw diagnostics remain ignored.
+User .gitignore/example config edits and the clean pinned Hex checkout are
+preserved. No production sweep, existing-run mutation, staging or push.
+Read-only Hex gate: 128 passed, 320 inherited warnings, 55.43 s. Exact commands
+and the corrected template-sharing test assumption are recorded in TEST.md.

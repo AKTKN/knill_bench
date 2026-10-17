@@ -26,9 +26,10 @@ physical circuit, sampler, decoder or matching graph.
 
 ```bash
 bash scripts/bootstrap.sh
-.venv/bin/knill-bench-v2 validate-config configs/fig4d_v2_example.yaml
-.venv/bin/knill-bench-v2 validate-config configs/logical_zero_factory_v2_example.yaml
-.venv/bin/knill-bench-v2 prepare configs/logical_zero_factory_v2_example.yaml
+conda activate knill_system
+knill-bench-v2 validate-config configs/fig4d_v2_example.yaml
+knill-bench-v2 validate-config configs/logical_zero_factory_v2_example.yaml
+knill-bench-v2 prepare configs/logical_zero_factory_v2_example.yaml
 ```
 
 `prepare` writes `config.yaml` and `metadata.json` and leaves an incomplete
@@ -50,9 +51,10 @@ All other fields are fixed for a run:
 | `name` | Safe ASCII name, 1–80 letters/digits/underscore/hyphen; defaults to kind |
 | `output_root` | Nonempty path, defaults to `results`; relative to invocation working directory |
 | `code`, `noise` | `rotated_surface`, `hex_uniform` |
-| `r_0`, `r_plus` | Literal `d` or positive integer; default `d` |
+| `r_0`, `r_plus` | Positive integer, `d`, or a positive multiple such as `"2*d"`, `"2/3*d"`, `"1.5*d"`; default `d` |
 | `T_tel` | Positive integer; default 8 for Fig. 4(d), 1 for factory |
 | `create_codecapacity_dem` | Boolean, default false; Fig. 4(d) requires false |
+| `skip_circuit_validation` | Boolean, default false; true skips full physical bundle validation for factory only |
 | `decoder` | `mwpm` |
 | `theta` | Optional finite analysis cut; default null, never a sampling/selection rule |
 | `shots`, `batch_size`, `workers` | Positive integers, defaults 64/32/1 |
@@ -64,8 +66,35 @@ forbidden sweeps, nonfinite values, expression strings such as `d-2`, and
 Python object tags fail. Only a duplicate-checking SafeLoader is used; no
 expression evaluation or environment interpolation occurs. Parsing alone
 does not certify that Hex supplies matrices/graphs for every requested case.
-The Fig.4(d) runner additionally requires T=8, both resolved preparation depths
-equal d, no theta and False prior mode, before creating any output.
+The Fig.4(d) runner additionally requires T=8, no theta and False prior mode,
+before creating any output. Its standard paper configuration uses both depths
+equal to d; other positive depths run preparation-depth variants.
+
+`skip_circuit_validation` changes verification work only: physical identities,
+seeds and decoding results are unchanged. True is rejected for Fig.4(d); v1 is
+unchanged. For old config-hash compatibility, false is omitted from canonical
+config JSON (the exact YAML is always preserved). True is included in the hash.
+See [factory validation and frame arithmetic](logical_zero_factory.md).
+
+Round multipliers use the restricted syntax `constant*d` or
+`numerator/denominator*d`, with positive integer/decimal constants and optional
+spaces around operators. The `*` separates the coefficient from `d`, and `/`
+denotes division within that coefficient. They are parsed as exact rational
+numbers, multiplied by each distance, and floored to an integer. For example:
+
+```yaml
+r_0: "2*d"
+r_plus: "2/3*d"
+```
+
+At d=3 these resolve to (6,2); at d=5 they resolve to (10,3). `"0.6*d"`
+resolves to 3 at d=5 without floating-point rounding. The resulting depth must
+be in [1, 2^63-1] at **every** swept distance; zero after flooring is an error,
+not clamped to one. Zero denominators, negative coefficients and other
+expressions are rejected before run creation. This applies to both experiments.
+Multipliers remain fixed round rules, not extra sweep axes. Resolved integer
+depths enter the physical identity, seeds, filenames and execution metadata;
+equivalent rules therefore retain the same physical point seeds.
 
 `load_config(path)` returns frozen `ConfigDocument(config,contents,source_path)`.
 `parse_config(mapping)` returns frozen `ExperimentConfig`; `as_dict()` gives
@@ -76,11 +105,26 @@ become the run's `config.yaml`; `input_sha256` identifies those bytes separately
 
 ## Run identity, seeds and provenance
 
-Each run is exactly `{UTC-timestamp}_{experiment-name}` below `output_root`,
-using `%Y%m%dT%H%M%S.%fZ`. An exclusive directory creation reserves its name;
-a timestamp collision advances by one microsecond. Different run-wide configs
-always receive distinct directories even when names/point filenames match.
-Existing directories/files are never reused or overwritten by preparation.
+Each new run is `{YYYYMMDDHHMMSS}_{config_hash8}_{experiment-name}` below
+`output_root`. The timestamp uses Japan time (Asia/Tokyo, UTC+09:00), without
+punctuation or fractional seconds. `config_hash8` is the first eight lowercase
+hex digits of the canonical simulation config's SHA256 (`config.config_hash`);
+metadata retains the full hash. Comments/YAML formatting do not change this
+hash, while configuration fields do. For example:
+
+```text
+20261016155547_2242fc7d_factory_v2_example/
+```
+
+An exclusive directory creation reserves each name. If that name already
+exists, the timestamp advances by one second until a fresh name is reserved;
+this also handles collisions in the short hash without reusing data. The
+directory timestamp can therefore be ahead of the actual start on collision;
+metadata retains the actual start/end times in ISO UTC. `run CONFIG` always
+starts a fresh experiment, including repeated identical configs. Only
+`resume RUN` continues saved execution. Existing directories/files are never
+reused or overwritten by preparation. Legacy directory names still load and
+resume; existing output directories are not renamed.
 
 A point's canonical physical identity includes kind, code, noise, d, p,
 resolved r_0/r_plus, T and the final-readout/basis convention. SHA256 gives its
@@ -234,4 +278,22 @@ Tests use synthetic <=7-row chunks for storage/failure boundaries and read-only
 Hex API inspection; no new physical Monte Carlo is performed in B0. Existing
 v1 regressions remain in the suite. No data-oracle selection, scientific gain,
 threshold, latency, speedup or paper-agreement claim is made by infrastructure
-tests. H5's projected-prior restrictions and approximation limits still apply.
+tests. Historical H5 projected limits describe old runs. Current factory True
+uses the module-local model documented below and retains H5's gap-lift checks.
+
+## Current factory True policy
+
+`create_codecapacity_dem:true` now records `prior_policy:module_local_stim_dem`
+and `projected_approximation:preparation_and_earlier_stage_residual_errors_excluded_v1`.
+The prior covers only native coupling/noisy destructive readout after an ideal
++1 stabilizer boundary; noisy preparation and propagated frames remain physical.
+No extra boundary noise is inserted. Pauli observable input/output annotations
+are used only for DEM analysis. Local DEM/matching caches are bounded and
+worker-local; sampler state remains point-local. See [the factory guide](logical_zero_factory.md).
+
+Existing `projected_prior_sha256`/`projected_model_sha256` execution keys now
+identify local configuration/DEM content, with additional local physical-module
+and analysis-circuit hashes plus explicit scope/exclusion fields. Stage hashes
+can repeat because identical modules share priors. Filenames/shot schemas/seeds
+are unchanged. Old projected runs remain readable by saved-only analysis with
+their original labels; resume refuses the old policy/source before any cleanup.

@@ -70,9 +70,10 @@ knill-bench-v2 resume results/<factory-run>
 knill-bench-v2 analyze-factory results/<factory-run> --settings configs/templates/factory_analysis.yaml --output factory_report.md
 ```
 
-`prepare` creates `{UTC-timestamp}_{experiment-name}/config.yaml` and one
+`prepare` creates `{YYYYMMDDHHMMSS}_{config_hash8}_{experiment-name}/config.yaml`
+(Japan time, with the simulation-config SHA256 prefix) and one
 `metadata.json`, with pending points and no physical sampling. Fig.4(d) `run`
-uses d preparation rounds on both resources, eight full Knill stages and
+uses configurable preparation rounds on both resources (default d), eight full Knill stages and
 noisy final readout. It streams one logical-error Parquet file per d/p and
 records actual shot/error counts. The explicit production p grid is approximate;
 the saved-data plot uses 95% Agresti-Coull intervals. Factory `run` uses Hex's
@@ -82,7 +83,31 @@ theta never controls sampling. Parent metadata marks complete points. Factory
 acceptance and first-rejection costs are computed from saved files by
 [the separate B3 helper](docs/factory_analysis.md), with no resimulation.
 
+Both v2 experiments accept positive integers, `d`, and fixed round rules such
+as `r_0: "2*d"` or `r_plus: "2/3*d"`. Multipliers use exact arithmetic and
+floor to an integer at each distance; every resolved depth must be positive.
+The standard Fig.4(d) configuration retains d rounds on both resources.
+See [configuration syntax](docs/auxiliary_v2.md). The Fig.4(d) plot labels its
+vertical axis `logical error rate` for the complete eight-stage experiment.
+
+V2 `run CONFIG` always starts a new experiment directory. After editing a
+simulation config, rerun it and update the saved run-path variable.
+`analyze-factory RUN --settings ANALYSIS_YAML` only reanalyzes the data already
+inside RUN; it does not execute a changed simulation config or resume sampling.
+
 Hex is pinned to completed H5 `4278d29`; its source/version is untouched.
+Factory `create_codecapacity_dem: true` now uses cached **module-local Stim
+DEMs** in the bench adapter. Preparation/earlier-stage residual errors are
+excluded from this prior only; noisy physical preparation and native frame
+processing remain. This replaces the historical full-prefix projected policy.
+Old runs can be analyzed with their original policy label, but require a fresh
+run for this model change. See [factory model and cache](docs/logical_zero_factory.md)
+and [measured wall times](docs/factory_performance_report.md).
+Both factory prior modes now use equivalent packed preparation-frame arithmetic.
+Factory YAML `skip_circuit_validation: true` skips the full construction-time
+bundle check; omitted/false retains it. This option changes verification cost,
+not physical sampling or decoding, and is not a validated-circuit disk cache.
+Runtime sign and prior-model checks remain enabled. See the factory guide above.
 The cluster builder adds matrix resources and build provenance in temporary
 packaging copies; installed wheels can run without Git checkouts.
 See [TEST.md](TEST.md) for regression results and

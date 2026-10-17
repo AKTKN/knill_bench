@@ -36,7 +36,6 @@ def summarize_saved(run_path):
     metadata = json.loads((path / "metadata.json").read_text())
     if (config.kind != "fig4d_reproduction" or config.T_tel != 8
             or config.theta is not None or config.create_codecapacity_dem
-            or any(p.r_0 != p.d or p.r_plus != p.d for p in config.points())
             or metadata.get("kind") != config.kind
             or metadata.get("schema_version") != 2 or metadata.get("status") != "complete"
             or metadata.get("config_hash") != config.config_hash
@@ -86,7 +85,7 @@ def plot_saved(run_path, output):
         errors = np.array([[r["conditional_ler"] - r["lower"] for r in rows],
                            [r["upper"] - r["conditional_ler"] for r in rows]])
         axis.errorbar([r["p"] for r in rows], y, yerr=errors, marker="o", capsize=3, label=f"d={distance}")
-    axis.set(xlabel="Physical error probability p", ylabel="Conditional logical error rate",
+    axis.set(xlabel="Physical error probability p", ylabel="logical error rate",
              title="Eight-cycle full Knill memory · 95% Agresti–Coull")
     axis.legend()
     axis.grid(alpha=.25)

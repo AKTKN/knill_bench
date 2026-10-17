@@ -11,7 +11,7 @@ import pyarrow.parquet as pq
 import yaml
 
 from knill_bench.data.storage_v2 import validate_point_files
-from knill_bench.experiments.config_v2 import _UniqueSafeLoader, load_config
+from knill_bench.experiments.config_v2 import _UniqueSafeLoader, load_config, LEGACY_PRIOR_POLICY
 from knill_bench.experiments.seeds import point_seed
 from .factory_cost import FactoryCostModel, first_rejected_stage, summarize_cost
 from .fig4d import agresti_coull
@@ -114,11 +114,16 @@ def analyze_saved(run_path, settings=None):
     config = document.config
     meta = json.loads((path / "metadata.json").read_text())
     units = "log_weight" if config.create_codecapacity_dem else "hamming_weight"
+    # Old saved projected-prior data remain analyzable, with their ORIGINAL
+    # policy label. Never relabel old gaps as the new local-noise model.
+    policies = {config.prior_policy}
+    if config.create_codecapacity_dem:
+        policies.add(LEGACY_PRIOR_POLICY)
     if (config.kind != "logical_zero_factory" or meta.get("kind") != config.kind
             or meta.get("schema_version") != 2 or meta.get("status") != "complete"
             or meta.get("config_hash") != config.config_hash or meta.get("config") != config.as_dict()
             or meta.get("input_sha256") != document.input_hash
-            or meta.get("gap_units") != units or meta.get("prior_policy") != config.prior_policy
+            or meta.get("gap_units") != units or meta.get("prior_policy") not in policies
             or meta.get("final_readout") != "noiseless_terminal_Z_factory_oracle"):
         raise ValueError("require a complete, unchanged factory run with declared score/oracle conventions")
     points = list(config.points())
@@ -164,7 +169,7 @@ def analyze_saved(run_path, settings=None):
             acceptance, a_lo, a_hi = _rate(accepted, shots)
             abort, b_lo, b_hi = _rate(shots-accepted, shots)
             rows.append(dict(case_id=point.case_id, d=point.d, p=point.p, r_0=point.r_0, r_plus=point.r_plus,
-                             T_tel=point.T_tel, prior_policy=config.prior_policy, gap_units=units,
+                             T_tel=point.T_tel, prior_policy=meta["prior_policy"], gap_units=units,
                              theta=_theta_json(theta), shots=shots, logical_errors=errors, accepted=accepted,
                              accepted_errors=bad, raw_ler=raw_rate, raw_ler_lower=raw_lo, raw_ler_upper=raw_hi,
                              acceptance=acceptance, acceptance_lower=a_lo, acceptance_upper=a_hi,

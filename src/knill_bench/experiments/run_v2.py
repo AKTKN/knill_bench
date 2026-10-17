@@ -12,9 +12,12 @@ from knill_bench.data.storage_v2 import (
     PointResult, acquire_lock, atomic_json, clear_stale_lock,
     restart_incomplete_point, validate_point_files,
 )
-from .config_v2 import ConfigDocument, load_config
+from .config_v2 import ConfigDocument, load_config, LOCAL_PRIOR_APPROXIMATION
 from .provenance import collect_environment
 from .seeds import SEED_DERIVATION, point_seed
+
+
+RUN_TIMEZONE = timezone(timedelta(hours=9), "Asia/Tokyo")
 
 
 def utc_now():
@@ -42,14 +45,17 @@ class RunStore:
         config = document.config
         root = Path(config.output_root).expanduser().resolve()
         root.mkdir(parents=True, exist_ok=True)
-        instant = utc_now()
+        instant = utc_now().astimezone(RUN_TIMEZONE)
+        suffix = f"{config.config_hash[:8]}_{config.name}"
         while True:
-            path = root / f"{instant.strftime('%Y%m%dT%H%M%S.%fZ')}_{config.name}"
+            path = root / f"{instant.strftime('%Y%m%d%H%M%S')}_{suffix}"
             try:
                 path.mkdir()
                 break
             except FileExistsError:
-                instant += timedelta(microseconds=1)
+                # Reserve a fresh directory even for identical configs in one
+                # second, preserving the requested format without reuse.
+                instant += timedelta(seconds=1)
         try:
             with (path / "config.yaml").open("xb") as output:
                 output.write(document.contents)
@@ -67,7 +73,7 @@ class RunStore:
                 final_readout=next(config.points()).final_readout,
                 gap_units=("log_weight" if config.create_codecapacity_dem else "hamming_weight")
                           if config.kind == "logical_zero_factory" else None,
-                projected_approximation=("single_fault_at_noiseless_reference_independent_superposition_v1"
+                projected_approximation=(LOCAL_PRIOR_APPROXIMATION
                                          if config.create_codecapacity_dem else None),
                 points={p.case_id: dict(p.sampling_identity, status="pending", seed=point_seed(config.master_seed, p),
                                        shots=0, logical_errors=0, wall_seconds=0., started_at=None,
@@ -103,6 +109,10 @@ class RunStore:
             if (value.get("schema_version") != 2 or value.get("config_hash") != config.config_hash
                     or value.get("input_sha256") != document.input_hash or value.get("config") != config.as_dict()):
                 raise ValueError("saved v2 config changed; resume rejected")
+            if (value.get("prior_policy") != config.prior_policy
+                    or (config.create_codecapacity_dem
+                        and value.get("projected_approximation") != LOCAL_PRIOR_APPROXIMATION)):
+                raise ValueError("saved prior policy changed; create a new run")
             env = collect_environment()
             if _compatibility(value["environment"]) != _compatibility(env):
                 raise ValueError("source/dependency environment changed; create a new run")

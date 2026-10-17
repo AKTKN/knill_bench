@@ -12,8 +12,8 @@ Tests parse that YAML but never construct/sample its large-distance circuits.
 Hex H5 fixed `knill_online_offline` module sequence for Z memory:
 
 1. Ideal encoded initial data in logical zero.
-2. Each stage prepares fresh zero and plus resources, each with exactly d
-   noisy X/Z SE rounds, then `CX(plus, zero)` and Hex's Bell coupling,
+2. Each stage prepares fresh zero and plus resources with r_0 and r_plus
+   noisy X/Z SE rounds respectively, then `CX(plus, zero)` and Hex's Bell coupling,
    destructive X/Z measurement and survivor-frame correction.
 3. After eight stages the survivor has a **noisy** destructive Z readout at p.
 
@@ -26,8 +26,16 @@ gate model is added. Offline and online decoders use PyMatching MWPM.
 and legacy preparation priors, without asserting optimal conditional weights.
 No old `knill_hex_dminus2` builder participates.
 
-The runner requires T=8, resolved r_0=r_plus=d, no theta and False prior mode
-before creating output. The lower-level adapter also accepts T=1/2 for tiny
+The runner requires T=8, no theta and False prior mode before creating output.
+The standard paper configuration keeps r_0=r_plus=d. Both depths also accept
+positive integers and fixed positive multiples of d, such as `"2*d"` and
+`"2/3*d"`; these run preparation-depth variants. Fractions and decimals use
+exact rational arithmetic and floor the result at each distance. A result
+below one or above signed int64 is rejected during config validation. The
+resolved depths are passed to Hex and recorded for all eight stages; no depth
+is silently replaced with d. See [round-rule syntax](auxiliary_v2.md).
+
+The lower-level adapter also accepts T=1/2 for tiny
 protocol fixtures. It exposes `sample(shots)` and `decode_batch(raw_bool)`;
 the latter returns `FullKnillBatch(logical_error, corrected_measurements)`.
 Raw input is never modified. All physical sampling precedes batch decoding.
@@ -101,7 +109,9 @@ whole eight-stage experiment, without a per-cycle conversion.
 `agresti_coull(k,n)` uses z=Phi^-1(0.975), n'=n+z²,
 p'=(k+z²/2)/n', and p' ± z sqrt(p'(1-p')/n'), clipped to [0,1].
 The plotted point is k/n; error bars are the two-sided 95% Agresti-Coull
-interval. Zero observed errors retain a positive upper bound.
+interval. Zero observed errors retain a positive upper bound. The plot's
+vertical label is `logical error rate`; the saved `conditional_ler` summary
+key is retained for API compatibility, with every shot accepted.
 `plot_saved(path, output)` writes only the requested optional figure, grouped
 by distance, using a headless Matplotlib canvas. Saved runs can be plotted
 without requiring their original simulation environment to match.

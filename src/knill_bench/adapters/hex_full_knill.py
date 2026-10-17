@@ -39,8 +39,8 @@ class HexFullKnill:
     """
 
     def __init__(self, point: ExperimentPoint, *, seed: int):
-        if point.kind != "fig4d_reproduction" or point.r_0 != point.d or point.r_plus != point.d:
-            raise ValueError("full Knill requires Fig.4(d) points with d rounds on each resource")
+        if point.kind != "fig4d_reproduction":
+            raise ValueError("full Knill requires Fig.4(d) points")
         code = Code.rotated(point.d)
         pcm, blocks = code.matrices, code.blocks(2 * point.T_tel + 1)
         matching = pymatching.Matching.from_check_matrix  # Legacy Hamming online weights.
@@ -56,12 +56,12 @@ class HexFullKnill:
         append(no_measurement_module(noiseless_unitary_state_prep(pcm, "z", eigenvalue=0), data),
                data, "ideal_encoded_data")
         families = {}
-        for basis, offset in (("z", 1), ("x", 2)):
+        for basis, offset, rounds in (("z", 1, point.r_0), ("x", 2, point.r_plus)):
             resource_supports = [sum((blocks[2 * j + offset][key]
                                       for key in ("data_qubits", "x_ancillas", "z_ancillas")), [])
                                  for j in range(point.T_tel)]
             canonical = list(range(len(resource_supports[0])))
-            template = generate_state_prep_modules(pcm, point.d, basis, point.p,
+            template = generate_state_prep_modules(pcm, rounds, basis, point.p,
                                                   [canonical], matching, matchable=True,
                                                   surface_code=True)[0]
             # The callback closes over local circuits, maps and decoder handles.
@@ -96,7 +96,7 @@ class HexFullKnill:
         self.sampler = self.engine.circuit.compile_sampler(seed=seed)
         self.metadata = dict(
             protocol="hex_fixed_full_knill", T_tel=point.T_tel,
-            r_0=[point.d] * point.T_tel, r_plus=[point.d] * point.T_tel,
+            r_0=[point.r_0] * point.T_tel, r_plus=[point.r_plus] * point.T_tel,
             initial_data="ideal_encoded_zero", memory_basis="z",
             noise="hex_uniform", physical_error=point.p,
             final_readout="noisy_destructive_Z", final_readout_error=point.p,

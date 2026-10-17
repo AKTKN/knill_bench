@@ -7,13 +7,13 @@ code: rotated_surface
 noise: hex_uniform
 sweep:
   d: [3, 5]
-  p: [0.0, 0.001]
+  p: [0.01, 0.001]
 r_0: d
 r_plus: d
 T_tel: 8
 create_codecapacity_dem: false
 decoder: mwpm
-shots: 64
-batch_size: 32
-workers: 1
+shots: 200
+batch_size: 50
+workers: 4
 master_seed: 12345

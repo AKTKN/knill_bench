@@ -1,5 +1,45 @@
 # Scripts and entry points
 
+## Factory wall-time diagnosis
+
+`profile_factory.py CONFIG --distance D --p P --output NEW.json` measures one
+selected real v2 factory point. It uses seven diagnostic shots by default,
+independently of the config's shot/worker budget, and runs one process. Optional
+`--prior configured|hamming|projected` changes only the selected inference mode
+for an explicit comparison. Sampling/decoding/writing call the actual bench
+worker with original seed and bounded batches; physical temporary tables are
+removed afterward. It never dispatches the config's full sweep or resumes data.
+
+Runtime-only wrappers on unchanged Hex/bench functions record nested inclusive
+and exclusive wall/CPU times, projected fault/group counts, native BLAS thread
+counts, source hashes and peak RSS. Wrappers are restored on exit. A Linux
+SIGALRM bounds the point (default 180 seconds), saving partial timings and a
+timeout status if needed; timeouts are not completed simulation results.
+`--cprofile` adds .pstats/.pstats.txt for call-site diagnosis and can substantially
+increase Python-loop timings. Use the default wrapper-only mode for primary
+wall-time comparisons. `--trace-validation` records per-line elapsed time in
+FactoryCircuitBundle.validate, including native child calls; compare its line
+proportions within that run. Existing output JSON is refused. Results belong under
+ignored results/, not committed experiment artifacts. See
+[the measured report](../docs/factory_performance_report.md).
+
+The fixed-distance T diagnostic uses separate fixed-T configuration snapshots;
+it does not add a simulation sweep axis. See the
+[d7 T-scaling report](../docs/factory_T_scaling_report.md) and ignored
+`results/factory_T_scaling_d7/measure.sh` / `summarize.py` for the exact run and
+saved-profile plotting commands. Per-shot sampling/decode throughput and full
+point time divided by the shot count are reported separately. First attempts
+are separated from same-process warm repeats; error bars are observed ranges,
+not statistical confidence intervals. Timing experiments are opt-in and are
+never part of the unit-test suite.
+
+The follow-up [distance-scaling report](../docs/factory_distance_scaling_report.md)
+fixes T=3 and measures d=3/5/7/9/11 with preparation depths equal to d. Exact
+configs, serial measurement commands and saved-only plotting code live in
+ignored `results/factory_distance_scaling_T3/`. Its 1,024-shot timing attempts
+are explicitly requested diagnostics, not new unit-test fixtures. It retains
+the same cold/warm and sampling/decode versus full-point timing definitions.
+
 ## Current Conda and cluster commands
 
 `bootstrap.sh` now uses environments.yaml to create/update Conda knill_system,
@@ -62,3 +102,22 @@ sweep is run automatically. Optional report settings and both small simulation
 templates are in configs/templates. [Getting started](../GETTING_STARTED.md)
 provides setup/copy/run/resume/plot/analyze commands, public APIs and exact
 dependency refs. Large Fig.4(d)/factory jobs remain the explicit wrappers above.
+
+## Local versus historical factory profiling
+
+profile_factory.py now treats configured/projected/local True as the current
+module_local_stim_dem policy. --prior legacy-projected is a diagnostic-only
+replay of pinned Hex H5's original full-prefix setup; no config/source edits
+are made. --repeat N creates N independently seeded attempts in temporary
+subdirectories in one process, retaining only DEM/graph cache state. Timings
+include per-attempt deltas, local cache counts, strict Stim extraction and
+legacy projection/merge counters. A fresh process/cache is used by default.
+All ideal analysis boundaries and inference model differences are explicit
+in the report; speed comparisons do not establish equal inference quality.
+
+The profiler honors factory config skip_circuit_validation and records it.
+It times both native and packed preparation-frame resolution, packed-map setup,
+and the private H5 construction path that omits full validation. Opt-out means
+zero setup.bundle_validation calls. legacy-projected diagnostics require full
+validation and reject a config opting out. Runtime instrumentation is confined
+to the diagnostic process and is restored on exit, including timeout.

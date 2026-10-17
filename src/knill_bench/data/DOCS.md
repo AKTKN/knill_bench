@@ -46,3 +46,11 @@ is present. Patch capture remains checkout-only. B0/v1 table schemas and all
 physical data semantics are unchanged. Shared source validation hashes Python/
 matrix resources and rejects changed wheel content. See
 [cluster setup](../../../docs/cluster_setup.md) for build/install/validation.
+
+## V2 run-directory names
+
+RunStore reserves `YYYYMMDDHHMMSS_<config_hash8>_<name>` in Asia/Tokyo time.
+Same-name collisions advance one second without data reuse; full hashes and
+actual ISO UTC timestamps remain in metadata. This changes only new directory
+names, not table names/schemas or legacy run loading. `run` starts fresh while
+`analyze-factory` reads only the specified saved run and its saved config.

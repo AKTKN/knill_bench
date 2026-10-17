@@ -51,7 +51,7 @@ def test_production_config_is_explicit_approximate_grid_only():
     runner.validate_experiment(doc.config)  # No large circuits or shots.
 
 
-@pytest.mark.parametrize("updates", [dict(T_tel=1), dict(r_0=1), dict(r_plus=1), dict(theta=0.)])
+@pytest.mark.parametrize("updates", [dict(T_tel=1), dict(theta=0.)])
 def test_runner_rejects_wrong_protocol_before_output(tmp_path, updates):
     doc = document(tmp_path, **updates)
     with pytest.raises(ValueError, match="Fig.4"):
@@ -102,9 +102,9 @@ def test_eight_stage_actual_sequence_depth_noise_and_readout(monkeypatch):
     assert any(op.name == "DEPOLARIZE2" for op in model.engine.circuit)
 
 
-@pytest.mark.parametrize("distance", [3, 5])
-def test_zero_noise_t1_and_native_objects_reused(distance, monkeypatch):
-    point = ExperimentPoint("fig4d_reproduction", distance, 0., distance, distance, 1)
+@pytest.mark.parametrize("distance,r_0,r_plus", [(3, 3, 3), (5, 5, 5), (3, 1, 1)])
+def test_zero_noise_t1_and_native_objects_reused(distance, r_0, r_plus, monkeypatch):
+    point = ExperimentPoint("fig4d_reproduction", distance, 0., r_0, r_plus, 1)
     model = HexFullKnill(point, seed=4321)
     sampler = model.sampler
     transitions = tuple(id(t) for t in model.transitions)
@@ -124,9 +124,8 @@ def test_zero_noise_t1_and_native_objects_reused(distance, monkeypatch):
 
 def test_adapter_rejects_other_protocols_and_invalid_raw_arrays():
     point = ExperimentPoint("fig4d_reproduction", 3, 0., 3, 3, 1)
-    for invalid in (replace(point, kind="logical_zero_factory"), replace(point, r_plus=1)):
-        with pytest.raises(ValueError, match="full Knill requires"):
-            HexFullKnill(invalid, seed=1)
+    with pytest.raises(ValueError, match="full Knill requires"):
+        HexFullKnill(replace(point, kind="logical_zero_factory"), seed=1)
     model = HexFullKnill(point, seed=1)
     columns = model.engine.circuit.num_measurements
     for raw in (np.zeros((2, columns), np.uint8), np.zeros((2, columns-1), bool),
@@ -241,14 +240,32 @@ def test_streamed_run_counts_seed_reuse_resume_and_saved_plot(tmp_path, monkeypa
 
 
 def test_spawn_workers_match_serial_point_streams(tmp_path):
-    doc = document(tmp_path, sweep=dict(d=[3], p=[0., .02]), shots=5, batch_size=3, workers=2)
+    settings = dict(sweep=dict(d=[3], p=[0., .02]), r_0="2*d", r_plus="2/3*d",
+                    shots=5, batch_size=3)
+    doc = document(tmp_path, **settings, workers=2)
     parallel = runner.run(doc)
-    serial_doc = document(tmp_path, sweep=dict(d=[3], p=[0., .02]), shots=5, batch_size=3, workers=1)
+    serial_doc = document(tmp_path, **settings, workers=1)
     serial = runner.run(serial_doc)
     for point in doc.config.points():
         a = pq.read_table(parallel / point.filename("logical_error"))
         b = pq.read_table(serial / point.filename("logical_error"))
         assert a.equals(b)
+
+
+def test_round_multipliers_reach_all_eight_stages_and_saved_plot(tmp_path):
+    doc = document(tmp_path, sweep=dict(d=[3], p=[0.]), r_0="2*d", r_plus="2/3*d", shots=3)
+    path = runner.run(doc)
+    case = next(doc.config.points())
+    assert (case.r_0, case.r_plus) == (6, 2)
+    metadata = json.loads((path / "metadata.json").read_text())
+    execution = metadata["points"][case.case_id]["execution"]
+    assert execution["r_0"] == [6] * 8 and execution["r_plus"] == [2] * 8
+    assert execution["resource_measurements"] == [48, 16] * 8
+    assert summarize_saved(path)[0]["logical_errors"] == 0
+    assert "r_0=6,r_+=2" in case.filename("logical_error")
+    output = plot_saved(path, tmp_path / "rounds.svg")
+    assert "logical error rate" in output.read_text()
+    assert "Conditional logical error rate" not in output.read_text()
 
 
 def test_saved_reader_rejects_missing_rows_and_shuffled_ids(tmp_path):

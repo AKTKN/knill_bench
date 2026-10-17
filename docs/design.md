@@ -2,7 +2,9 @@
 
 The original schema-v1 design below remains unchanged. B1 adds an independent
 [eight-cycle Fig.4(d) experiment](fig4d.md) using actual Hex full Knill modules,
-d preparation rounds on each resource and noisy final readout. It shares the
+configurable preparation rounds on each resource (default d) and noisy final
+readout. Fixed positive multiples of d are floored with exact arithmetic;
+standard paper settings retain d rounds. It shares the
 native adapter's local frame helpers, not the v1 d-2 physical builder. Saved
 labels use B0 streaming output and 95% Agresti-Coull analysis; no factory
 execution or statistical paper validation is included in B1. B2 adds a separate
@@ -82,3 +84,19 @@ H5 ancestry are inspected at the actual imported checkout without constructing
 scientific objects. Existing v1 APIs/tables/tests stay separate.
 [The B0 guide](auxiliary_v2.md) specifies interfaces, shapes, physical/readout
 conventions, seed hashing, ownership, publication limits and future boundaries.
+
+## Factory module-local prior revision
+
+The current v2 factory True policy is implemented in adapters.hex_factory; v1
+and the B1 adapter are unchanged. DEM analysis assumes ideal +1 input
+stabilizers and uses Pauli-target logical boundaries around only the actual
+native coupling/noisy readout. Preparation and previous-stage residual errors
+are excluded from this prior but retained by physical sampling and unchanged
+Hex causal frame processing. The ideal input is never sampled. Bounded
+worker-local caches share identical local DEMs/gap graphs, never sampler RNGs.
+Full native physical validation runs once per factory compilation by default;
+the factory-only skip_circuit_validation=True option explicitly omits it.
+Both prior modes use composed packed preparation-frame maps, preserving all
+four native matching decisions and causal frame semantics. See
+[factory definitions](logical_zero_factory.md) for the model change, boundary,
+cache keys, initialization binding and legacy saved-data compatibility.

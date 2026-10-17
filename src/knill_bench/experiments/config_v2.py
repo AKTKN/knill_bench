@@ -1,6 +1,7 @@
 """Small, strict schema-v2 configuration with exactly two sweep axes."""
 
 from dataclasses import asdict, dataclass
+from fractions import Fraction
 import hashlib
 import json
 import math
@@ -11,6 +12,9 @@ import yaml
 
 
 KINDS = {"fig4d_reproduction", "logical_zero_factory"}
+LOCAL_PRIOR_POLICY = "module_local_stim_dem"
+LOCAL_PRIOR_APPROXIMATION = "preparation_and_earlier_stage_residual_errors_excluded_v1"
+LEGACY_PRIOR_POLICY = "circuit_informed_projected"
 
 
 def canonical(value) -> str:
@@ -53,8 +57,35 @@ def _choice(value, choices, where):
     return value
 
 
+def _round_multiplier(value, where):
+    """Parse only a positive constant times d, using exact rational arithmetic."""
+    if value == "d":
+        return Fraction(1)
+    number = r"(?:[0-9]+(?:\.[0-9]*)?|\.[0-9]+)"
+    match = (re.fullmatch(rf"\s*({number})(?:\s*/\s*({number}))?\s*\*\s*d\s*", value)
+             if isinstance(value, str) else None)
+    if match is None:
+        raise ValueError(f"{where} must be a positive integer, 'd', or a multiple such as '2*d' or '2/3*d'")
+    numerator = Fraction(match[1])
+    denominator = Fraction(match[2]) if match[2] is not None else Fraction(1)
+    if numerator <= 0 or denominator <= 0:
+        raise ValueError(f"{where} multiplier and denominator must be positive")
+    return numerator / denominator
+
+
 def _rounds(value, where):
-    return value if value == "d" else _integer(value, where)
+    if type(value) is int:
+        return _integer(value, where)
+    _round_multiplier(value, where)
+    return value
+
+
+def _resolve_rounds(value, d, where):
+    if type(value) is int:
+        return _integer(value, where)
+    multiplier = _round_multiplier(value, where)
+    rounds = multiplier.numerator * d // multiplier.denominator
+    return _integer(rounds, f"{where} resolved at d={d} (after flooring)")
 
 
 class _UniqueSafeLoader(yaml.SafeLoader):
@@ -143,9 +174,13 @@ class ExperimentConfig:
     batch_size: int = 32
     workers: int = 1
     master_seed: int = 12345
+    skip_circuit_validation: bool = False
 
     def as_dict(self):
         result = asdict(self)
+        # Preserve canonical hashes of existing configurations with full validation.
+        if not result["skip_circuit_validation"]:
+            result.pop("skip_circuit_validation")
         result["schema_version"] = 2
         result["sweep"] = {"d": list(result.pop("distances")), "p": list(result.pop("probabilities"))}
         return result
@@ -156,13 +191,13 @@ class ExperimentConfig:
 
     @property
     def prior_policy(self):
-        return "circuit_informed_projected" if self.create_codecapacity_dem else "hex_legacy_hamming"
+        return LOCAL_PRIOR_POLICY if self.create_codecapacity_dem else "hex_legacy_hamming"
 
     def points(self):
         for d in self.distances:
             for p in self.probabilities:
-                yield ExperimentPoint(self.kind, d, p, d if self.r_0 == "d" else self.r_0,
-                                      d if self.r_plus == "d" else self.r_plus, self.T_tel,
+                yield ExperimentPoint(self.kind, d, p, _resolve_rounds(self.r_0, d, "r_0"),
+                                      _resolve_rounds(self.r_plus, d, "r_plus"), self.T_tel,
                                       self.code, self.noise)
 
 
@@ -179,7 +214,7 @@ class ConfigDocument:
 
 def parse_config(raw) -> ExperimentConfig:
     _mapping(raw, "schema_version kind name output_root code noise sweep r_0 r_plus T_tel theta "
-             "create_codecapacity_dem decoder shots batch_size workers master_seed".split(), "root")
+             "create_codecapacity_dem decoder shots batch_size workers master_seed skip_circuit_validation".split(), "root")
     if type(raw.get("schema_version")) is not int or raw["schema_version"] != 2:
         raise ValueError("schema_version must be 2")
     kind = _choice(raw.get("kind"), KINDS, "kind")
@@ -209,19 +244,31 @@ def parse_config(raw) -> ExperimentConfig:
         raise ValueError("create_codecapacity_dem must be bool")
     if kind == "fig4d_reproduction" and policy:
         raise ValueError("Fig.4(d) reproduction requires create_codecapacity_dem=False")
+    skip_validation = raw.get("skip_circuit_validation", False)
+    if type(skip_validation) is not bool:
+        raise ValueError("skip_circuit_validation must be bool")
+    if skip_validation and kind != "logical_zero_factory":
+        raise ValueError("skip_circuit_validation=True is supported only for logical_zero_factory")
     theta = raw.get("theta")
     if theta is not None:
         theta = _number(theta, "theta")
+    rounds = {}
+    for round_name in ("r_0", "r_plus"):
+        rounds[round_name] = _rounds(raw.get(round_name, "d"), round_name)
+        # Validate every distance now, before prepare/run creates any output.
+        for d in ds:
+            _resolve_rounds(rounds[round_name], d, round_name)
     return ExperimentConfig(
         kind, name, ds, ps, output,
         _choice(raw.get("code", "rotated_surface"), {"rotated_surface"}, "code"),
         _choice(raw.get("noise", "hex_uniform"), {"hex_uniform"}, "noise"),
-        _rounds(raw.get("r_0", "d"), "r_0"), _rounds(raw.get("r_plus", "d"), "r_plus"),
+        rounds["r_0"], rounds["r_plus"],
         _integer(raw.get("T_tel", 8 if kind == "fig4d_reproduction" else 1), "T_tel"),
         theta, policy, _choice(raw.get("decoder", "mwpm"), {"mwpm"}, "decoder"),
         _integer(raw.get("shots", 64), "shots"), _integer(raw.get("batch_size", 32), "batch_size"),
         _integer(raw.get("workers", 1), "workers"),
         _integer(raw.get("master_seed", 12345), "master_seed", 0, 2**64 - 1),
+        skip_validation,
     )
 
 

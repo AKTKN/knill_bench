@@ -10,13 +10,20 @@ from .config_v2 import load_config
 def main(argv=None):
     parser = argparse.ArgumentParser(prog="knill-bench-v2")
     sub = parser.add_subparsers(dest="command", required=True)
-    for name in ("validate-config", "prepare", "run"):
-        sub.add_parser(name).add_argument("config")
-    sub.add_parser("resume").add_argument("run")
+    for name, help_text in (
+        ("validate-config", "Validate a simulation config without sampling."),
+        ("prepare", "Create a new run directory without sampling."),
+        ("run", "Create a new run directory and simulate the supplied config."),
+    ):
+        sub.add_parser(name, help=help_text, description=help_text).add_argument("config")
+    sub.add_parser("resume", help="Continue an existing run directory.").add_argument("run")
     plot = sub.add_parser("plot-fig4d")
     plot.add_argument("run")
     plot.add_argument("--output", required=True)
-    analysis = sub.add_parser("analyze-factory")
+    analysis_text = ("Analyze saved data in RUN using analysis settings. This does not simulate; "
+                     "after editing a simulation config, use 'run CONFIG' to create a new experiment.")
+    analysis = sub.add_parser("analyze-factory", help="Analyze a saved factory run without simulation.",
+                              description=analysis_text)
     analysis.add_argument("run")
     analysis.add_argument("--settings")
     cuts = analysis.add_mutually_exclusive_group()

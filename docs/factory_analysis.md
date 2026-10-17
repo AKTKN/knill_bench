@@ -108,6 +108,13 @@ are serialized as strings '-inf'/'inf', undefined quantities as null or blank
 CSV cells. Readers can work with old saved data without matching today's source
 environment; resume retains stricter source/environment compatibility rules.
 
+This command always reads the simulation config saved inside RUN. Changing
+an external simulation YAML does not select new data. To simulate changed
+parameters, first use `FACTORY_RUN=$(knill-bench-v2 run SIMULATION_YAML)` and
+then analyze that new path. `--settings` controls only cuts/cost assumptions.
+Repeated analysis recomputes the report and overwrites the explicitly requested
+output file; it never resumes or skips a simulation because another run exists.
+
 The reported costs do not certify exact posterior confidence, fault tolerance,
 an improved projected prior, threshold scaling or Fig.4(d) agreement. Hamming
 and log-weight cuts are not interchangeable. See [getting started](../GETTING_STARTED.md)
@@ -115,3 +122,10 @@ for setup/templates/reproduce commands and [TEST.md](../TEST.md) for tiny v2
 end-to-end smoke, existing constructor-counter checks, read-only Hex integration
 and full v1 regression results. No production sweep or large performance job
 is run by unit tests.
+
+Current True runs use module_local_stim_dem, excluding preparation/earlier-stage
+residuals from the prior while retaining noisy physical preparation. Historical
+circuit_informed_projected data remain readable, and report rows retain their
+saved policy label. Even though both use log_weight units, their gaps/cuts are
+not interchangeable calibrations. Source/policy changes require a fresh
+simulation run, not resume. See [the model definition](logical_zero_factory.md).

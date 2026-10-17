@@ -9,8 +9,8 @@ noise: hex_uniform
 sweep:
   d: [3, 5]
   p: [0.0, 0.001]
-r_0: d                # Required d SE rounds on EACH Bell resource.
-r_plus: d
+r_0: d                # Standard paper depth; also accepts "2*d" or "2/3*d" (floor).
+r_plus: d             # Plus resource depth; same round-rule syntax, result >=1.
 T_tel: 8              # Required for this runner; fixed across the run.
 theta: null           # Fig.4(d) retains every shot.
 create_codecapacity_dem: false  # Required original Hamming online priors.

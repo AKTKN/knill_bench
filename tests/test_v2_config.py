@@ -29,7 +29,8 @@ def raw_config(**updates):
                                          ("logical_zero_factory_v2_example.yaml", "logical_zero_factory")])
 def test_examples_parse_without_v1_changes(filename, kind):
     doc = load_config(ROOT / "configs" / filename)
-    assert doc.config.kind == kind and len(list(doc.config.points())) == 4
+    assert doc.config.kind == kind
+    assert len(list(doc.config.points())) == len(doc.config.distances) * len(doc.config.probabilities)
     assert parse_config(doc.config.as_dict()) == doc.config
     assert doc.contents == doc.source_path.read_bytes()
     with pytest.raises(ValueError, match="unknown fields|schema_version"):
@@ -62,6 +63,54 @@ def test_invalid_fixed_fields(key, value):
     cfg[key] = value
     with pytest.raises(ValueError):
         parse_config(cfg)
+
+
+@pytest.mark.parametrize("kind", ["fig4d_reproduction", "logical_zero_factory"])
+@pytest.mark.parametrize("rule,expected", [
+    ("d", [3, 5]), (2, [2, 2]), ("2*d", [6, 10]), ("2/3*d", [2, 3]),
+    ("1.5*d", [4, 7]), ("0.6*d", [1, 3]), (" 2 / 3 * d ", [2, 3]),
+    ("999999999999999999/1000000000000000000*d", [2, 4]),
+])
+def test_round_multipliers_floor_exactly_for_both_experiments(kind, rule, expected):
+    raw = raw_config()
+    raw.update(kind=kind, r_0=rule, r_plus=rule, sweep={"d": [3, 5], "p": [.001]})
+    config = parse_config(raw)
+    points = list(config.points())
+    assert config.name == raw["name"]
+    assert [p.r_0 for p in points] == [p.r_plus for p in points] == expected
+    assert config.r_0 == config.r_plus == rule
+    assert parse_config(config.as_dict()) == config
+
+
+@pytest.mark.parametrize("rule", [
+    "0*d", "-2*d", "1/0*d", "2/-3*d", "2//3*d", "d*2", "2*d+1",
+    "2**d", "nan*d", "inf*d", "2/3", "2", "", False, .5,
+    "9223372036854775807*d",
+])
+def test_invalid_round_multipliers_rejected(rule):
+    for name in ("r_0", "r_plus"):
+        raw = raw_config()
+        raw[name] = rule
+        with pytest.raises(ValueError, match=name):
+            parse_config(raw)
+
+
+def test_round_multiplier_must_resolve_positive_at_every_distance():
+    raw = raw_config()
+    raw.update(r_0="1/4*d", sweep={"d": [5, 3], "p": [.001]})
+    with pytest.raises(ValueError, match=r"r_0 resolved at d=3.*flooring"):
+        parse_config(raw)
+
+
+def test_equivalent_round_rules_keep_physical_identity_and_seed():
+    raw = raw_config()
+    raw.update(r_0="2/3*d", r_plus="2*d", sweep={"d": [3], "p": [.001]})
+    multiple = parse_config(raw)
+    literal = parse_config(dict(raw, r_0=2, r_plus=6))
+    a, b = next(multiple.points()), next(literal.points())
+    assert a == b and a.case_id == b.case_id
+    assert point_seed(multiple.master_seed, a) == point_seed(literal.master_seed, b)
+    assert multiple.config_hash != literal.config_hash
 
 
 @pytest.mark.parametrize("sweep", [None, {}, {"d": [3]}, {"d": [], "p": [.001]},

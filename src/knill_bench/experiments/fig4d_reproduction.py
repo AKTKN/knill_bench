@@ -12,8 +12,6 @@ def validate_experiment(config):
         raise ValueError("Fig.4(d) requires kind fig4d_reproduction and exactly T_tel=8")
     if config.theta is not None or config.create_codecapacity_dem:
         raise ValueError("Fig.4(d) requires no theta and create_codecapacity_dem=False")
-    if any(p.r_0 != p.d or p.r_plus != p.d for p in config.points()):
-        raise ValueError("Fig.4(d) requires d noisy preparation rounds on EACH resource block")
 
 
 def _run_point(path, point, shots, batch_size, seed):

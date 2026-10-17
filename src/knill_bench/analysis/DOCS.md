@@ -21,7 +21,10 @@ error counts; it streams Parquet and returns d/p/count/LER/lower/upper mappings.
 `plot_saved(run, output)` writes only an optional headless figure with grouped
 distance curves. No simulator or runner is imported. Every Fig.4(d) shot is
 retained, so conditional LER is errors/shots over eight stages, without a
-per-round transform. No paper agreement follows from tiny regression fixtures.
+per-round transform. The vertical label is `logical error rate`; the existing
+`conditional_ler` summary key is unchanged. Valid saved preparation-depth
+variants are accepted as well as standard d-round runs. No paper agreement
+follows from tiny regression fixtures.
 See [the B1 guide](../../../docs/fig4d.md) for equations and commands.
 
 ## B3 saved factory analysis
@@ -49,3 +52,11 @@ CLI defaults to stdout JSON. Simulation files and v1 analysis remain unchanged.
 See [B3 details](../../../docs/factory_analysis.md),
 [getting started](../../../GETTING_STARTED.md) and the
 [analysis template](../../../configs/templates/factory_analysis.yaml).
+
+## Saved factory prior versions
+
+factory.analyze_saved recognizes current module_local_stim_dem and historical
+circuit_informed_projected for True runs, using the saved policy label in
+report rows. It never reinterprets old projected gaps as new local gaps,
+rebuilds a DEM or resumes a simulation. Current local priors exclude
+preparation/earlier-stage residuals; see the factory guide for that model change.

@@ -170,24 +170,39 @@ def test_exclusive_writer_ownership_and_parent_only_metadata(document, tmp_path,
         monkeypatch.undo()
 
 
-def test_exact_config_minimal_metadata_run_collision_and_complete(document, monkeypatch):
-    instant = datetime(2026, 10, 16, 1, 2, 3, tzinfo=timezone.utc)
+@pytest.mark.parametrize("instant,stamp,next_stamp", [
+    (datetime(2026, 10, 16, 1, 2, 3, tzinfo=timezone.utc), "20261016100203", "20261016100204"),
+    (datetime(2026, 10, 16, 14, 59, 59, tzinfo=timezone.utc), "20261016235959", "20261017000000"),
+])
+def test_exact_config_minimal_metadata_run_collision_and_complete(document, monkeypatch,
+                                                                 instant, stamp, next_stamp):
     monkeypatch.setattr(run_v2, "utc_now", lambda: instant)
+    suffix = f"{document.config.config_hash[:8]}_test_run"
     with RunStore.create(document) as first:
+        assert first.path.name == f"{stamp}_{suffix}"
         point = next(document.config.points())
         first.start_point(point)
         first.record_complete(write_point(first.path, point))
         first.finish()
         first_path = first.path
+    first_bytes = {file.name: file.read_bytes() for file in first_path.iterdir()}
     with RunStore.create(document) as second:
         assert second.path != first_path
-        assert second.path.name == "20261016T010203.000001Z_test_run"
+        assert second.path.name == f"{next_stamp}_{suffix}"
+        assert second.metadata["status"] == "running" and second.metadata["resume_count"] == 0
+        assert all(p["status"] == "pending" and p["shots"] == 0
+                   for p in second.metadata["points"].values())
+        assert not list(second.path.glob("*.parquet"))
     changed = document.config.as_dict()
     changed.update(create_codecapacity_dem=True, theta=4.)
     document.source_path.write_text(yaml.safe_dump(changed))
-    with RunStore.create(load_config(document.source_path)) as different_policy:
-        assert different_policy.path.name == "20261016T010203.000002Z_test_run"
-        assert different_policy.metadata["prior_policy"] == "circuit_informed_projected"
+    changed_document = load_config(document.source_path)
+    changed_hash = changed_document.config.config_hash
+    assert changed_hash[:8] != document.config.config_hash[:8]
+    with RunStore.create(changed_document) as different_policy:
+        assert different_policy.path.name == f"{stamp}_{changed_hash[:8]}_test_run"
+        assert different_policy.metadata["prior_policy"] == "module_local_stim_dem"
+    assert first_bytes == {file.name: file.read_bytes() for file in first_path.iterdir()}
     assert (first_path / "config.yaml").read_bytes() == document.contents
     assert sorted(p.name for p in first_path.iterdir()) == sorted(["config.yaml", "metadata.json", *[point.filename(t) for t in point.tables]])
     metadata = json.loads((first_path / "metadata.json").read_text())
@@ -199,6 +214,11 @@ def test_exact_config_minimal_metadata_run_collision_and_complete(document, monk
     assert metadata["points"][point.case_id]["shots"] == 7
     with RunStore.resume(first_path) as unchanged:
         assert unchanged.metadata["status"] == "complete"
+    # Run loading/resume accepts legacy directory names; no output is renamed.
+    legacy_path = first_path.with_name("20261016T010203.000000Z_test_run")
+    first_path.rename(legacy_path)
+    with RunStore.resume(legacy_path) as legacy:
+        assert legacy.metadata["status"] == "complete"
 
 
 def test_failed_run_and_restart_removes_partial_public_pair(document):

@@ -54,6 +54,20 @@ def test_default_config_and_factory_kind_boundary(tmp_path):
     assert not (tmp_path / "runs").exists()
 
 
+def test_round_multipliers_reach_native_factory_and_saved_metadata(tmp_path):
+    doc = document(tmp_path, sweep=dict(d=[3], p=[0.]), r_0="2/3*d", r_plus="2*d",
+                   T_tel=2, shots=3)
+    path = runner.run(doc)
+    case = next(doc.config.points())
+    metadata = json.loads((path / "metadata.json").read_text())
+    execution = metadata["points"][case.case_id]["execution"]
+    assert execution["r_0"] == 2 and execution["r_plus"] == 6
+    errors, gaps = tables(path, case)
+    assert errors.num_rows == gaps.num_rows == 3
+    assert not any(errors["logical_error"].to_pylist())
+    assert all(np.all(gaps[name].to_numpy() == 3.) for name in ("gap_t001", "gap_t002"))
+
+
 @pytest.mark.parametrize("d,T,p", [(3, T, p) for T in (1, 2, 3) for p in (0., .003)] + [(5, 2, 0.)])
 def test_real_hex_shapes_two_reused_supports_and_finite_hamming(d, T, p):
     bundle, compiled = runner.compile_point(point(T, p, d), seed=471)
@@ -224,7 +238,9 @@ def test_projected_and_hamming_share_raw_sampler_and_seeds_but_keep_units(tmp_pa
     assert meta["gap_units"] == execution["score_units"] == "log_weight"
     assert len(execution["projected_prior_sha256"]) == len(execution["projected_model_sha256"]) == 2
     assert execution["projected_prior_sha256"] == [p.configuration_sha256 for p in projected.projected_priors]
-    assert meta["projected_approximation"] == "single_fault_at_noiseless_reference_independent_superposition_v1"
+    assert meta["projected_approximation"] == "preparation_and_earlier_stage_residual_errors_excluded_v1"
+    assert meta["prior_policy"] == execution["prior_policy"] == "module_local_stim_dem"
+    assert execution["preparation_residual_errors_in_prior"] is False
 
 
 def test_unsupported_projected_model_fails_without_files_or_fallback(tmp_path):
@@ -239,13 +255,23 @@ def test_unsupported_projected_model_fails_without_files_or_fallback(tmp_path):
     assert "UnsupportedProjectedModel" in info["error"]
 
 
-def test_serial_and_spawn_streams_match_and_completed_resume_does_not_compile(tmp_path, monkeypatch):
-    doc = document(tmp_path, sweep=dict(d=[3], p=[0., .003]), T_tel=2, shots=5, workers=2)
+@pytest.mark.parametrize("local_prior", [False, True])
+@pytest.mark.parametrize("skip", [False, True])
+def test_serial_and_spawn_streams_match_and_completed_resume_does_not_compile(tmp_path, monkeypatch, local_prior, skip):
+    probabilities = [.002, .003] if local_prior else [0., .003]
+    doc = document(tmp_path, sweep=dict(d=[3], p=probabilities), T_tel=2, shots=5, workers=2,
+                   create_codecapacity_dem=local_prior, skip_circuit_validation=skip)
     parallel = runner.run(doc)
-    serial_doc = document(tmp_path, sweep=dict(d=[3], p=[0., .003]), T_tel=2, shots=5)
+    serial_doc = document(tmp_path, sweep=dict(d=[3], p=probabilities), T_tel=2, shots=5,
+                          create_codecapacity_dem=local_prior, skip_circuit_validation=skip)
     serial = runner.run(serial_doc)
     for case in doc.config.points():
         assert all(a.equals(b) for a, b in zip(tables(parallel, case), tables(serial, case)))
+        meta = json.loads((parallel / "metadata.json").read_text())
+        execution = meta["points"][case.case_id]["execution"]
+        assert execution["skip_circuit_validation"] is skip
+        assert execution["circuit_validation"] == ("skipped_by_configuration" if skip else "full_native")
+        assert execution["preparation_frame_implementation"] == "factory_packed_preparation_frames_v1"
     before = {p.name: p.read_bytes() for p in parallel.glob("*.parquet")}
 
     def forbidden(*args, **kwargs):
@@ -256,13 +282,15 @@ def test_serial_and_spawn_streams_match_and_completed_resume_does_not_compile(tm
     assert before == {p.name: p.read_bytes() for p in parallel.glob("*.parquet")}
 
 
-def test_midpoint_failure_discards_both_files_and_resume_replays_seed(tmp_path, monkeypatch):
-    doc = document(tmp_path, sweep=dict(d=[3], p=[0., .003]), T_tel=2)
+@pytest.mark.parametrize("local_prior", [False, True])
+def test_midpoint_failure_discards_both_files_and_resume_replays_seed(tmp_path, monkeypatch, local_prior):
+    doc = document(tmp_path, sweep=dict(d=[3], p=[.002, .003] if local_prior else [0., .003]), T_tel=2,
+                   create_codecapacity_dem=local_prior)
     original_compile = runner.compile_point
 
     def fail_midpoint(case, **options):
         bundle, compiled = original_compile(case, **options)
-        if case.p == 0.:
+        if case.p != .003:
             return bundle, compiled
 
         class Failing:
@@ -292,7 +320,7 @@ def test_midpoint_failure_discards_both_files_and_resume_replays_seed(tmp_path, 
     assert dispatcher.resume(path) == path
     assert preserved == {name: (path / cases[0].filename(name)).read_bytes() for name in cases[0].tables}
     seed = point_seed(doc.config.master_seed, cases[1])
-    _, reference = original_compile(cases[1], seed=seed)
+    _, reference = original_compile(cases[1], seed=seed, create_codecapacity_dem=local_prior)
     expected = [reference.decode(reference.sample_measurements(n), shot_id_start=start)
                 for start, n in ((0, 3), (3, 3), (6, 1))]
     errors, gaps = tables(path, cases[1])

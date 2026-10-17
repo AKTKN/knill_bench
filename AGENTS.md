@@ -180,3 +180,102 @@ Migration gate after removing .venv: 207 passed, 608 inherited warnings,
 147.48 s. Offline installed-wheel smoke also passed v1/v2 experiments, saved
 analysis and resume with Git absent. TEST.md records the missing-sinter-wheel
 build correction and resource audit. All fork source checkouts remain clean.
+
+## User-requested v2 round multiples and Fig.4(d) label
+
+The user explicitly authorized preparation-depth multiples in both v2
+experiments, superseding the literal-d/integer-only and mandatory r_0=r_plus=d
+constraints above. Accept fixed positive coefficients times d, including
+"2*d", "2/3*d" and decimal coefficients, with exact rational flooring.
+Require a positive signed-int64 result at every distance before creating a run;
+reject arbitrary expressions and zero denominators. Only d/p are sweep axes.
+Standard Fig.4(d) paper config stays at d rounds; variants must pass actual
+resolved r_0/r_plus to Hex and retain accurate metadata/identities. T=8,
+False priors, no theta and noisy final readout remain required for full Knill.
+The plot's vertical label is exactly "logical error rate"; saved summary keys
+and per-shot schemas remain unchanged. Preserve incoming edits to both
+configs/*_v2_example.yaml as well as .gitignore. Use small isolated fixtures,
+never these user-edited experiment budgets, for validation.
+
+Current full gate: `bash scripts/python.sh -m pytest -q` — 242 passed,
+620 existing-category warnings, 136.34 s. TEST.md records the corrected
+config-name loop-variable collision and the final validation.
+
+## User-requested v2 directory names and command clarification
+
+New v2 run names use YYYYMMDDHHMMSS_<config_hash8>_<name> in Asia/Tokyo time,
+superseding the historical UTC/microsecond directory format. The short hash
+is the first eight hex digits of config.config_hash; metadata retains the full
+hash and actual ISO UTC timestamps. Exclusive mkdir collisions advance the
+directory timestamp one second, never reuse a previous run. Existing directory
+names still load/resume; do not rename existing outputs. `run CONFIG` always
+starts fresh. `analyze-factory RUN --settings ANALYSIS_YAML` reads RUN's saved
+simulation config/data only and does not simulate or automatically resume.
+
+Latest full gate: 243 passed, 620 inherited warnings, 169.15 s. Legacy-path,
+collision/midnight rollover and fresh pending-state checks pass; see TEST.md.
+
+## User-requested factory wall-time diagnosis
+
+The user explicitly requested measured wall times and bottleneck identification
+for the edited factory example. Read existing run/process status without
+interrupting user jobs. Isolated selected-point diagnostic runs (including d7)
+are authorized for this investigation; do not launch the full production sweep.
+Keep Hex and other dependency source read-only. scripts/profile_factory.py
+instruments real worker/native boundaries in its own process, with temporary
+physical files and bounded wall time. Runtime patches are diagnostics only.
+Do not change decoder policies in the user's config or apply an optimization
+to the pinned fork as part of a report-only request. Keep raw timing artifacts
+under ignored results/ and document measurements/limits in the repo report.
+
+The measured root cause is projected merge_independent_events growing-ID
+validation, with repeated bundle signed-flow validation secondary. See
+docs/factory_performance_report.md. Latest full gate: 245 passed, 620 inherited
+warnings, 163.25 s; explicit bounded-profile timeouts are not failed unit tests.
+
+## User-requested module-local factory DEM revision
+
+The user authorized replacing factory True inference with module-local Stim
+DEMs, cache/redundancy optimization and measured wall-time comparison. This
+supersedes the historical full-prefix projected-prior/report-only constraints.
+Hex H5 remains read-only. Bench adapters.hex_factory uses native physical
+modules and inherits native causal frame/decode methods; v1 and B1 stay unchanged.
+The DEM-only input has all +1 CSS stabilizers, a Pauli logical input boundary,
+native coupling/readout noise and a logical measurement output boundary.
+Preparation/earlier-stage residuals are EXCLUDED FROM THE PRIOR, not removed
+from physical simulation. No added boundary noise, ideal physical reset or
+oracle information is permitted. Strict Stim/Hex structural checks remain.
+
+Cache local DEM/gap models by complete canonical body/code, bounded per worker;
+never cache/reuse sampler RNG state across points. Full native physical bundle
+validation still runs once on each fresh True factory before the private H5
+initialization binding. Save explicit new model/scope/hash identifiers. Analyze
+old saved models under their original labels; refuse mixed-policy resume.
+Use Conda, <=7-shot d3/5 unit fixtures, and isolated selected-point wall-time
+profiles (d7 authorized). No production sweep. Preserve incoming user config
+and .gitignore edits and append STATUS/TEST results. See factory guide/report.
+
+Latest gates for this revision: 255 bench tests passed (688 warnings, 164.62 s),
+128 read-only Hex tests passed (320 warnings, 55.76 s). Selected-point True
+profiles complete at d3/5/7; legacy projection/merge calls are zero, local DEM
+cache miss=1/hit=3 across two T=2 attempts. See TEST.md and the performance
+report for exact commands, timings, and unchanged user/dependency scope.
+
+## User-requested factory validation option and packed frames
+
+The user authorized skip_circuit_validation and preparation-frame arithmetic
+optimization. Their clarification specifies True=skip, False/default=validate.
+This supersedes the mandatory full validation for fresh True factories above
+only when explicitly opted out. Both factory prior modes now use bench's
+packed final-check/exit-frame computation with all four original matching
+decisions retained. V1/B1 and Hex H5 source remain unchanged. Full checks run
+once by default; runtime sign/model/gap checks remain in skip mode. This is
+not a persisted validated-circuit cache. Private H5 builder/decoder bindings
+must be re-audited on upgrades. See docs/factory_frame_optimization.md and
+the updated factory guide. Keep unit fixtures <=7 shots at d3/5; selected d7
+timing comparisons remain separate opt-in diagnostics under ignored results.
+
+Latest gates: 272 bench tests passed (744 warnings, 168.27 s) and 128 existing
+Hex tests passed read-only (320 warnings, 55.43 s). See TEST.md for commands
+and corrected test assumptions; docs/factory_frame_optimization.md reports
+exact-output comparison and measured setup/frame speed changes at d7/T3.

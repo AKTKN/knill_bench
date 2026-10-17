@@ -69,3 +69,49 @@ science/run/analysis regressions run in the new Conda interpreter. Separate
 installed-wheel integration builds/installs all four packages and pip locks
 into an isolated temporary target, removes Git/Conda from PATH, then runs
 small v1/v2 experiments, analysis and resume. See TEST.md for exact results.
+
+## V2 rational round rules and Fig.4(d) label
+
+Config tests cover integer/decimal/fraction multiples, exact flooring near
+integer boundaries, invalid syntax/denominators, zero-depth and int64 overflow
+rejection, and seed equality for equivalent physical depths. Example parsing
+checks the actual d/p Cartesian product instead of assuming four points,
+allowing user edits without sampling those examples. Small physical fixtures
+verify native factory propagation and all eight full-Knill stage depths,
+measurement counts, saved metadata, custom-depth serial/spawn equality and
+saved plotting with the `logical error rate` label. Existing d-round Hex circuit
+and manual-array comparisons remain; no dependency source is changed.
+
+V2 storage collision fixtures now check the compact Asia/Tokyo timestamp,
+eight-digit config-hash prefix, midnight rollover, fresh pending state on an
+identical-config creation, changed-config naming, preservation of completed
+data and legacy-directory resume. They use synthetic seven-row tables only.
+
+`test_factory_profiling.py` checks the optional diagnostic's inclusive versus
+exclusive wall/CPU accounting with deterministic clocks and verifies that an
+interrupted phase records its timing and restores runtime patches. Unit tests
+do not execute a performance sweep or assert machine-specific speed thresholds.
+
+## Factory module-local DEM checks
+
+test_factory_local_dem.py compares strict Stim local DEMs with independent
+forward fault propagation and analytic readout probabilities (d3/5), checks
+Pauli logical boundaries and frame invariance, exhaustively enumerates d3
+sector minima while manually replaying three stages of native preparation
+frames, and verifies original physical samples. Cache checks cover stage/
+depth/seed reuse, noise/body invalidation, bounded eviction and no legacy
+projection calls or repeated bundle validation. Existing runner tests now
+exercise True serial/spawn equality and failed-chunk restart as well as False.
+Saved-data checks preserve historical policy labels and forbid mixed-policy
+resume. Profiling tests verify cold/warm cache counters and identical seeded
+outputs. New physical samples remain <=7 shots at d3/5.
+
+test_factory_frames.py checks packed GF(2) against independent integer products
+at byte/block boundaries and zero dimensions; d3/5 <=7-shot comparisons match
+all native full-history exit frames and every decoded result field under both
+prior modes, including nonzero faults and noiseless random stabilizer signs.
+It verifies exact circuit/RNG/decode equality with validation enabled/skipped,
+explicit validate() on returned native bundles, template sharing, strict flag
+parsing and config-hash/physical-seed compatibility. Runner tests cover both
+validation modes under serial/spawn and saved execution metadata; profiler
+tests count the skipped/full checks and packed-map/frame calls.

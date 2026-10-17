@@ -66,3 +66,37 @@ manifests, without modifying fork source. Both provenance implementations
 support checksum-verified installed wheels as well as source checkouts.
 Scientific builders/decoders/storage remain unchanged. See
 [cluster setup](../../docs/cluster_setup.md) and [getting started](../../GETTING_STARTED.md).
+
+## Configurable v2 preparation depths
+
+Both experiments accept fixed integer/d/positive-multiple round rules, such as
+`"2*d"` or `"2/3*d"`. Resolution uses exact rational arithmetic and floors at
+each distance; all depths must be positive signed-int64 values. The full Knill
+adapter passes these resolved depths to Hex for every resource preparation,
+while the factory uses its existing PreparationPlan interface. Standard
+Fig.4(d) settings retain d rounds. The saved-data Fig.4(d) vertical axis now
+reads `logical error rate`; summary keys and table schemas are unchanged.
+
+New v2 directories are `YYYYMMDDHHMMSS_<config_hash8>_<name>` (Asia/Tokyo),
+with exclusive creation and one-second collision increments. Metadata retains
+actual UTC times and the full simulation-config hash. `run CONFIG` always
+creates fresh data; `analyze-factory RUN` reanalyzes saved data/config only.
+Legacy run paths and v1 directory/schema contracts remain supported.
+
+## Module-local factory DEM revision
+
+adapters.hex_factory now builds strict local Stim DEMs for v2 factory True.
+The prior excludes preparation/earlier-stage residuals; physical sampling and
+Hex frame logic retain them. Bounded per-worker DEM/gap caching and one full
+validation by default per freshly built True factory remove legacy projection and repeated
+validation. Experiments save explicit policy/scope/hashes; old saved analysis
+keeps its original labels. No fork/v1/B1 source changes. See
+[factory guide](../../docs/logical_zero_factory.md) and
+[measured report](../../docs/factory_performance_report.md).
+
+Both factory prior modes now use adapters.factory_frames for equivalent packed
+GF(2) exit-frame/final-check computation, retaining the four native matching
+calls. ExperimentConfig.skip_circuit_validation defaults to false and can skip
+the full construction-time bundle check for factory only. Runtime checks and
+physical/seed/model semantics remain unchanged; execution metadata declares
+the validation mode and frame implementation. V1/B1 and Hex stay unchanged.

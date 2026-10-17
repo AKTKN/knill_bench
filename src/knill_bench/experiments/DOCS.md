@@ -3,17 +3,27 @@
 - `config_v2.py`: strict SafeLoader, `ConfigDocument`, `ExperimentConfig`,
   `ExperimentPoint`, `load_config`/`parse_config`, canonical identities and
   exact literal-plus filenames. Only d/p sweep, all other values are fixed.
+  Preparation rules accept positive integers, d, or positive constants times d
+  (e.g. `"2*d"`, `"2/3*d"`, `"1.5*d"`), with exact rational flooring.
+  Parsing rejects any resolved depth outside [1,2^63-1] over the entire d grid;
+  no eval/general expressions or new sweep axes are allowed.
 - `seeds.py`: deterministic uint64 `point_seed`/`chunk_seed`; prior, theta,
   workers and shot count do not change physical sampling identity.
 - `provenance.py`: actual imported Git/source-resource/dependency/CPU info
   and read-only H5 factory export validation; no physical object construction.
 - `run_v2.py`: parent-owned `RunStore.create/resume/start_point/record_complete/
-  finish/fail/close`. Atomic single metadata file, collision-free UTC run
+  finish/fail/close`. Atomic single metadata file, collision-free run
   directories, exact YAML bytes, clean full-point restart and completion marker.
+  New names are `YYYYMMDDHHMMSS_<config_hash8>_<name>` using Asia/Tokyo time.
+  Hash prefixes come from the canonical simulation config; metadata keeps the
+  full hash and actual ISO UTC timestamps. Collision retries add one second.
+  Create always reserves a fresh directory; legacy names can still resume.
 - `dispatcher.py`: lazy kind dispatch to `run(document)` for B1 Fig.4(d) and
   B2 factory. Missing dependencies within an installed runner propagate.
 - `cli.py`: separate `knill-bench-v2 validate-config/prepare/run/resume/plot-fig4d/analyze-factory`;
   v1 CLI and schemas are unchanged. `prepare` writes pending infrastructure only.
+  Help distinguishes `run CONFIG` (new experiment) from `resume RUN` and
+  `analyze-factory RUN --settings ANALYSIS_YAML` (saved-data analysis only).
 
 See [the complete B0 specification](../../../docs/auxiliary_v2.md) for YAML
 fields/defaults, public shapes/equations/filenames, lock ownership, crash/rename
@@ -24,8 +34,10 @@ per-shot constructors, oracle-driven selection or scientific claims are added.
 
 ## B1 execution
 
-`fig4d_reproduction.run(document, resume_path=None)` enforces T=8, r_0=r_plus=d,
-no theta and False prior mode before output. It constructs a HexFullKnill per
+`fig4d_reproduction.run(document, resume_path=None)` enforces T=8,
+no theta and False prior mode before output. Standard paper settings use
+r_0=r_plus=d; positive integer/multiple depth variants are also supported.
+It constructs a HexFullKnill per
 point, advances one sampler seeded with point_seed, and streams bounded batches
 including the exact final partial batch. Workers > 1 use spawn and at most
 workers pending whole-point tasks. Native objects stay in workers; only small
@@ -77,3 +89,23 @@ Python/matrix resource. Wheel mode records checkout:null and install_kind:wheel.
 Hex wheel mode requires the exact pinned H5 commit and verified H5 marker plus
 existing API checks; ordinary unstamped wheels are not silently trusted.
 Source resume hashes remain strict. See [cluster setup](../../../docs/cluster_setup.md).
+
+## Current factory True revision
+
+compile_point routes True through adapters.hex_factory's cached module-local
+Stim DEMs. Hex physical construction and causal frame/decode methods remain.
+The prior excludes preparation/earlier-stage residuals, with explicit metadata
+identifiers and scope; the physical circuit retains those errors. Both factory
+prior modes use equivalent packed preparation-frame arithmetic with unchanged
+native matching decisions. Physical identities/seed inputs are unchanged, but
+prior_policy now identifies module_local_stim_dem. RunStore refuses resume
+across policy changes before incomplete-file cleanup. Saved-only analysis
+accepts historical projected data with the original label. See
+[factory guide](../../../docs/logical_zero_factory.md) and the adapter DOCS.
+
+Factory `skip_circuit_validation` defaults to false (one full native check).
+True skips full bundle validation, including signed prefix-flow checks, while
+keeping runtime decoding/sign/model checks. The parser rejects non-booleans
+and True for Fig.4(d). The scheduler forwards it to each worker; execution
+metadata declares the choice and frame implementation. False is omitted from
+canonical config JSON to preserve existing default hashes, True is included.

@@ -8,11 +8,12 @@ noise: hex_uniform
 sweep:
   d: [3, 5]            # Odd distances with bundled Hex matrices.
   p: [0.0, 0.001]     # True projected mode requires positive p and supported graphs.
-r_0: d                # Initial zero preparation; literal d or positive integer.
-r_plus: d             # Each initial/refresh plus preparation.
+r_0: d                # Initial zero prep; integer, d, "2*d" or "2/3*d" (floor, >=1).
+r_plus: d             # Each initial/refresh plus prep; same round-rule syntax.
 T_tel: 1              # Set 2/3/etc. for fixed two-support role swapping.
 theta: null           # Stored hint only; analysis settings choose cuts.
 create_codecapacity_dem: false  # True is an explicit projected approximation.
+skip_circuit_validation: false # True skips full bundle checks; decoding stays active.
 decoder: mwpm
 shots: 64             # Fixed shots per d/p, not a target error count.
 batch_size: 32        # Keep fixed for exact seeded replay.

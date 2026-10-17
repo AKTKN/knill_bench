@@ -396,3 +396,412 @@ have d3/5, p0/.001, 64 shots per point, batch size 32 and one worker. Commands
 cover sampling, saved Fig.4(d) plotting and factory acceptance/error analysis.
 No additional production experiment was launched. The incoming user .gitignore
 edit and ignored experiment/bundle artifacts are excluded from the commit.
+
+## V2 round multipliers and Fig.4(d) label (2026-10-16)
+
+The user requested the plot label `logical error rate` and constant multiples
+of d for r_0/r_plus. Both experiments now resolve positive integer, fraction
+and decimal coefficients with Fraction and integer flooring, never eval or
+floating-point products. All resolved depths must fit positive signed int64.
+Tests cover exact behavior just below an integer boundary, zero/negative or
+invalid denominators, unsupported arithmetic, zero after flooring at a later
+swept distance, int64 overflow and unchanged seeds for equivalent depths.
+
+Focused command:
+
+```bash
+bash scripts/python.sh -m pytest -q tests/test_v2_config.py tests/test_fig4d.py tests/test_logical_zero_factory.py
+```
+
+**127 passed, 168 existing-category Matrix Market warnings, 46.33 s**. Small
+physical checks confirm d3 depths (6,2) reach all eight full-Knill stages with
+measurement counts (48,16), saved identities/metadata, noiseless labels and a
+saved SVG carrying the requested label. A d3 two-stage factory passes (2,6)
+through native Hex and saves aligned finite-gap/error tables. Custom-depth
+serial/spawn results agree. The standard d-round circuit/manual-array Hex
+comparisons are retained. Added a minimum-depth (1,1) adapter fixture for the
+full regression gate. No test or implementation failure occurred in the
+focused run.
+
+Example config validation now checks the actual Cartesian product rather than
+assuming four points. The user's incoming example changes are neither reverted
+nor sampled. Direct installed-config resolution gives (d,r_0,r_plus) values
+(3,6,2), (5,10,3), (7,14,4) for the requested rules; local documentation links
+resolve. Incoming .gitignore and both v2-example bytes are preserved.
+
+First full gate: `bash scripts/python.sh -m pytest -q` — **1 failed, 241 passed,
+620 warnings, 160.66 s**. The existing run-collision test caught the new round
+validation loop reusing the experiment-name variable, changing every parsed
+name to r_plus. Renamed that loop variable to round_name and added an explicit
+name-preservation assertion across both kinds and all valid round-rule cases.
+The failure did not concern a circuit or decoder; all physical fixtures passed.
+
+After the fix, `bash scripts/python.sh -m pytest -q tests/test_v2_config.py
+tests/test_v2_storage.py::test_exact_config_minimal_metadata_run_collision_and_complete`
+passed **85 tests, 1.60 s**.
+
+Final full gate: `bash scripts/python.sh -m pytest -q` — **242 passed,
+620 warnings, 136.34 s**, with no skips/deselections. Warnings are inherited
+SciPy Matrix Market notices (12 additional instances from the three new
+physical fixtures) and four existing v1 legend warnings. The minimum-depth
+adapter fixture passes. `git diff --check` passes, local documentation links
+resolve, both locks are unchanged and all three dependency repositories are
+clean. SHA256 checks confirm the three incoming user-edited files remain
+byte-identical. Only isolated tiny fixtures were sampled; no production sweep
+or user-edited experiment configuration was run.
+
+## V2 directory names and saved-analysis clarification (2026-10-16)
+
+Read the reported run metadata without modifying experiment outputs:
+results/20261016T065547.915842Z_factory_v2_example is complete with
+resume_count=0. Code inspection confirms analyze-factory loads config.yaml
+inside RUN, streams saved Parquet and rewrites the requested report. It does
+not dispatch a simulation. `run CONFIG` always creates fresh pending metadata;
+only explicit resume loads existing execution. Updated CLI help and docs to
+explain updating FACTORY_RUN after editing a simulation config.
+
+New directory format: YYYYMMDDHHMMSS_<config_hash[:8]>_<name>, Asia/Tokyo.
+Synthetic storage tests check exact timestamps/hash prefixes, same-config
+collision to the next second, midnight date rollover, changed-config hashes,
+fresh pending state despite a complete earlier run, preservation of all earlier
+run bytes, actual ISO UTC metadata times and legacy-name resume.
+
+```bash
+bash scripts/python.sh -m pytest -q tests/test_v2_storage.py tests/test_v2_config.py
+```
+
+**109 passed, 3.86 s**. No test failures. Installed analyze-factory --help
+explains saved analysis versus `run CONFIG`; local documentation links resolve
+and `git diff --check` passes. No user experiment config or production sweep
+was sampled for this update.
+
+Full gate: `bash scripts/python.sh -m pytest -q` — **243 passed, 620 inherited
+warnings, 169.15 s**, no skips/deselections or failures. Existing actual
+Fig.4(d)/factory execution, saved analysis and explicit resume tests all pass
+with the new naming code. Incoming .gitignore and both v2 example SHA256s
+remain unchanged. All three dependency repositories remain clean.
+
+## Factory wall-time diagnosis (2026-10-16)
+
+The user explicitly requested bottleneck profiling for the current edited
+factory example. Read-only inspection found its last job failed by
+KeyboardInterrupt after 1373.85 s; no simulation was active when investigated.
+Added scripts/profile_factory.py and deterministic tests for nested inclusive/
+exclusive clocks, exception accounting and restored runtime patches. Profiling
+patches only the diagnostic process, calls the actual _run_point, writes physical
+tables to temporary directories and keeps raw timings in results/factory_wall_profile.
+
+Common commands (run serially to avoid measuring our own concurrent profiles):
+
+```bash
+# Default-thread baseline with and without --cprofile; d3 only.
+bash scripts/python.sh scripts/profile_factory.py configs/logical_zero_factory_v2_example.yaml --distance 3 --p .003 --shots 7 --batch-size 7 --output NEW.json
+# Set OMP_NUM_THREADS=OPENBLAS_NUM_THREADS=MKL_NUM_THREADS=1 before these:
+bash scripts/python.sh scripts/profile_factory.py configs/logical_zero_factory_v2_example.yaml --distance 3 --p .003 --shots 100 --batch-size 100 --output NEW.json
+bash scripts/python.sh scripts/profile_factory.py configs/logical_zero_factory_v2_example.yaml --distance 5 --p .003 --shots 7 --batch-size 7 --max-wall-seconds 240 --output NEW.json
+bash scripts/python.sh scripts/profile_factory.py configs/logical_zero_factory_v2_example.yaml --distance 7 --p .003 --shots 7 --batch-size 7 --max-wall-seconds 60 --output NEW.json
+# Comparison: --prior hamming, d3/5/7; extra d7 --trace-validation / --cprofile.
+```
+
+The d5/d7 True runs deliberately time out and return exit code 2, saving partial
+timings. These are measurement limits, not implementation/test failures or
+completed-shot results. d3 True wall=9.517–9.738 s at 7 shots, 9.651 s at 100;
+100-shot sampling=.000242 s, decoding=.008989 s, projected models=8.535 s and
+merge_independent_events=8.021 s. d5's 240 s cap includes 230.594 s of merging
+and .0946 s of PyMatching calls before physical sampling. Per-signature growing
+ID tuple validation/sorting is quadratic; cProfile shows ~7.17 million ID-check
+generator calls even at d3. cProfile increases d3 point wall to ~40 s, so the
+report's primary values use direct perf_counter timers, not profiler totals.
+
+Hamming comparisons d3/5/7 take .937/3.738/16.539 s. d7 validation takes
+13.412 s in the ordinary run. Separate line tracing assigns 6.383/6.982 s
+to has_all_flows (1972 calls over two validations); absolute times vary across
+instrumented runs and are not an optimization result. Default OpenBLAS uses
+20 threads; forcing one gives no material d3 improvement. Full details,
+measurement exclusions and partial-profile limits are in
+docs/factory_performance_report.md; JSON, pstats, snapshot and phase CSV remain
+under ignored results/factory_wall_profile. Completed d3 policy comparisons
+retain identical physical circuit hashes/seeds.
+
+An initial optional threadpoolctl inventory probe found that package absent;
+used stdlib ctypes to query the loaded OpenBLAS library instead, without
+installing anything or changing the environment. No scientific/test failure
+occurred in this investigation. Full gate:
+
+```bash
+bash scripts/python.sh -m pytest -q
+```
+
+**245 passed, 620 inherited warnings, 163.25 s**. No skips/deselections.
+All prior numerical regressions remain. The earlier round-rule, naming and
+axis-label edits are preserved. No fork source/config, numerical lock, or
+existing experimental data was modified. No full production sweep was run.
+
+## Module-local Stim factory prior revision (2026-10-16)
+
+User-authorized model change: True excludes preparation/earlier-stage residuals
+from its prior only, keeps the native physical circuit and inherited H5 causal
+frames, and uses strict local Stim DEMs. No dependency source changes. New
+fixtures are d3/5 and at most seven physical shots; fault enumeration is
+deterministic model analysis, not Monte Carlo.
+
+Focused commands/results during implementation:
+
+```bash
+bash scripts/python.sh -m pytest -q tests/test_logical_zero_factory.py tests/test_v2_storage.py
+# 46 passed, 108 warnings, 20.46 s
+bash scripts/python.sh -m pytest -q tests/test_factory_local_dem.py
+# 7 passed, 36 warnings, 5.67 s
+bash scripts/python.sh -m pytest -q tests/test_factory_local_dem.py tests/test_logical_zero_factory.py tests/test_factory_profiling.py tests/test_factory_analysis.py tests/test_v2_storage.py
+# 78 passed, 184 warnings, 39.41 s (before adding the cold/warm profile test)
+bash scripts/python.sh -m pytest -q tests/test_factory_profiling.py
+# 3 passed, 8 warnings, 2.76 s
+```
+
+Coverage: independent forward fault/analytic probability equivalence; Pauli
+logical boundary and known-frame invariance; exhaustive d3 sector costs with
+manual three-stage native frame replay; unchanged sampled physical records;
+cache reuse across depths/stages/seeds, invalidation and bounded eviction;
+legacy projection/merge forbidden; one full native validation per fresh True
+bundle; True/False serial-spawn equivalence, oracle/future isolation, paired
+output and failed-chunk restart; old-data labeling and mixed-policy resume
+rejection. Profile cold/warm attempts retain identical seed/output hashes.
+No numerical test failures occurred in these focused gates. Several documentation
+patches initially missed their exact context and were reapplied after reading
+the current text; no source/test failure was hidden.
+
+Full bench gate after all source/test changes:
+
+```bash
+bash scripts/python.sh -m pytest -q
+```
+
+**255 passed, 688 warnings, 164.62 s**. No failures/skips/deselections.
+Warnings are the existing SciPy sparse-matrix, Stim measurement-reference, and
+plot-legend categories exercised by the inherited suite and additional fixtures.
+Full command output was captured in /tmp/knill-local-dem-full-test.log.
+
+Read-only pinned Hex gate (no dependency edits):
+
+```bash
+bash scripts/python.sh -m pytest -q external/Hex/tests/test_factory_circuit.py external/Hex/tests/test_factory_batch.py external/Hex/tests/test_surface_gap.py external/Hex/tests/test_codecapacity_public.py
+```
+
+**128 passed, 320 warnings, 55.76 s**. Output: /tmp/knill-local-dem-hex-test.log.
+
+Selected-point timing commands, run sequentially after the bench gate, before
+the Hex gate, with no concurrent investigation profiles/tests:
+
+```bash
+# Prefix EVERY command below with:
+# OMP_NUM_THREADS=1 OPENBLAS_NUM_THREADS=1 MKL_NUM_THREADS=1
+bash scripts/python.sh scripts/profile_factory.py results/factory_local_dem_profile/config.snapshot.yaml --distance 3 --p .003 --shots 7 --batch-size 7 --prior legacy-projected --max-wall-seconds 60 --output results/factory_local_dem_profile/d3_legacy_7.json
+bash scripts/python.sh scripts/profile_factory.py results/factory_local_dem_profile/config.snapshot.yaml --distance 3 --p .003 --shots 7 --batch-size 7 --repeat 2 --max-wall-seconds 120 --output results/factory_local_dem_profile/d3_local_7.json
+bash scripts/python.sh scripts/profile_factory.py results/factory_local_dem_profile/config.snapshot.yaml --distance 5 --p .003 --shots 7 --batch-size 7 --repeat 2 --max-wall-seconds 120 --output results/factory_local_dem_profile/d5_local_7.json
+bash scripts/python.sh scripts/profile_factory.py results/factory_local_dem_profile/config.snapshot.yaml --distance 7 --p .003 --shots 7 --batch-size 7 --repeat 2 --max-wall-seconds 120 --output results/factory_local_dem_profile/d7_local_7.json
+bash scripts/python.sh scripts/profile_factory.py results/factory_local_dem_profile/config.snapshot.yaml --distance 3 --p .003 --shots 100 --batch-size 100 --max-wall-seconds 60 --output results/factory_local_dem_profile/d3_local_100.json
+```
+
+All five diagnostics completed without timeout/failure. The 100-shot case is
+an explicitly requested opt-in timing diagnostic, never a unit-test fixture.
+Current d3/5/7 cold point times: .874790 / 2.507117 / 10.830310 s; warm attempts
+.394060 / 2.045403 / 10.088741 s. d3/100 shots: .896075 s. Legacy d3/7 shots
+replay: 10.480277 s, including 8.883106 s in two growing-ID merges. New True
+has zero legacy projection/merge calls, one local DEM build for T=2 and zero
+rebuilds on the second attempt (cache miss=1/hit=3). Full native bundle
+validation is one per True compilation, versus three for legacy True.
+Current d7 validation remains 7.522175 s of 10.830310 s, the major remaining
+cost. Differences in model and first-write lazy imports are explicitly noted
+in docs/factory_performance_report.md; historical d5/d7 timeouts are not
+completed-time speedup estimates.
+
+Every current diagnostic matches the historical configuration hash and seed.
+Physical circuit hashes match historical completed Hamming profiles at all
+three distances and historical True d3. Repeated local attempts have identical
+paired file hashes. Raw timing artifacts and summary CSV are ignored under
+results/factory_local_dem_profile. No full production sweep or existing-run
+resume occurred. User .gitignore and both v2 example YAML diffs match their
+pre-task byte-for-byte snapshot; Hex remains clean at pinned H5. V1/B1
+numerical source was not edited in this task. git diff --check passes.
+
+## 2026-10-16: fixed-d factory T-scaling wall-time report
+
+User-requested opt-in timing experiment after the local DEM revision. Fixed
+d=7, p=.003, r0=rplus=7, True local priors, master seed 12345; T=1/2/4/8
+each has its own snapshot YAML. No new simulation sweep axis or numerical
+source change. Each point uses 1,024 shots, batch 128, one first attempt and
+three warm repeats in one process. These are diagnostics, not unit tests.
+Each T runs in a separate process, sequentially with no concurrent bench tests.
+
+Exact commands (the loop is also saved as results/factory_T_scaling_d7/measure.sh):
+
+```bash
+export OMP_NUM_THREADS=1 OPENBLAS_NUM_THREADS=1 MKL_NUM_THREADS=1
+for T in 1 2 4 8; do
+  bash scripts/python.sh scripts/profile_factory.py \
+    "results/factory_T_scaling_d7/T${T}.yaml" --distance 7 --p .003 \
+    --shots 1024 --batch-size 128 --repeat 4 --max-wall-seconds 600 \
+    --output "results/factory_T_scaling_d7/T${T}.json"
+done
+bash scripts/python.sh results/factory_T_scaling_d7/summarize.py
+git diff --check
+git -C external/Hex status --short
+```
+
+All four bounded diagnostics and all **16 attempts completed**, with no
+timeouts/failures. Saved-profile assertions verify fixed settings, eight
+sampling/decode batches per attempt, one bundle validation per attempt,
+one local DEM build per process and zero warm rebuilds/legacy projection or
+event-merge calls. Cache miss=1 and hit=3/7/15/31 for T=1/2/4/8. The local
+prior configuration hash agrees across every T/stage, and paired output
+hashes agree across all four same-seed attempts at each T.
+
+Warm medians, T=1/2/4/8: sampling+decode **.192585 / .288639 / .510293 /
+.893249 ms/shot**; full point amortization **5.860925 / 10.008451 /
+18.474526 / 43.290427 ms/shot**. Bundle validation medians **3.696050 /
+7.028790 / 15.288759 / 39.269553 s**. Error bars show the observed range
+of the three warm repeats, not confidence intervals. First attempts are
+reported separately. Summarizer emitted per-attempt CSV, summary JSON and
+two figures in PNG/SVG/PDF; PNGs were inspected for layout and labels.
+
+Report: docs/factory_T_scaling_report.md, linked from the existing performance
+report. Raw artifacts, exact configs, host details and reproduction scripts
+stay under ignored results/factory_T_scaling_d7. No simulation implementation
+or unit tests changed, so the preceding 255-test bench / 128-test Hex gates
+were not rerun for this documentation-and-measurement task. User .gitignore
+and both example config diffs still match the pre-revision snapshot; Hex
+remains clean. No production sweep, existing-run resume, staging or push.
+
+## 2026-10-17: user-requested T=3 distance timing through d11
+
+The explicit follow-up extends selected diagnostic distances to d=3/5/7/9/11.
+Fixed p=.003, T=3, r0=rplus=d, True local prior, master seed 12345. Each
+distance uses a fresh process; four attempts of 1,024 shots/batch 128 measure
+one first attempt plus three warm repeats. These remain opt-in measurements,
+not large unit-test fixtures or a production-budget sweep. Runtime and pinned
+dependency sources were not edited. Measurement spanned October 16–17 JST.
+
+Exact commands (also saved in results/factory_distance_scaling_T3/measure.sh):
+
+```bash
+export OMP_NUM_THREADS=1 OPENBLAS_NUM_THREADS=1 MKL_NUM_THREADS=1
+for d in 3 5 7 9 11; do
+  bash scripts/python.sh scripts/profile_factory.py \
+    results/factory_distance_scaling_T3/config.snapshot.yaml --distance "${d}" --p .003 \
+    --shots 1024 --batch-size 128 --repeat 4 --max-wall-seconds 2400 \
+    --output "results/factory_distance_scaling_T3/d${d}.json"
+done
+bash scripts/python.sh results/factory_distance_scaling_T3/summarize.py
+git diff --check
+git -C external/Hex status --short
+```
+
+All **20 attempts completed**, no diagnostic timeout/failure. Saved-profile
+assertions validate the fixed settings, shot/batch counts, eight sample/decode
+calls and one full validation per attempt, one local Stim DEM per distance,
+zero warm regeneration and zero legacy fault propagation/event merging.
+Each process finishes at cache miss=1/hit=11/currsize=1. Models share one
+configuration hash across three stages and differ across all five distances.
+All four attempts have identical paired output hashes at each distance.
+Recorded qubits/records agree with 4*d*d-2 and 4*(d*(d*d-1)+d*d).
+
+Warm processing medians are .130245/.213445/.396107/.757258/1.387510 ms/shot.
+Full-point amortized medians are .607912/2.968308/14.185958/48.493113/
+145.194036 ms/shot. d11 validation is 127.266977 s versus first local prior
+.383694 s, including .00149954 s of Stim extraction. d7 warm processing
+varies .155776–.429290 ms/shot despite identical output hashes; CPU time also
+changes. Its cause is not established, no sample is dropped, and the report
+explicitly avoids a fitted complexity claim. Observed min/max ranges are
+not confidence intervals.
+
+Summarizer passed and emitted attempts.csv, summary.json and two graphs in
+PNG/SVG/PDF. Both PNGs were visually inspected. A documentation-only patch
+initially failed to match a redundant context hunk; the hunk was removed and
+the patch applied successfully, with no simulation/artifact change. No unit
+or numerical tests were changed; previous 255-test bench / 128-test Hex gates
+were not rerun for this report-only task. Protected user diffs were checked
+against the snapshot saved before this follow-up; Hex stays clean and the
+index empty. No existing run was resumed or production sweep launched.
+
+## 2026-10-17: opt-out factory validation and equivalent packed preparation frames
+
+The user clarified skip_circuit_validation=True means skip; False/default
+retains one complete native bundle validation. Both factory prior modes now
+use packed final-check/exit-frame maps with the same four native matching
+calls. Hex/v1/B1 sources are unchanged. Full validation uses the native builder;
+opt-out uses its exact function with a private construction-type binding,
+returning a normal native bundle whose explicit validate() still works.
+
+Initial integration check:
+
+```bash
+bash scripts/python.sh -m pytest -q tests/test_factory_local_dem.py tests/test_logical_zero_factory.py tests/test_factory_profiling.py
+```
+
+33 passed, 176 warnings, 26.65 s (before the new test cases were added).
+The first new frame-test run had 11 passes and 3 failures: all numerical
+comparisons passed, but a cache assertion incorrectly assumed plus plans
+shared one template across A/B. H5 templates are per support/basis/depth.
+The test now asserts sharing only for the same native module; the profiling
+expectation was likewise corrected from two to three templates at T=2.
+No numerical workaround or matching change was made. A combined source patch
+and a later documentation patch each initially failed context verification;
+both were reapplied with correct context, without partial changes.
+
+Focused gate after corrections:
+
+```bash
+bash scripts/python.sh -m pytest -q tests/test_factory_frames.py tests/test_factory_profiling.py tests/test_logical_zero_factory.py tests/test_v2_config.py
+```
+
+127 passed, 196 warnings, 32.34 s. New physical fixtures remain d3/5 and
+<=7 shots. Independent GF(2) products cover byte/chunk boundaries and zero
+dimensions. Native full-history comparisons cover every exit frame and
+decoded result field; skip/full modes preserve exact physical circuits,
+seeds/raw arrays, cache keys and decoded outputs. Both prior and validation
+modes pass serial/spawn equality, metadata checks and completed resume.
+Runtime sign repair and strict local prior checks remain active.
+
+Separate authorized d7 selected-point diagnostic (not a unit-test workload):
+
+```bash
+OMP_NUM_THREADS=1 OPENBLAS_NUM_THREADS=1 MKL_NUM_THREADS=1 \
+  bash scripts/python.sh results/factory_frame_optimization/compare.py \
+  > results/factory_frame_optimization/compare.log 2>&1
+```
+
+T=3, p=.003, r0=rplus=7, seed=917, 1,024 shots, batch 128, with an explicit
+300 s wall bound. Full and skipped setup each ran three times with cold local
+prior caches, alternating order. Native/packed arithmetic used identical
+physical records/models, checking every result field exactly before seven
+alternating warm repeats. No tests were run concurrently with measurement.
+Setup medians: full 14.179799 s, skipped 3.212478 s. Preparation medians:
+native .280835 s, packed .222392 s; whole decode .348699 versus .289702 s.
+Packed lookup tables total 2.614502 MiB. Full ranges/host/source hashes and
+the reproducible script remain in ignored results/factory_frame_optimization;
+docs/factory_frame_optimization.md explains scope and throughput/latency limits.
+
+Full bench gate:
+
+```bash
+bash scripts/python.sh -m pytest -q > /tmp/knill-frame-opt-full-tests.log 2>&1
+```
+
+**272 passed, 744 existing-category warnings, 168.27 s**. This includes all
+v1/B1 tests, strict configs, both factory prior/validation modes, persistence,
+serial/spawn and local DEM/cache/causality comparisons. No full-gate failures.
+
+Read-only pinned Hex regression gate:
+
+```bash
+bash scripts/python.sh -m pytest -q external/Hex/tests/test_factory_circuit.py external/Hex/tests/test_factory_batch.py external/Hex/tests/test_surface_gap.py external/Hex/tests/test_codecapacity_public.py > /tmp/knill-frame-opt-hex-tests.log 2>&1
+git diff --check
+git diff -- .gitignore configs/fig4d_v2_example.yaml configs/logical_zero_factory_v2_example.yaml | cmp - /tmp/knill-frame-opt-protected.diff
+git -C external/Hex status --short
+git diff --cached --stat
+```
+
+**128 passed, 320 inherited warnings, 55.43 s**. Diff checks pass, protected
+user edits match the pre-task snapshot, Hex stays clean at H5, and the index
+is empty. No user job/run was interrupted, production sweep launched, or
+dependency source patched. All final code changes preceded the full gates.

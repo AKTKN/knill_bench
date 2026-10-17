@@ -4,7 +4,7 @@ This branch supplies two schema-v2 experiments and saved-data analysis:
 
 | Experiment | Physical stages | Final readout | Saved point files |
 | --- | --- | --- | --- |
-| Fig.4(d) full Knill | Eight full Knill stages; d noisy SE rounds on each Bell resource | Noisy Z | logical_error |
+| Fig.4(d) full Knill | Eight full Knill stages; configurable noisy SE preparation, default d rounds on each Bell resource | Noisy Z | logical_error |
 | Logical-zero factory | Fixed T>=1 one-bit stages on two reused supports | One ideal Z evaluation oracle | logical_error + logical_gaps |
 
 Factory conditional error rates describe the terminal **factory oracle**;
@@ -48,19 +48,38 @@ knill-bench-v2 validate-config my_fig4d.yaml
 
 The simulation templates have d3/5, p0/.001, 64 shots per point, batches of 32
 and one worker. Edit only d and p as sweep axes. Round rules accept literal
-`d` or a positive integer, not expressions such as d-2. T, decoder, prior,
+`d`, a positive integer, or a quoted positive multiple such as `"2*d"`,
+`"2/3*d"` or `"1.5*d"`. Exact rational arithmetic floors the result for each
+distance: `"2/3*d"` gives 2 rounds at d=3 and 3 at d=5. A result below one
+is rejected. General expressions such as d-2 are unsupported. T, decoder, prior,
 workers, shots and seed are fixed per run. Unknown keys/duplicate YAML fail.
 
 Factory T defaults to one; set T_tel=2 or 3 for fixed role-swapping stages.
 r_0 applies once to initial zero preparation; r_plus applies to each initial/
 refresh plus preparation. A trajectory produces one final survivor. Full Knill
-requires T_tel=8, r_0=r_plus=d, False priors and theta:null.
+requires T_tel=8, False priors and theta:null. The standard Fig.4(d)
+configuration uses r_0=r_plus=d; changing the depths runs a preparation-depth
+variant through the same eight-stage protocol.
+
+For example, either simulation template can use:
+
+```yaml
+r_0: "2*d"
+r_plus: "2/3*d"
+```
+
+Check resolved depths before sampling with `knill-bench-v2 validate-config
+my_fig4d.yaml` (or my_factory.yaml). The printed points show integer r_0/r_plus.
 
 Keep `create_codecapacity_dem:false` initially. False uses finite Hamming gaps
-even at p0. True is a projected approximation with structural restrictions;
-p0 True is unsupported. A tested small positive-p True factory configuration
-is d3, p=.001, r_0=r_plus=2, T=1/2. Unsupported models raise without fallback.
-Hamming and log-weight gap cuts use different units.
+even at p0. True now uses module-local Stim DEMs with cached matching graphs.
+Its prior EXCLUDES preparation and earlier-stage residual errors; the actual
+noisy preparation and causal frames remain in the simulation. See the
+[factory guide](docs/logical_zero_factory.md) for the input boundary and
+analysis-only Pauli observable. p0 True remains unsupported; structural errors
+raise without fallback. Historical projected, local and Hamming gaps are not
+interchangeable. Start a new run after this model change; old saved data can
+still be analyzed with their original policy labels.
 
 ## 3. Run the small factory and analyze saved data
 
@@ -78,6 +97,22 @@ knill-bench-v2 analyze-factory "$FACTORY_RUN" --settings my_analysis.yaml --outp
 knill-bench-v2 analyze-factory "$FACTORY_RUN" --theta=-inf --theta=1 --theta=2 --theta=inf --output factory_report.csv
 knill-bench-v2 analyze-factory "$FACTORY_RUN" --theta-grid 0 5 11 --iid-restarts --output factory_cost.json
 ```
+
+`analyze-factory` reads the saved `config.yaml` and Parquet files inside
+`$FACTORY_RUN`. Its `--settings` argument is the analysis/cost configuration,
+not the simulation configuration. Repeating it recomputes the analysis and
+rewrites the requested report; it does not start or resume a simulation.
+Editing my_factory.yaml does not update `$FACTORY_RUN`. After changing a
+simulation configuration, start a new experiment and update that variable:
+
+```bash
+FACTORY_RUN=$(knill-bench-v2 run my_factory.yaml)
+echo "$FACTORY_RUN"
+knill-bench-v2 analyze-factory "$FACTORY_RUN" --settings my_analysis.yaml --output "$FACTORY_RUN/factory_report.md"
+```
+
+Every `run` starts fresh, even with the same config. Use `resume RUN` only
+when continuing an existing experiment.
 
 Acceptance requires every stage gap>=theta. Negative infinity retains all
 shots; positive infinity rejects all finite gaps. No accepted shots means
@@ -107,7 +142,9 @@ knill-bench-v2 plot-fig4d "$FIG4D_RUN" --output fig4d_smoke.png
 
 This checks the eight-stage execution path at small distances. The plot reads
 saved labels and uses 95% Agresti-Coull intervals; it does not establish paper
-agreement. The distinct large opt-in jobs are:
+agreement. Its vertical axis is labeled `logical error rate`; this is errors
+per complete eight-stage shot. Existing saved runs can be replotted with the
+same plot command without resimulation. The distinct large opt-in jobs are:
 
 ```bash
 bash scripts/run_fig4d.sh configs/fig4d.yaml
@@ -120,9 +157,15 @@ point. Neither job runs during bootstrap or unit tests.
 
 ## 5. Inspect outputs and resume safely
 
-Every run is `results/<UTC-timestamp>_<name>/`, relative to the invocation
-working directory unless output_root is absolute. It contains exact config.yaml,
-one metadata.json and one/two Parquet tables per completed d/p point.
+New v2 runs use `results/<YYYYMMDDHHMMSS>_<config_hash8>_<name>/`, relative to
+the invocation working directory unless output_root is absolute. The timestamp
+is Japan time (Asia/Tokyo); the eight hex digits are the prefix of the canonical
+simulation-config SHA256. For example,
+`results/20261016155547_2242fc7d_factory_v2_example/`. A name collision advances
+the directory timestamp by one second; it never reuses completed data. Actual
+start/end timestamps and the full hash remain in metadata. Legacy run names
+remain usable. Each run contains exact config.yaml, one metadata.json and
+one/two Parquet tables per completed d/p point.
 
 ```text
 logical_error__code=rotated_surface,d=3,p=0.001,noisemodel=hex_uniform,T=1,r_0=3,r_+=3.parquet
@@ -167,3 +210,27 @@ integration tests. Existing schema-v1 commands remain `knill-bench` or
 `python -m knill_bench.cli`; v2 commands are deliberately separate. Detailed
 references: [v2 schema](docs/auxiliary_v2.md), [Fig.4(d)](docs/fig4d.md),
 [factory](docs/logical_zero_factory.md), [B3 analysis](docs/factory_analysis.md).
+
+For unexpectedly slow factory setup, see the measured
+[wall-time report](docs/factory_performance_report.md). The opt-in diagnostic
+profiles one selected point without running the config's full shot/worker
+budget or changing existing results:
+
+```bash
+python scripts/profile_factory.py configs/logical_zero_factory_v2_example.yaml \
+  --distance 3 --p .001 --shots 7 --output results/profile_factory_d3.json
+```
+
+Select d/p values present in your config and a new output filename. True mode
+constructs a local DEM once per distinct canonical module and reuses it across
+stages. `--repeat 2` measures a fresh-seeded warm-cache attempt in the same
+process; `--prior legacy-projected` explicitly replays the old H5 inference for
+diagnostic comparison only. JSON records partial timings at the wall limit.
+
+Factory simulation YAML also accepts `skip_circuit_validation: true` to skip
+the expensive full physical bundle check during compilation. The default is
+`false` (one full check). This does not change the physical circuit, prior,
+sampling or matching decisions; decoder/sign/model checks still run. It is
+not a saved validated-circuit cache. Both factory prior modes use packed
+preparation-frame arithmetic. See [the factory guide](docs/logical_zero_factory.md)
+for the exact scope. Fig.4(d) does not accept the opt-out.
