@@ -79,6 +79,10 @@ class ChunkSizer:
 
 
 def _compile_model(point, seed, options):
+    if point.kind == "se_memory":
+        from knill_bench.adapters.hex_memory import HexMemory
+        model = HexMemory(point, seed=seed)
+        return model, model.circuit, model.metadata
     if point.kind == "fig4d_reproduction":
         from knill_bench.adapters.hex_full_knill import HexFullKnill
         model = HexFullKnill(point, seed=seed)
@@ -109,9 +113,10 @@ def run_chunk(task, **options):
     # independent of which worker receives it; no dependency globals are patched.
     sampler = circuit.compile_sampler(seed=task.seed)
     raw = sampler.sample(shots=task.shots)
-    if task.point.kind == "fig4d_reproduction":
-        labels = model.decode_batch(raw).logical_error
-        gaps = None
+    if task.point.kind in {"fig4d_reproduction", "se_memory"}:
+        decoded = model.decode_batch(raw)
+        labels = decoded.logical_error
+        gaps = getattr(decoded, "gaps", None)
     else:
         from .logical_zero_factory import _decode_chunk
         decoded = _decode_chunk(model, raw, task.start, task.point, execution["score_units"])
@@ -134,11 +139,11 @@ def _validate_result(task, result):
             or type(result.max_shots) is not int or result.max_shots < 1):
         raise ValueError("adaptive worker result identity/count/timing mismatch")
     gaps = result.gaps
-    if task.point.kind == "logical_zero_factory":
+    if "logical_gaps" in task.point.tables:
         if (not isinstance(gaps, np.ndarray) or gaps.dtype != np.float64
                 or gaps.shape != (task.shots, task.point.T_tel) or not np.isfinite(gaps).all()
                 or (gaps < 0).any()):
-            raise ValueError("adaptive factory requires finite nonnegative aligned gaps")
+            raise ValueError("adaptive worker requires finite nonnegative aligned gaps")
     elif gaps is not None:
         raise ValueError("Fig.4(d) cannot return gaps")
 

@@ -132,3 +132,11 @@ WORKERS can lower it. Oversubscription/multi-node requests fail. BLAS/OpenMP
 threads are 1. run --workers saves effective YAML; resume retains saved workers
 and checks allocation. Setup stays on the login node, via the exact-ref Conda
 bootstrap. See [clone/setup/qsub instructions](../docs/cluster_setup.md).
+
+## Ordinary SE memory launcher
+
+run_se_memory.sh [CONFIG] invokes the v2 run command through python.sh; default
+is configs/se_memory_v2_example.yaml (small d3/5 example, not launched by tests).
+PBS cluster_run_simualtion.sh already accepts this kind via CONFIG_FILE.
+Same Conda selection/worker overrides apply; no extra dependencies or cluster
+script changes are required. See [memory guide](../docs/se_memory.md).

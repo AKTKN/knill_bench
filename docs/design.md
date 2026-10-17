@@ -109,3 +109,14 @@ chunk seeds are independent of scheduling identities, but automatic partitions
 depend on timing. Integer batch_size retains historical whole-point workers
 and fixed-partition replay. Physical protocols, v1 execution and dependency
 sources are unchanged. See [execution specification](parallel_execution.md).
+
+## Ordinary SE memory through Hex
+
+V2 se_memory uses Hex's native stabilizer_measurement_circuit with z basis,
+surface_code=True and disable_final_detectors=False. Noisy physical-zero
+reset precedes exactly rounds X/Z SE rounds; final destructive Z is noisy.
+The complete-event circuit DEM and observable matrix feed one cached MWPM
+decoder; optional opposite-class decoding uses a graphlike two-boundary lift
+on the spacetime graph. Truth evaluates labels only after inference/scoring.
+This has no teleportations or ideal factory oracle. Existing physical sources
+are unchanged. See [memory definition and proof](se_memory.md).

@@ -70,3 +70,17 @@ gathers are bounded to 32 input bytes, and lookup tables use 256 combinations
 per group of 8 input bits. ExitFrame is private; native diagnostic return APIs
 are unchanged. Runtime sign consistency checks remain enabled in skip mode.
 See [factory guide](../../../docs/logical_zero_factory.md) for hashes and limits.
+
+## Hex ordinary SE memory
+
+`hex_memory.HexMemory(point, seed=...)` owns the exact native
+stabilizer_measurement_circuit(z, rounds, p, surface_code=True,
+disable_final_detectors=False), a converter, sampler, full-event DEM and
+ObservableMWPM. `sample` advances the fixed-mode sampler; adaptive execution
+uses its circuit with assigned chunk seeds. `decode_detectors` accepts only
+detectors; `decode_batch` converts raw records, decodes/scores, then compares
+the predicted and actual logical observable. MemoryBatch has bool
+logical_error and optional float64 (shots,1) gaps. Physical initialization,
+SE and final readout are noisy; no ideal oracle/correction module is added.
+Metadata declares actual boundaries/rounds, selected detector sector and
+circuit/DEM/model hashes. See [protocol](../../../docs/se_memory.md).

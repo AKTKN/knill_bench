@@ -126,3 +126,16 @@ aggregate worker setup/sampling-decode seconds, workers used, target and cap.
 Auto consumes chunk seeds; the saved point seed remains an identity. Config
 hashes describe the effective --workers override when present; saved YAML
 includes the original input SHA256 comment. See [execution](parallel_execution.md).
+
+## Ordinary v2 memory output
+
+se_memory reuses logical_error's shot_id:uint64/logical_error:bool and, when
+get_logicalgap is true, logical_gaps with aligned shot_id and gap_t001:float64.
+The one score covers the whole memory trajectory; requested scores are finite,
+nonnegative and non-null. Standard filename keys remain, with T=1 for one
+trajectory score, r_0=r_+=0 for no Knill resources, and an added rounds key.
+Physical identity records actual rounds/noisy initial and terminal boundaries,
+not those compatibility placeholders. Metadata declares teleportations=0,
+full-circuit DEM/decoder/model hashes and complementary log-weight score scope.
+Same buffer, paired-publication and full-point restart rules apply. Existing
+schemas/filenames/hashes are unchanged. See [memory output](se_memory.md).

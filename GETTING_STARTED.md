@@ -243,3 +243,14 @@ sampling or matching decisions; decoder/sign/model checks still run. It is
 not a saved validated-circuit cache. Both factory prior modes use packed
 preparation-frame arithmetic. See [the factory guide](docs/logical_zero_factory.md)
 for the exact scope. Fig.4(d) does not accept the opt-out.
+
+## Ordinary syndrome-extraction memory
+
+Copy `configs/templates/se_memory.yaml` and run it through the same v2 CLI or
+PBS script (`CONFIG_FILE=my_memory.yaml`). Use `kind: se_memory`, `rounds: d`
+and optional `get_logicalgap: true`; Knill resource/teleportation/prior fields
+are not accepted for this kind. Initial physical-zero reset and final Z are
+noisy, and total noisy SE count is exactly rounds. Requested complementary
+gaps require 0<p<0.5 and a supported positive-weight graphlike circuit DEM;
+p0 works with the option false. The additional file uses the same shot IDs
+and gap_t001 for the entire memory experiment. See [memory guide](docs/se_memory.md).

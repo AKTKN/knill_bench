@@ -917,3 +917,108 @@ change only batch policy/output buffer/target settings and explanatory comments.
 Package source is unchanged since the final full gate began. Only documentation
 and PBS directives changed afterward; the final shell unit/syntax gate above
 covers those final directives. No simulation outputs/caches/virtualenvs are staged.
+
+## 2026-10-17: Hex ordinary SE memory and optional complementary gap
+
+Added v2 kind se_memory with Hex's exact native noisy reset / repeated X/Z SE /
+noisy final Z circuit. get_logicalgap adds an opposite-observable-class MWPM
+solve and optional aligned Parquet. No Hex source, v1 numerical source, B1
+physical adapter or factory policy/frame implementation was modified.
+
+Read-only native inspection and a <=7-shot diagnostic at d3/5 checked circuit
+round counts and complete DEM columns. d3/5 full circuit DEMs have degree 1/2
+columns. Native SurfaceMWPMHomologyGap rejects these graphs at its spatial
+planarity restriction; no check was bypassed. A new bench decoder validates
+the observable-potential/two-boundary lift algebra on general spacetime graphs.
+Complete event signatures are retained; there is no separator splitting,
+hyperedge drop, truth/oracle inference or approximation-disjoint escape.
+
+Initial focused gate:
+
+```bash
+bash scripts/python.sh -m pytest -q tests/test_se_memory.py tests/test_v2_config.py > /tmp/knill_memory_focused.log 2>&1
+```
+
+129 passed and one test failed (120 warnings, 14.63 s). The failed cache test
+tried to monkeypatch compile_sampler on a read-only native Stim Circuit
+instance. The invalid test patch was removed; cached matching-construction
+checks remain. No simulator behavior was changed to accommodate the test.
+
+Integration gate after correcting the test:
+
+```bash
+bash scripts/python.sh -m pytest -q tests/test_se_memory.py tests/test_v2_config.py tests/test_v2_storage.py tests/test_adaptive_execution.py > /tmp/knill_memory_integration.log 2>&1
+```
+
+**187 passed, 148 warnings, 24.42 s**. After adding invalid-gap and saved-option
+cases plus pre-extension golden hashes:
+
+```bash
+bash scripts/python.sh -m pytest -q tests/test_se_memory.py > /tmp/knill_memory_final_focused.log 2>&1
+```
+
+**57 passed, 156 warnings, 19.46 s**. New physical fixtures remain d3/5,
+<=7 shots. Tests cover exact Hex circuits and round/noise boundaries, ordinary
+PyMatching labels, unchanged first decode when enabling gap, both H constraints
+and opposite L parity, pure-truth-flip isolation, exhaustive tiny-graph class
+minima/ties, and independent SciPy binary-integer optimization of both classes
+on the d3 circuit DEM. Tiny MILP calls are deterministic verification, not
+Monte Carlo or production performance benchmarks. Cached graphs and full-event
+model semantics are checked. Hyperedges, detector-free logical mechanisms,
+inconsistent potentials and unsupported weights fail without fallback.
+
+Storage/runner tests cover optional-file presence, gap_t001 meaning/dtype,
+paired uint64 IDs/counts, bool labels, 3/3/1 output groups, actual metadata,
+fixed serial/spawn equality, adaptive spawn, gap-toggle fixed stream/labels,
+p0 plain memory, completed resume, failed second-chunk full-point restart,
+invalid requested gap rejection and changed-option resume before deletion.
+Golden config/point hashes from de21bfc confirm existing kinds are unchanged.
+
+Installed editable CLI/shell/PBS smoke uses only a temporary d3, p=.003,
+rounds=d, get_logicalgap=true, 3-shot configuration at
+/tmp/knill_memory_smoke_jdqu7rml/memory.yaml, buffer_shot=2 and two workers.
+No checked-in example budget or production sweep was executed:
+
+```bash
+bash scripts/run_se_memory.sh "$(cat /tmp/knill_memory_smoke_path)/memory.yaml" > /tmp/knill_memory_smoke.log 2>&1
+PBS_O_WORKDIR="$PWD" PBS_NCPUS=2 CONFIG_FILE="$(cat /tmp/knill_memory_smoke_path)/memory.yaml" bash scripts/cluster_run_simualtion.sh > /tmp/knill_memory_pbs_smoke.log 2>&1
+knill_memory_smoke_run=$(tail -n 1 /tmp/knill_memory_pbs_smoke.log)
+PBS_O_WORKDIR="$PWD" PBS_NCPUS=2 RESUME_RUN="$knill_memory_smoke_run" bash scripts/cluster_run_simualtion.sh > /tmp/knill_memory_resume_smoke.log 2>&1
+bash -n scripts/run_se_memory.sh scripts/cluster_run_simualtion.sh
+bash scripts/python.sh -m pip check
+```
+
+Direct wrapper run, real local Conda/PBS-wrapper run and completed resume all
+passed. Shell syntax passed and pip check reports no broken requirements.
+This is local wrapper validation, not an actual cluster qsub invocation.
+The original user configs/.gitignore and all dependency pins/sources remain
+unchanged; no new package dependency was introduced.
+
+Final full bench gate (all package source frozen before starting):
+
+```bash
+bash scripts/python.sh -m pytest -q > /tmp/knill_memory_full.log 2>&1
+```
+
+**369 passed, 928 existing-category warnings, 183.80 s**. All previous 312
+cases remain and 57 memory cases are added. Warnings are the existing SciPy
+sparse-migration / plotting categories. No full-gate failures.
+
+Read-only pinned Hex gate:
+
+```bash
+bash scripts/python.sh -m pytest -q external/Hex/tests/test_factory_circuit.py external/Hex/tests/test_factory_batch.py external/Hex/tests/test_surface_gap.py external/Hex/tests/test_codecapacity_public.py > /tmp/knill_memory_hex.log 2>&1
+git -C external/Hex status --short
+git -C external/lomatching status --short
+git -C external/surface-sim status --short
+git diff --name-only -- src/knill_bench/circuits src/knill_bench/simulation src/knill_bench/adapters/hex_factory.py src/knill_bench/adapters/hex_full_knill.py
+git diff -- .gitignore configs/fig4d_v2_example.yaml configs/logical_zero_factory_v2_example.yaml
+git diff --check
+```
+
+**128 passed, 320 inherited warnings, 51.62 s**. All dependency checkouts are
+clean at their pinned refs. Scope/diff checks pass: the original user configs,
+.gitignore and existing numerical/physical modules have no diff. Actual smoke
+outputs contain complete metadata, rounds=3, gap_units=log_weight, and exactly
+three joined rows in both tables. Test/output artifacts are temporary or
+ignored; no production simulation or cluster submission was launched.

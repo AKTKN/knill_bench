@@ -1,0 +1,19 @@
+# Ordinary |0_L> memory from Hex. Only d and p are sweep axes.
+schema_version: 2
+kind: se_memory
+name: my_se_memory
+output_root: results
+code: rotated_surface
+noise: hex_uniform
+sweep:
+  d: [3, 5]
+  p: [0.001, 0.003]
+rounds: d                # Total noisy X/Z SE rounds; integer/d/positive multiple.
+get_logicalgap: true     # Optional opposite-class MWPM cost difference; default false.
+decoder: mwpm
+shots: 64
+batch_size: auto
+buffer_shot: 10000
+target_chunk_seconds: 1.0
+workers: 1
+master_seed: 12345

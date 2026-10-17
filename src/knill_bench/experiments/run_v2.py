@@ -71,8 +71,7 @@ class RunStore:
                 master_seed=config.master_seed, seed_derivation=SEED_DERIVATION,
                 prior_policy=config.prior_policy,
                 final_readout=next(config.points()).final_readout,
-                gap_units=("log_weight" if config.create_codecapacity_dem else "hamming_weight")
-                          if config.kind == "logical_zero_factory" else None,
+                gap_units=config.gap_units,
                 projected_approximation=(LOCAL_PRIOR_APPROXIMATION
                                          if config.create_codecapacity_dem else None),
                 points={p.case_id: dict(p.sampling_identity, status="pending", seed=point_seed(config.master_seed, p),

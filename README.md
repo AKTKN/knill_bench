@@ -120,3 +120,15 @@ Multiple workers can share one d/p point; results append in buffer-sized
 Parquet groups. Integer `batch_size` retains the fixed execution/replay path.
 See [parallel execution](docs/parallel_execution.md) for memory bounds, seeds
 and [PBS / Anaconda clone instructions](docs/cluster_setup.md).
+
+## Ordinary SE memory
+
+V2 also supports `kind: se_memory`, using Hex's unmodified noisy physical-zero
+initialization, d repeated X/Z syndrome-extraction rounds and noisy final Z.
+`rounds` accepts d/integer/positive-multiple rules; `get_logicalgap: true`
+adds a constrained opposite-observable-class MWPM decode and aligned
+logical_gaps Parquet (one full-experiment gap_t001). Existing auto/fixed
+execution, buffers, seed/provenance and restart rules are shared.
+Start from [the template](configs/templates/se_memory.yaml), run
+`bash scripts/run_se_memory.sh my_memory.yaml`, or set PBS CONFIG_FILE to it.
+See [memory protocol, score definition and output](docs/se_memory.md).

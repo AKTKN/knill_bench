@@ -64,3 +64,10 @@ the tail then delegates to PointWriter. Auto mode owns both in the parent;
 fixed mode can use them inside its point worker. No raw histories are buffered.
 PointWriter remains the single owner of paired close/fsync/check/rename/abort.
 See [parallel execution](../../../docs/parallel_execution.md).
+
+Ordinary memory uses these unchanged schemas/writers: optional logical_gaps
+has exactly gap_t001 for the full trajectory. Its point.tables flag determines
+whether a second writer exists. Both auto/fixed modes reject unavailable or
+invalid requested memory scores; paired publication and buffer/restart rules
+are unchanged. Filenames retain literal r_+ and add resolved rounds; see
+[memory](../../../docs/se_memory.md).

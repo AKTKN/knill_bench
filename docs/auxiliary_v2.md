@@ -310,3 +310,16 @@ and analysis-circuit hashes plus explicit scope/exclusion fields. Stage hashes
 can repeat because identical modules share priors. Filenames/shot schemas/seeds
 are unchanged. Old projected runs remain readable by saved-only analysis with
 their original labels; resume refuses the old policy/source before any cleanup.
+
+## Additional kind: ordinary SE memory
+
+`kind: se_memory` is now available through run/prepare/resume and the shared
+adaptive/fixed schedulers. New fixed fields are `rounds` (default d; same exact
+positive integer/d/multiple grammar) and `get_logicalgap` (boolean, default
+false). Both are forbidden on existing kinds. Memory rejects Knill-only
+r_0/r_plus/T_tel/theta/create_codecapacity_dem and skip_circuit_validation:true.
+Only d/p sweep. get_logicalgap requires 0<p<0.5 and supported positive DEM
+weights; without it p0 is supported. Native physics, boundary conventions,
+first/opposite-class inference and exact table/filename meaning are in
+[the memory guide](se_memory.md). New default fields are omitted from old
+canonical configs/point identities, preserving prior hashes and seeds.

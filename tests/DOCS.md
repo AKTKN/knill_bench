@@ -126,3 +126,14 @@ runs for full Knill and both factory priors, worker-cache reuse and explicit
 chunk-seed replay. Existing fixed-mode serial/spawn equality is retained.
 `test_cluster_script.py` exercises PBS/Conda invocation and allocation guards
 with stub executables. No production or throughput benchmarks run in tests.
+
+## Ordinary memory and complementary gap
+
+test_se_memory.py covers strict config/round rules and pre-extension golden
+hashes; exact Hex physical circuits/noisy boundaries; d3/5 <=7-shot labels,
+optional-gap first-decode and truth isolation; exhaustive tiny graph minima,
+independent binary-integer sector costs on the d3 circuit DEM, constraint and
+native-cost validation, cached graphs, optional paired schemas/IDs/buffers,
+serial/spawn (auto and fixed), p0 plain decoding and failure/restart. Invalid
+requested gaps and changed-option resume are rejected. No production sweep,
+new large Monte Carlo, dependency edit or benchmark is included.

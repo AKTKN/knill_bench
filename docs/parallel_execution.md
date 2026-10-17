@@ -120,3 +120,10 @@ Saved runs whose old YAML omitted batch_size retain their historical default
 32 through load_saved_config, using the saved canonical metadata to identify
 that default. They remain readable by saved-only analysis; new omitted-field
 inputs select auto. Source/environment resume compatibility remains strict.
+
+Ordinary `kind: se_memory` uses the same execution paths. HexMemory caches its
+circuit/converter/unconstrained matching and optional opposite-class graph per
+point/worker; only output labels/gaps cross processes. get_logicalgap is absent
+from physical identity/seeds, although extra work can change auto partitions.
+Fixed mode preserves exact common records and first labels with gap on/off.
+One optional gap_t001 covers the entire trajectory. See [memory](se_memory.md).

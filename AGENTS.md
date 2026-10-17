@@ -308,3 +308,37 @@ Latest adaptive revision gates: 312 bench tests passed (772 warnings,
 173.96 s); 128 read-only Hex tests passed (320 warnings, 50.71 s). PBS shell
 unit/syntax checks, pip check and the real local Conda wrapper's three-shot
 run/resume/analysis pass. See TEST.md for exact commands and corrected checks.
+
+## User-requested ordinary memory and complementary gap
+
+The user authorized a v2 ordinary syndrome-extraction |0> memory adapter,
+runner and output, using the actual Hex implementation, with optional
+get_logicalgap. kind=se_memory uses noisy physical-zero initialization,
+exactly rounds (default d) X/Z SE rounds and noisy final Z, with no Knill
+resources/teleportations/ideal oracle. Hex H5 and v1/B1/B2 physics stay read-only.
+rounds is a fixed integer/d/multiple rule; only d/p sweep. Knill-only options
+are rejected, and memory-specific fields do not change old canonical hashes.
+
+Full-circuit complete independent DEM events and their observable matrix feed
+cached MWPM. get_logicalgap adds a constrained opposite-class decode using a
+validated two-boundary spacetime lift, preserving the first prediction. This
+is a min-weight cost difference in log_weight units, not posterior log odds.
+No truth enters inference/scoring. Unsupported graph/logical/weight structure
+raises; get_logicalgap requires 0<p<0.5, while plain memory supports p0.
+No spatial-planarity check in Hex is bypassed: bench's new graph construction
+has its own algebra/constraint validation and works on spacetime graphs.
+
+Output shares v2 error schema and optional aligned gap_t001 for the whole
+memory experiment. Required filename keys are retained with T=1 (one score),
+r_0=r_+=0 (no Knill resources), plus resolved rounds; physical identity excludes
+these compatibility keys and the gap flag. Metadata explicitly records zero
+teleportations and noisy boundaries. Both adaptive/fixed execution, bounded
+buffers, paired publication and whole-point resume are shared. Keep new
+physical fixtures d3/5 and <=7 shots; no production sweep is authorized.
+See docs/se_memory.md and TEST.md for math, tests and usage.
+
+Latest memory revision gates: 369 bench tests passed (928 warnings,
+183.80 s), and 128 read-only Hex tests passed (320 warnings, 51.62 s).
+Three-shot direct/PBS-wrapper run and completed resume, shell syntax and
+pip check pass. TEST.md records the corrected native-method monkeypatch
+assumption, exact commands and unchanged user/dependency scope.

@@ -108,3 +108,13 @@ Integer batch_size retains the legacy fixed path. See
 memory and restart limits. CLI --workers supports PBS allocations; saved
 config.yaml describes the effective setting without editing the source input.
 V1, native adapters and Hex source remain unchanged in this revision.
+
+## Ordinary memory extension
+
+adapters.hex_memory and experiments.se_memory connect Hex's native repeated-SE
+Z memory to existing v2 auto/fixed runners and paired buffered output. Optional
+get_logicalgap adds one cached opposite-observable-class graph via
+[decoding.observable_gap](decoding/DOCS.md), without changing the first decode
+or exposing truth to inference. All original v1/B1/B2 numerical sources and
+Hex remain unchanged. [Memory guide](../../docs/se_memory.md) defines noisy
+boundaries, rounds, scores, compatibility filename keys and validation limits.

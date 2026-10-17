@@ -187,3 +187,8 @@ qsub -v で渡すか、サイトの Anaconda module をロードしてくださ�
 チャンクは独立です。詳細・seed の再現性の限界は
 [並列実行仕様](parallel_execution.md)を参照してください。
 ローカルの模擬 PBS 環境で検証していますが、実クラスタでの qsub は未実施です。
+
+The same PBS script also accepts ordinary SE memory configurations. Copy
+configs/templates/se_memory.yaml, edit rounds/d/p/shots/get_logicalgap and pass
+that file as CONFIG_FILE. No environment/dependency change is required.
+See [memory configuration and output](se_memory.md).

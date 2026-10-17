@@ -131,3 +131,18 @@ load_config(path, workers=N), dispatch(path, workers=N) and the CLI
 run/prepare/validate-config --workers save effective YAML with source-input
 SHA256; no override preserves original bytes. Resume uses saved settings.
 See [full specification](../../../docs/parallel_execution.md).
+
+## Ordinary syndrome-extraction memory
+
+config_v2 adds se_memory plus rounds/get_logicalgap. Existing canonical hashes
+are preserved by omitting new defaults for old kinds/points. Memory points
+carry resolved rounds and an output-only flag; physical identity excludes the
+flag and Knill filename placeholders. T=1/r_0=r_+=0 preserve filename keys;
+an extra rounds key identifies the actual duration. One optional gap_t001
+covers the complete trajectory. Config.gap_units drives run metadata.
+
+se_memory.run uses the same RunStore, execute_points and PointBuffer/PointWriter
+contracts, with strict requested-score checks. adaptive_execution now compiles
+HexMemory and accepts its optional gap table; no old runner physics changes.
+Point labels and gaps are returned only after full physical sampling. See
+[memory guide](../../../docs/se_memory.md) for CLI/config/output semantics.

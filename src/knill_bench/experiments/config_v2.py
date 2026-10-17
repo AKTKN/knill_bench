@@ -11,7 +11,7 @@ import re
 import yaml
 
 
-KINDS = {"fig4d_reproduction", "logical_zero_factory"}
+KINDS = {"fig4d_reproduction", "logical_zero_factory", "se_memory"}
 LOCAL_PRIOR_POLICY = "module_local_stim_dem"
 LOCAL_PRIOR_APPROXIMATION = "preparation_and_earlier_stage_residual_errors_excluded_v1"
 LEGACY_PRIOR_POLICY = "circuit_informed_projected"
@@ -110,6 +110,8 @@ class ExperimentPoint:
     T_tel: int
     code: str = "rotated_surface"
     noise: str = "hex_uniform"
+    rounds: int | None = None
+    get_logicalgap: bool = False
 
     def __post_init__(self):
         _choice(self.kind, KINDS, "kind")
@@ -122,8 +124,18 @@ class ExperimentPoint:
         if not 0 <= p <= .5:
             raise ValueError("p must be in [0, 0.5]")
         object.__setattr__(self, "p", p)
-        for name in ("r_0", "r_plus", "T_tel"):
-            _integer(getattr(self, name), name)
+        if type(self.get_logicalgap) is not bool:
+            raise ValueError("get_logicalgap must be bool")
+        if self.kind == "se_memory":
+            _integer(self.rounds, "rounds")
+            _integer(self.r_0, "se_memory r_0 (no separate preparation)", 0, 0)
+            _integer(self.r_plus, "se_memory r_plus (no separate preparation)", 0, 0)
+            _integer(self.T_tel, "se_memory single trajectory", 1, 1)
+        else:
+            for name in ("r_0", "r_plus", "T_tel"):
+                _integer(getattr(self, name), name)
+            if self.rounds is not None or self.get_logicalgap:
+                raise ValueError("rounds/get_logicalgap are supported only for se_memory")
 
     @property
     def final_readout(self):
@@ -134,7 +146,15 @@ class ExperimentPoint:
     def sampling_identity(self):
         # Decoder policy, theta, workers and requested shots cannot change the
         # identity of the physical circuit or its sampling seed.
-        return dict(asdict(self), final_readout=self.final_readout, memory_basis="z")
+        result = asdict(self)
+        result.pop("get_logicalgap")  # An output/inference option, never physical identity.
+        if self.kind == "se_memory":
+            for name in ("r_0", "r_plus", "T_tel"):
+                result.pop(name)
+            result["initial_boundary"] = "noisy_physical_zero"
+        else:
+            result.pop("rounds")  # Preserve every existing physical ID/seed.
+        return dict(result, final_readout=self.final_readout, memory_basis="z")
 
     @property
     def case_id(self):
@@ -143,16 +163,18 @@ class ExperimentPoint:
     def filename(self, table: str) -> str:
         if table not in {"logical_error", "logical_gaps"}:
             raise ValueError("unknown v2 point table")
-        if table == "logical_gaps" and self.kind != "logical_zero_factory":
-            raise ValueError("Fig.4(d) has no logical_gaps table")
+        if table not in self.tables:
+            raise ValueError("this point has no logical_gaps table")
         # The literal '+' is valid in a filename. Never use these names as
         # unescaped regular expressions or interpolate them into shell code.
         return (f"{table}__code={self.code},d={self.d},p={self.p!r},noisemodel={self.noise},"
-                f"T={self.T_tel},r_0={self.r_0},r_+={self.r_plus}.parquet")
+                f"T={self.T_tel},r_0={self.r_0},r_+={self.r_plus}"
+                + (f",rounds={self.rounds}" if self.kind == "se_memory" else "") + ".parquet")
 
     @property
     def tables(self):
-        return ("logical_error", "logical_gaps") if self.kind == "logical_zero_factory" else ("logical_error",)
+        return (("logical_error", "logical_gaps") if self.kind == "logical_zero_factory" or self.get_logicalgap
+                else ("logical_error",))
 
 
 @dataclass(frozen=True)
@@ -177,6 +199,8 @@ class ExperimentConfig:
     skip_circuit_validation: bool = False
     buffer_shot: int | None = None
     target_chunk_seconds: float = 1.0
+    rounds: int | str = "d"
+    get_logicalgap: bool = False
 
     @property
     def output_buffer_shots(self):
@@ -192,6 +216,12 @@ class ExperimentConfig:
             result.pop("buffer_shot")
         if self.target_chunk_seconds == 1.0:
             result.pop("target_chunk_seconds")
+        if self.kind == "se_memory":
+            for name in ("r_0", "r_plus", "T_tel", "theta", "create_codecapacity_dem"):
+                result.pop(name)
+        else:
+            result.pop("rounds")
+            result.pop("get_logicalgap")
         result["schema_version"] = 2
         result["sweep"] = {"d": list(result.pop("distances")), "p": list(result.pop("probabilities"))}
         return result
@@ -202,11 +232,25 @@ class ExperimentConfig:
 
     @property
     def prior_policy(self):
+        if self.kind == "se_memory":
+            return "full_circuit_stim_dem"
         return LOCAL_PRIOR_POLICY if self.create_codecapacity_dem else "hex_legacy_hamming"
+
+    @property
+    def gap_units(self):
+        if self.kind == "se_memory":
+            return "log_weight" if self.get_logicalgap else None
+        if self.kind == "logical_zero_factory":
+            return "log_weight" if self.create_codecapacity_dem else "hamming_weight"
+        return None
 
     def points(self):
         for d in self.distances:
             for p in self.probabilities:
+                if self.kind == "se_memory":
+                    yield ExperimentPoint(self.kind, d, p, 0, 0, 1, self.code, self.noise,
+                                          _resolve_rounds(self.rounds, d, "rounds"), self.get_logicalgap)
+                    continue
                 yield ExperimentPoint(self.kind, d, p, _resolve_rounds(self.r_0, d, "r_0"),
                                       _resolve_rounds(self.r_plus, d, "r_plus"), self.T_tel,
                                       self.code, self.noise)
@@ -226,10 +270,14 @@ class ConfigDocument:
 def parse_config(raw) -> ExperimentConfig:
     _mapping(raw, "schema_version kind name output_root code noise sweep r_0 r_plus T_tel theta "
              "create_codecapacity_dem decoder shots batch_size workers master_seed skip_circuit_validation "
-             "buffer_shot target_chunk_seconds".split(), "root")
+             "buffer_shot target_chunk_seconds rounds get_logicalgap".split(), "root")
     if type(raw.get("schema_version")) is not int or raw["schema_version"] != 2:
         raise ValueError("schema_version must be 2")
     kind = _choice(raw.get("kind"), KINDS, "kind")
+    if kind != "se_memory" and {"rounds", "get_logicalgap"} & raw.keys():
+        raise ValueError("rounds/get_logicalgap are supported only for se_memory")
+    if kind == "se_memory" and {"r_0", "r_plus", "T_tel", "theta", "create_codecapacity_dem"} & raw.keys():
+        raise ValueError("se_memory accepts rounds/get_logicalgap, not Knill resource/teleportation/prior options")
     name = raw.get("name", kind)
     if not isinstance(name, str) or not re.fullmatch(r"[A-Za-z0-9][A-Za-z0-9_-]{0,79}", name):
         raise ValueError("name must be a safe 1-80 character experiment name")
@@ -251,6 +299,14 @@ def parse_config(raw) -> ExperimentConfig:
         raise ValueError("sweep.p must be in [0, 0.5]")
     if len(set(ds)) != len(ds) or len(set(ps)) != len(ps):
         raise ValueError("sweep axes must be unique")
+    memory_rounds = _rounds(raw.get("rounds", "d"), "rounds")
+    for d in ds:
+        _resolve_rounds(memory_rounds, d, "rounds")
+    get_gap = raw.get("get_logicalgap", False)
+    if type(get_gap) is not bool:
+        raise ValueError("get_logicalgap must be bool")
+    if get_gap and any(not 0 < p < .5 for p in ps):
+        raise ValueError("get_logicalgap log-weight scoring requires 0 < p < 0.5")
     policy = raw.get("create_codecapacity_dem", False)
     if type(policy) is not bool:
         raise ValueError("create_codecapacity_dem must be bool")
@@ -289,7 +345,7 @@ def parse_config(raw) -> ExperimentConfig:
         _integer(raw.get("shots", 64), "shots"), batch,
         _integer(raw.get("workers", 1), "workers"),
         _integer(raw.get("master_seed", 12345), "master_seed", 0, 2**64 - 1),
-        skip_validation, buffer, target,
+        skip_validation, buffer, target, memory_rounds, get_gap,
     )
 
 

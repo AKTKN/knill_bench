@@ -468,3 +468,45 @@ analysis also pass. The local smoke used d3/T1/3 shots and both allocated
 workers. TEST.md records all commands, the invalid overlapping-source baseline
 attempt and corrected report-key assertion. No production sweep, real cluster
 qsub, dependency edit or other Conda environment change was performed.
+
+## 2026-10-17: ordinary Hex SE memory with optional complementary gap
+
+Implemented v2 kind se_memory through the actual pinned Hex repeated-SE Z
+memory circuit: noisy physical-zero reset, exactly rounds (default d) noisy
+X/Z SE rounds, noisy final Z. No Knill teleportation/resource preparation or
+terminal ideal factory oracle is added. rounds accepts the fixed exact
+integer/d/multiple rules; only d/p sweep. get_logicalgap defaults false and
+is restricted to this new kind. Existing config/physical identity hashes are
+preserved, with golden checks against de21bfc.
+
+The full independent-event circuit DEM supplies H/L and log weights. One
+cached MWPM graph determines the first correction and label; optional scoring
+uses a second cached observable-preserving two-boundary spacetime lift to
+force the opposite logical class. Both H constraints and opposite L parity,
+original/native weights and nonnegative cost difference are verified. This is
+a min-weight complementary gap, not a posterior sum or exact logical MAP.
+Detector-only inference never sees actual logical truth. Unsupported graph/
+logical/weight structures raise. p0 plain decoding works; complementary
+log-weight scoring requires 0<p<0.5 with positive representable model weights.
+No lossy fallback or native spatial-planarity bypass is used.
+
+The shared fixed/adaptive execution and buffers write the existing error
+schema and optional joined logical_gaps with one whole-memory gap_t001 per
+shot. Required filename keys remain (T=1 score, r_0=r_+=0 no resources), with
+resolved rounds added. Metadata explicitly records zero teleportations,
+actual noisy boundaries/rounds, hashes and policies. Pair publication, full-
+point restart, strict resume checks and parent ownership are unchanged.
+
+User-facing template/example, run_se_memory.sh and docs/se_memory.md provide
+local/PBS usage. Existing cluster launcher accepts memory YAML through
+CONFIG_FILE without changes or new dependencies. Hex/v1/B1/factory physics,
+protected user configs/.gitignore and all fork sources remain untouched.
+
+Validation: **369 bench tests passed (928 warnings, 183.80 s)**, including
+57 new memory cases; **128 read-only Hex tests passed (320 warnings, 51.62 s)**.
+Independent exhaustive/MILP class-cost checks, truth isolation, first-decode
+preservation, optional schemas, serial/spawn, buffering, invalid gaps and
+failure/restart pass. Real local three-shot direct/PBS wrappers and completed
+resume, shell syntax and pip check pass. TEST.md records exact commands and
+the corrected invalid monkeypatch test. No production sweep, performance
+claim or real cluster qsub was performed.
