@@ -15,6 +15,7 @@ from knill_bench.data.storage_v2 import (
 from .config_v2 import ConfigDocument, load_saved_config, LOCAL_PRIOR_APPROXIMATION
 from .provenance import collect_environment
 from .seeds import SEED_DERIVATION, point_seed
+from .noise_v2 import validate_noise_execution
 
 
 RUN_TIMEZONE = timezone(timedelta(hours=9), "Asia/Tokyo")
@@ -127,6 +128,8 @@ class RunStore:
                 if info["files"] != [point.filename(t) for t in point.tables]:
                     raise ValueError("saved point filenames changed")
                 if info["status"] == "complete":
+                    validate_noise_execution(point, info.get("execution"),
+                                             create_codecapacity_dem=config.create_codecapacity_dem)
                     validate_point_files(path, point, config.shots)
                     if (type(info["shots"]) is not int or info["shots"] != config.shots
                             or type(info["logical_errors"]) is not int
@@ -191,6 +194,7 @@ class RunStore:
                 or result.files != tuple(point.filename(t) for t in point.tables)):
             raise ValueError("invalid point result identity/counts")
         validate_point_files(self.path, point, config.shots)
+        validate_noise_execution(point, execution, create_codecapacity_dem=config.create_codecapacity_dem)
         if execution is not None:
             if not isinstance(execution, dict):
                 raise ValueError("execution metadata must be a JSON mapping")

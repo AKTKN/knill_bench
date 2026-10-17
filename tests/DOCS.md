@@ -147,3 +147,15 @@ before output, duplicate YAML keys, native frozen/pickled objects, canonical
 roundtrip, short filenames, complete noise/seed identity and legacy uniform
 config/point/seed goldens. It constructs no physical circuit. Existing v1/
 Fig.4(d)/memory/factory regression suites remain required at the new Hex pin.
+
+
+
+
+BENCH-N2 test_factory_custom_noise.py adds small d3 physical cases (batches
+<=7 shots): exact native circuit identity, both validation/prior modes, actual
+alternating idle supports/probabilities, preparation frames versus native,
+analytic gate/readout DEM weights, included post-control and excluded storage
+regions, complete custom cache separation, paired physical logical faults,
+no oracle influence, native reuse, zero multipliers, fixed/auto/spawn aligned
+Parquet/counts/metadata, saved analysis, tamper rejection and failed-point
+restart/replay. No production sweep or new large Monte Carlo fixture is added.

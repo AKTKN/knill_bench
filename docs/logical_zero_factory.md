@@ -82,9 +82,11 @@ The adapter extracts the actual native coupling/readout fragments and maps
 the consumed/fresh supports to canonical local IDs. DEM analysis adds an
 ideal encoded |0> / |+> input with all CSS stabilizers +1, then the native
 coupling/noise and noisy destructive Z readout. The boundary is immediately
-after preparation and before coupling. H5 has no additional boundary/idle
-channel there: none is invented, and the last SE gate's noise belongs to the
-excluded preparation. All native coupling/readout channels are included.
+after preparation and before coupling. Legacy hex_uniform has no additional
+boundary/idle channel there: none is invented, and the last SE gate's noise
+belongs to the excluded preparation. For custom noise, the native post-CNOT
+control channel is inside coupling and included; separate pre-coupling storage
+idle is excluded from this prior. All native coupling/readout channels are included.
 
 Before that noise window, Pauli-target `OBSERVABLE_INCLUDE(0)` marks
 Z_L(A) Z_L(B); after readout the same observable includes the logical Z
@@ -256,3 +258,15 @@ Legacy scalar hex_uniform behavior stays exact. The guide defines each
 multiplier, normalized durations, the two disjoint windows, early validation,
 physical/local-prior scope and short custom filenames. Start with the
 [commented seven-shot template](../configs/templates/logical_zero_factory_custom_noise.yaml).
+
+
+
+
+Custom execution is implemented for both Hamming and local Stim prior modes.
+The native coupling region includes post-CNOT survivor idle; the preceding
+refresh-storage idle remains physical but outside the local prior. Full native
+noise configuration hashes separate custom local-cache entries. Effective
+probabilities/durations/hash/scope metadata is checked by the parent and saved
+analysis. The same shared fixed/adaptive bounded schedulers and exact paired
+schemas apply. See [custom noise](factory_custom_noise.md) for complete usage,
+metadata, inference limits and the deterministic survivor-fault test.

@@ -84,3 +84,26 @@ logical_error and optional float64 (shots,1) gaps. Physical initialization,
 SE and final readout are noisy; no ideal oracle/correction module is added.
 Metadata declares actual boundaries/rounds, selected detector sector and
 circuit/DEM/model hashes. See [protocol](../../../docs/se_memory.md).
+
+
+
+
+## BENCH-N2 native custom-noise factory
+
+compile_local_factory passes point.noise_model directly to Hex's optional
+FactoryCircuitBuilder argument; uniform omits it. The dependency stays
+read-only at HEX-N2 86c9495. Physical preparation modules/priors/maps come from
+Hex; packed plans reuse all native matching decisions, including joint Pauli
+representatives. Private builder-type and decoder-slot bindings retain their
+validated meanings at the new pin.
+
+_local_body already extracts every actual data-only coupling/readout channel:
+native post-CNOT control idle is included; separate storage_idle occurs before
+coupling and is excluded. _analysis_circuit keeps the same +1 stabilizer/Pauli
+logical boundary and no oracle. _cached_local_prior/_build_local_prior accept
+an optional complete native noise hash: custom configurations stay separately
+identified even if excluded prep/storage changes leave identical DEM text.
+Uniform calls/hashes are unchanged. The 16-entry worker-local LRU remains
+bounded and caches no sampler RNG. See
+[custom noise](../../../docs/factory_custom_noise.md) for the target-syndrome
+invisibility of survivor errors, analytic weights and exact scope/limits.

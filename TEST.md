@@ -1077,3 +1077,92 @@ bench cases plus 40 new schema cases, with uniform physics/seed and pin/API
 binding checks. Both obsolete error-message assertions are fixed and no test
 is deselected. N1 is complete; N2 integration is next. All dependency source
 checkouts remain unchanged by bench.
+
+
+## BENCH-N2 native factory custom-noise integration (2026-10-17)
+
+BENCH-N1 was committed/pushed as e3e3e8d on auxiliary-system. N2 removes
+its temporary execution guard and forwards the fully validated frozen native
+noise object directly to Hex FactoryCircuitBuilder. No physical quantum
+construction or decoder policy was copied into bench. Hex remains clean and
+read-only at 86c9495; v1, full Knill/Fig.4(d), SE-memory numerical adapters,
+shared scheduling/seed algorithms, locks and per-shot schemas are unchanged.
+The existing user examples/.gitignore and numerical locks are unchanged.
+
+The actual native coupling/readout body, including post-CNOT control idle,
+is fed to strict module-local Stim DEM construction. Native pre-coupling
+storage idle and preparation/earlier-stage residuals remain physical but are
+excluded from this approximation. Analytic target-bit probabilities agree
+with DEM weights. The included control-only post-CNOT channel can have no
+current target detector/logical effect: a paired physical survivor logical X
+flips the terminal label with identical operational records/frames/gaps. This
+is explicitly tested/documented, without a posterior or quality-certificate
+claim. Terminal readout remains noiseless and evaluation-only.
+
+Both prior/validation modes reuse native custom preparation priors/maps and
+all four matching decisions through the existing packed frame plans, including
+joint Pauli representatives. Fixed/auto/spawn execution transports frozen
+point settings through its existing cache/key. Custom local LRU keys additionally
+include the entire native noise hash, conservatively separating even changed
+excluded parameters whose actual DEM text can remain identical. The cache
+stays bounded; no sampler RNG leaks across points or per-shot model rebuild
+is introduced. Uniform cache calls/config/model/physical/seed hashes retain
+the previous form.
+
+Compact execution metadata now records the complete noise mapping, canonical
+native parameter JSON/hash, physical-noise/circuit/model hashes, actual
+operation/readout probabilities, normalized window durations/application
+counts and explicit local-prior scope flags. Parent completion, completed
+resume and saved analysis cross-check these against the config/point. Altered
+noise/hash/scope/inner-policy metadata is rejected; a changed external resume
+document fails before unfinished-file cleanup. Saved tables remain exactly
+aligned bool labels/float64 gaps with contiguous uint64 IDs and short
+noisemodel=custom basenames. No extra mandatory artifact is added. B3's
+separate assumed-cost model does not infer timing/costs from noise durations.
+
+Validation commands/results:
+
+- `bash scripts/python.sh -m pytest -q tests/test_factory_custom_noise.py`
+  — initial 29 physical/integration cases passed, 156 existing-category warnings,
+  24.57 s. No new failing physical test preceded this result.
+- `bash scripts/python.sh -m pytest -q tests/test_factory_custom_noise.py tests/test_v2_factory_noise.py`
+  — 72 passed, 176 warnings, 25.87 s after adding gate/readout cache separation
+  and noiseless zero-multiplier cases. Two further scope/policy tamper cases
+  were then added and are included in the full gate below.
+- `bash scripts/python.sh -m pytest -q`
+  — **443 passed**, 1112 existing-category warnings, **214.21 s**, no exclusions.
+  Includes all inherited v1/Fig.4(d)/memory/factory/analysis/provenance cases,
+  40 new schema tests and 34 new d3 <=7-shot integration cases. No new large
+  physical fixture/production sweep was run.
+- Read-only Hex worktree:
+  `conda run --no-capture-output -n knill_system python -m pytest -q tests/test_factory_noise_model.py tests/test_factory_custom_noise.py tests/test_factory_circuit.py tests/test_factory_batch.py tests/test_surface_gap.py`
+  — **199 passed**, 348 inherited warnings, **36.91 s**. Retains original native
+  fixtures; no dependency source change or general adaptive regression run.
+- Actual shell/installed-CLI smoke via `bash scripts/python.sh -` used a
+  TemporaryDirectory and copied the commented template to a spaced YAML path,
+  overriding only output_root, shots=3, create_codecapacity_dem=True and
+  batch_size=2. Subprocess commands were
+  `bash scripts/run_logical_zero_factory.sh TEMP_CONFIG`,
+  `python -m knill_bench.experiments.cli resume TEMP_RUN`, and
+  `python -m knill_bench.experiments.cli analyze-factory TEMP_RUN --theta=-inf`.
+  All pass; exactly three saved rows and correct noise/prior metadata were
+  checked. No smoke output was left in Git.
+- `bash scripts/python.sh -m pip check` passes (no broken requirements).
+  `bash scripts/python.sh -m compileall -q src`, `git diff --check` and 128
+  existing local Markdown link targets pass. Hex status remains clean.
+
+Coverage includes native circuit identity/channel placement, both validation/
+prior modes, d3 role swaps/window probabilities, native versus packed frames,
+exact analytic local event weights, full custom cache identities, control/oracle
+causality, no native constructors in batch decode, zero multipliers, fixed/
+auto/spawn aligned tables/counts, theta independence, completed resume,
+metadata tamper refusal, early mismatched-doc rejection, failed-chunk restart
+and exact fixed replay, and explicit unsupported zero-active-noise True.
+
+N2 changes are scoped to adapters/hex_factory.py; experiments/noise_v2.py,
+logical_zero_factory.py and run_v2.py; analysis/factory.py; the new integration
+tests; AGENTS/STATUS/TEST; affected package DOCS and user-facing noise/factory/
+schema/parallel/getting-started guides. The commented config was added in N1.
+There are no known failing bench tests. Model/graph restrictions and the
+specified local preparation/storage approximation remain. Stop after N2
+commit/push; no production sweep or further protocol extension is authorized.

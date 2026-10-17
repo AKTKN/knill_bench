@@ -71,3 +71,14 @@ whether a second writer exists. Both auto/fixed modes reject unavailable or
 invalid requested memory scores; paired publication and buffer/restart rules
 are unchanged. Filenames retain literal r_+ and add resolved rounds; see
 [memory](../../../docs/se_memory.md).
+
+
+
+
+BENCH-N2 custom factory noise uses exactly these paired schemas and bounded
+writers. noisemodel=custom is the short filename label; full physical noise
+parameters remain in config/point identity and compact metadata. Parent
+publication and completed resume additionally reject inconsistent custom noise
+provenance/scope. No table column, mandatory artifact, row-ID, buffering or
+pair-publication boundary changes. See
+[custom noise](../../../docs/factory_custom_noise.md).

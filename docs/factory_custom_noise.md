@@ -3,8 +3,8 @@
 # Custom physical noise for the schema-v2 factory
 
 BENCH-N1 adds strict parsing, native frozen noise objects, full configuration/
-physical identities and pointwise probability validation. BENCH-N2 connects
-physical execution. Hex is pinned to HEX-N2 86c9495; no dependency source is
+physical identities and pointwise probability validation. BENCH-N2 implements
+physical execution through the native factory builder and causal decoder. Hex is pinned to HEX-N2 86c9495; no dependency source is
 edited by bench. See [the commented example](../configs/templates/logical_zero_factory_custom_noise.yaml).
 Legacy `noise: hex_uniform` is unchanged. Only kind logical_zero_factory
 accepts the mapping below. Fig.4(d) and SE memory raise exactly:
@@ -64,6 +64,8 @@ prior mode, workers and requested shots do not change sampling identity.
 Filenames use noisemodel=custom and retain all existing point keys including
 literal r_+; full parameters belong in exact saved YAML/compact metadata.
 Different run hashes/directories separate configurations with equal basenames.
+Normalized durations parameterize noise exposure. The separate B3 assumed-cost
+model is unchanged and does not infer hardware timing/costs from this noise YAML.
 No per-shot/table schema or extra mandatory simulation artifact is introduced.
 
 The local prior starts at the coupling boundary: actual post-CNOT control
@@ -75,5 +77,95 @@ The terminal oracle remains noiseless and evaluation-only. Saved-data cuts do
 not control physical sampling. Strict model restrictions still raise without
 lossy graph decomposition or fallback.
 
-During the N1 checkpoint execution is explicitly unavailable for custom noise;
-N2 supplies the native bridge. Uniform execution remains available throughout.
+At the historical N1 checkpoint custom execution was explicitly unavailable
+to prevent uniform fallback. N2 supplies the native bridge; current custom
+examples run through both existing fixed/adaptive bounded schedulers.
+
+
+## Run and analyze
+
+```bash
+bash scripts/python.sh -m knill_bench.experiments.cli validate-config configs/templates/logical_zero_factory_custom_noise.yaml
+bash scripts/run_logical_zero_factory.sh configs/templates/logical_zero_factory_custom_noise.yaml
+# Use the printed run path for these commands:
+bash scripts/python.sh -m knill_bench.experiments.cli resume results/RUN
+bash scripts/python.sh -m knill_bench.experiments.cli analyze-factory results/RUN --theta=-inf
+```
+
+The template is seven d3 shots, two teleportations and auto chunks, with
+bounded three-row result groups. Integer batch_size retains fixed partition
+replay. No threshold enters compilation, worker arguments or sampling. Both
+prior modes draw the same physical circuit and point seed; auto timing can
+change actual partitions, so use equal integer batch_size for paired records.
+No production sweep or dynamic quantum retry is part of this feature.
+
+## Physical construction and decoder consistency
+
+Bench passes the frozen validated object as noise_model to Hex's actual
+FactoryCircuitBuilder. Hex prepares the noisy native modules and derives their
+own DEM priors/correction maps before compilation. Bench's packed preparation
+plans consume those exact maps and all four matching decisions, including
+joint Pauli representatives supported in HEX-N2. It does not strip noise from
+compiled preparations or duplicate a quantum gate sequence. The private
+construction-type binding used for skip_circuit_validation and the causal
+decoder-slot binding were re-audited at the new pin; the default still performs
+one full signed/ledger/strict-DEM validation. Runtime gap/frame/model checks
+remain active when that full construction check is skipped.
+
+False retains finite unit-Hamming online recovery/gaps, including zero noise.
+True retains the existing bench module-local Stim DEM and strict Hex graph/
+weight checks. _local_body extracts every actual coupling/readout instruction,
+including native post_cnot_control_idle; storage_idle is before that boundary
+and is excluded along with preparation/earlier-stage residuals. The analysis
+input/Pauli logical boundary has all +1 CSS stabilizers and never uses sampled
+preparation records, future records or oracle labels. Unsupported graphs,
+zero-active-noise True and other existing restrictions raise without fallback.
+This is not native Hex H5's full-prefix projected policy.
+
+A post-CNOT control error does not propagate backwards into the consumed
+target's readout. That channel is present in the local analysis circuit, but
+Stim may give it no current detector/logical effect. Analytic target-bit
+marginals are q_gate=8*p*two_qubit/15 and q_readout=p*measurement, combined by
+XOR q_gate+q_readout-2*q_gate*q_readout. A survivor logical X can change the final
+oracle label with identical operational records/gaps. Including a channel in
+the analyzed window therefore does not make the gap a complete posterior or
+survivor-quality certificate. Storage noise still affects later physical
+records and terminal labels although the local prior excludes it.
+
+## Caches, metadata and resume
+
+The worker caches one compiled native factory/decoder per full physical point;
+fresh independently seeded samplers in auto mode retain the existing RNG policy.
+The bounded 16-entry local-prior LRU additionally keys the **complete native
+noise configuration hash** for custom models. Identical stages with alternating
+A/B IDs share canonical local models. Changing even excluded preparation/
+storage parameters keeps configuration entries separate. Their DEM text may
+be equal because those sources are outside the prior; post-control duration
+changes the local body/analysis hashes even when its current DEM effect is
+invisible. Gate/readout changes alter the corresponding DEM probabilities.
+Uniform cache calls/model hashes keep their previous form. No sampler RNG
+state is shared across points, and no model/graph/map is built per shot.
+
+Exact executed YAML, one metadata.json and the two existing Parquet tables
+remain the only mandatory outputs. Effective metadata records full normalized
+noise_parameters, native noise_model_json/sha256, physical_noise_sha256,
+operation probabilities, both resolved idle probabilities, normalized durations
+and application counts. The native circuit SHA256 still hashes actual Stim
+text. Local module/analysis/DEM/configuration hashes and explicit flags
+post_cnot_control_idle_in_local_prior=true and
+storage_idle_errors_in_local_prior=false identify True's scope. Effective
+teleportation_readout_error is p*measurement; the terminal oracle is noiseless.
+
+The parent cross-checks custom configuration/probability/hash/scope metadata
+before publishing a complete point, on completed resume, and during saved
+analysis. Changed config YAML, physical identity/seeds, noise provenance or
+local scope is rejected. A mismatched external resume document is rejected
+before touching unfinished data. Ordinary source/dependency compatibility
+checks remain strict. Completed files are preserved; unfinished paired files
+restart from shot zero under the existing fixed/auto replay limits.
+
+Saved-only analysis constructs no circuit, matching graph, sampler or decoder.
+Uniform settings remain import-independent of Hex; custom settings load Hex's
+native frozen parameter classes and idle-probability validation only. Old
+uniform saved data retain their original policy labels and per-shot schemas.
+No circuit dumps, detector tables or large provenance archives are required.

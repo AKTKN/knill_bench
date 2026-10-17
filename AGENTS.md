@@ -368,3 +368,22 @@ Do not invent a generic hardware schedule, extra idle channel or retry path.
 Use Conda and d3/5 <=7-shot physical fixtures; retain paired bounded output,
 strict metadata/resume and worker-local native caching. Update STATUS/TEST and
 all affected guides each stage; stop after N2 commit/push. No production sweep.
+
+
+
+
+BENCH-N2 now implements native noise forwarding and both-prior/fixed/adaptive
+execution. The local body includes post-control idle and excludes pre-coupling
+storage; a control fault may be invisible to that stage's target gap. Custom
+LRU keys include the full native parameter hash, even for excluded sources.
+Parent publication/resume/saved analysis cross-check custom noise/probability/
+hash/scope metadata. External mismatched resume docs fail before cleanup.
+Uniform hashes, seeds, caches, model labels and v1 physics remain unchanged.
+
+
+BENCH-N2 final gates: `bash scripts/python.sh -m pytest -q` — 443 passed,
+1112 existing-category warnings, 214.21 s. Read-only Hex factory/noise/frame/
+gap gate: 199 passed, 348 warnings, 36.91 s. Three-shot custom True shell/CLI
+run/completed-resume/saved-analysis, pip check and compile/link integrity pass.
+TEST.md records exact commands and the N1 provenance-message assertion fixes.
+Both bench stages are complete after the N2 commit/push; no production runs.

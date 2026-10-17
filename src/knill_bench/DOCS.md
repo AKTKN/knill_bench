@@ -127,3 +127,13 @@ parameters and strict pre-output validation. Uniform identities remain exact;
 Fig.4(d)/SE memory reject the custom mapping explicitly. See
 [custom noise](../../docs/factory_custom_noise.md) for channels/timing,
 configuration, inference boundaries and the two-stage integration contract.
+
+
+
+
+BENCH-N2 forwards custom factory noise to native Hex preparation/circuit APIs,
+retaining cached causal/packed decoding and the existing local prior boundary.
+The parent validates effective parameters/hashes/scope on publish/resume;
+saved analysis validates the same noise metadata. Fixed/adaptive output remains
+paired and bounded. Full Knill/Fig.4(d), SE memory and v1 numerical paths are
+unchanged. See [custom noise](../../docs/factory_custom_noise.md).

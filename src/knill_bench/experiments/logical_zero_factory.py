@@ -5,6 +5,8 @@ import numpy as np
 from knill_bench.adapters.factory_frames import FRAME_IMPLEMENTATION
 from knill_bench.data.storage_v2 import PointBuffer, PointWriter
 from .execution import execute_points
+from .config_v2 import load_saved_config
+from .noise_v2 import execution_noise
 from .run_v2 import RunStore
 
 
@@ -21,8 +23,6 @@ def compile_point(point, *, seed, create_codecapacity_dem=False, skip_circuit_va
     from knill_bench.adapters.hex_factory import compile_local_factory
     if point.kind != "logical_zero_factory":
         raise ValueError("factory compilation requires a logical_zero_factory point")
-    if point.noise_model is not None:
-        raise NotImplementedError("custom-noise physical execution requires BENCH-N2 integration")
     if type(create_codecapacity_dem) is not bool:
         raise ValueError("create_codecapacity_dem must be bool")
     return compile_local_factory(point, seed=seed, create_codecapacity_dem=create_codecapacity_dem,
@@ -65,6 +65,20 @@ def _prepare_point(point, seed, *, create_codecapacity_dem=False, skip_circuit_v
         sampling="one_point_seeded_stim_sampler_advanced_in_fixed_batches",
         zero_noise_gap_policy="finite_unit_hamming" if not create_codecapacity_dem else "unsupported",
     )
+    if point.noise_model is not None:
+        expected = execution_noise(point)
+        # Native metadata must identify the exact configured noise before any
+        # parent publication. Hex owns the physical channel implementation.
+        for key in ("noise_model_json", "noise_model_sha256", "physical_noise_sha256",
+                    "post_cnot_control_idle_probability", "storage_idle_probability"):
+            if bundle.metadata.get(key) != expected[key]:
+                raise ValueError("native factory noise disagrees with point configuration")
+        execution.update(expected)
+        execution.update(
+            teleportation_readout_error=expected["noise_operation_probabilities"]["measurement"],
+            post_cnot_control_idle_in_local_prior=True if local_policy else None,
+            storage_idle_errors_in_local_prior=False if local_policy else None,
+        )
     return bundle, compiled, execution
 
 
@@ -98,8 +112,8 @@ def _run_point(path, point, shots, batch_size, seed, *, create_codecapacity_dem=
 def run(document, *, resume_path=None):
     if document.config.kind != "logical_zero_factory":
         raise ValueError("factory runner requires kind logical_zero_factory")
-    if document.config.noise_model is not None:
-        raise NotImplementedError("custom-noise physical execution requires BENCH-N2 integration")
+    if resume_path is not None and load_saved_config(resume_path).config != document.config:
+        raise ValueError("resume document must match the saved run configuration")
     with (RunStore.create(document) if resume_path is None else RunStore.resume(resume_path)) as store:
         if store.document.config != document.config:
             raise ValueError("resume document must match the saved run configuration")

@@ -13,6 +13,7 @@ import yaml
 from knill_bench.data.storage_v2 import validate_point_files
 from knill_bench.experiments.config_v2 import _UniqueSafeLoader, load_saved_config, LEGACY_PRIOR_POLICY
 from knill_bench.experiments.seeds import point_seed
+from knill_bench.experiments.noise_v2 import validate_noise_execution
 from .factory_cost import FactoryCostModel, first_rejected_stage, summarize_cost
 from .fig4d import agresti_coull
 
@@ -102,8 +103,9 @@ def _theta_json(theta):
 def analyze_saved(run_path, settings=None):
     """Return compact rows; all cuts use gaps only and terminal labels only score.
 
-    Complete source metadata is checked without importing Hex, constructing a
-    circuit/decoder, or requiring the original simulation environment today.
+    Complete source metadata is checked without constructing a circuit/decoder
+    or requiring the original simulation environment today. Uniform configs
+    need no Hex import; custom configs load native noise parameter objects.
     Unavailable scores, broken pairing and changed counts fail explicitly.
     """
     settings = AnalysisSettings() if settings is None else settings
@@ -138,6 +140,8 @@ def analyze_saved(run_path, settings=None):
                 or any(info.get(k) != v for k, v in point.sampling_identity.items())):
             raise ValueError("require complete aligned factory points")
         files = [path / point.filename(t) for t in point.tables]
+        validate_noise_execution(point, info.get("execution"),
+                                 create_codecapacity_dem=config.create_codecapacity_dem)
         if any(not file.is_file() for file in files):
             raise ValueError("missing paired factory file")
         validate_point_files(path, point, config.shots)

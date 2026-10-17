@@ -127,3 +127,14 @@ point/worker; only output labels/gaps cross processes. get_logicalgap is absent
 from physical identity/seeds, although extra work can change auto partitions.
 Fixed mode preserves exact common records and first labels with gap on/off.
 One optional gap_t001 covers the entire trajectory. See [memory](se_memory.md).
+
+
+
+
+Factory custom-noise points carry immutable native parameters in the existing
+worker task/key, so physically different models never share the point cache.
+No scheduler/seed partition algorithm changes. Custom configuration affects
+physical point/chunk seeds; theta/prior/workers/shot count remain excluded.
+Use fixed integer batch_size for common-record comparisons. Local model LRU
+keys additionally include the full custom noise hash; no RNG is reused across
+points. See [custom noise](factory_custom_noise.md).

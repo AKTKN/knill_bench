@@ -82,9 +82,9 @@ def _ideal_input(code):
 def _local_body(bundle, stage):
     """Extract the actual module, canonicalizing consumed/fresh support IDs.
 
-    H5 has no extra idle/boundary channel between preparation and coupling.
-    Include all native coupling/readout noise, and invent none. In particular
-    the last SE gate's noise belongs to preparation and is excluded.
+    Include every actual coupling/readout channel, including native post-CNOT
+    control idle. Native storage_idle is before coupling and excluded along
+    with preparation residuals. No boundary channel is invented.
     """
     blocks = {b.name: b for b in bundle.blocks}
     support = (blocks[stage.consumed_block].data_qubits
@@ -148,7 +148,7 @@ def _event_model(dem):
     return ProjectedErrorModel(dem.num_detectors, tuple(events))
 
 
-def _build_local_prior(code, body_text):
+def _build_local_prior(code, body_text, noise_model_sha256=""):
     circuit = _analysis_circuit(code, body_text)
     dem = _stim_dem(circuit)
     model = _event_model(dem)
@@ -156,21 +156,26 @@ def _build_local_prior(code, body_text):
     description = dict(policy=POLICY, approximation=LOCAL_PRIOR_APPROXIMATION,
                        boundary=BOUNDARY, code=asdict(code), physical_module=body_text,
                        analysis_circuit=str(circuit), stim=stim.__version__, pymatching=pymatching.__version__)
+    if noise_model_sha256:
+        description["noise_model_sha256"] = noise_model_sha256
     prior = LocalPrior(model, str(dem), digest(description), _sha(str(dem)),
                        _sha(body_text), _sha(str(circuit)))
     return prior, gap
 
 
 @lru_cache(maxsize=16)
-def _cached_local_prior(code, body_text):
+def _cached_local_prior(code, body_text, noise_model_sha256=""):
     """Bounded synchronous worker-local cache; no samplers/RNG state cached.
 
-    Code and complete canonical physical module text include every noise
-    parameter. T, preparation depths, seed, shots, theta and physical support
-    labels do not affect this local model. Native versions are process-fixed
+    Complete canonical physical module text includes every in-window channel.
+    Custom mode also keys the complete native noise configuration, keeping
+    excluded prep/storage parameter changes separately identified. T, depths,
+    seeds, shots, theta and physical support labels do not affect this local
+    model. Native versions are process-fixed
     and recorded in the configuration hash. Spawn workers have separate caches.
     """
-    return _build_local_prior(code, body_text)
+    return (_build_local_prior(code, body_text, noise_model_sha256) if noise_model_sha256
+            else _build_local_prior(code, body_text))
 
 
 def clear_local_prior_cache():
@@ -202,8 +207,10 @@ class _LocalFactoryDecoder(native.FactoryBatchDecoder):
             raise ValueError("factory must have one zero prep and one plus prep per stage")
         self._initial = self._plans[self._stages[0].preparations[0].measurements.start]
         self._readout = SurfaceFactoryReadout(bundle.code, self._initial.module.z_pcm)
-        models = ([_cached_local_prior(bundle.code, _local_body(bundle, stage)) for stage in self._stages]
-                  if create_codecapacity_dem else [])
+        noise_hash = bundle.metadata.get("noise_model_sha256", "")
+        models = ([_cached_local_prior(bundle.code, _local_body(bundle, stage), noise_hash)
+                   if noise_hash else _cached_local_prior(bundle.code, _local_body(bundle, stage))
+                   for stage in self._stages] if create_codecapacity_dem else [])
         self.projected_priors = tuple(prior for prior, _ in models)
         self._projected_gaps = tuple(gap for _, gap in models)
         # Native stage methods retain causal readout/frame/gap/oracle behavior.
@@ -245,9 +252,10 @@ def compile_local_factory(point, *, seed, create_codecapacity_dem=True,
     if seed is not None:
         native._validate_shot_ids(seed, 1)
         seed = int(seed)
+    noise_options = {} if point.noise_model is None else {"noise_model": point.noise_model}
     builder = FactoryCircuitBuilder(
         RotatedSurfaceCodeAdapter(point.d), PreparationPlan(point.r_0, point.r_plus),
-        point.p, T_tel=point.T_tel,
+        point.p, T_tel=point.T_tel, **noise_options,
     )
     bundle = (_build_without_full_validation(builder) if skip_circuit_validation else builder.build())
     if _sha(str(bundle.circuit)) != bundle.metadata["circuit_sha256"]:
@@ -263,6 +271,7 @@ def compile_local_factory(point, *, seed, create_codecapacity_dem=True,
                     else "surface_two_boundary_hamming_v1"),
         create_codecapacity_dem=create_codecapacity_dem,
         projected_prior_sha256=tuple(p.configuration_sha256 for p in decoder.projected_priors),
+        noise_model_sha256=metadata.get("noise_model_sha256", ""),
     )
     # Keep the physical circuit independent of the caller's returned bundle.
     circuit = bundle.circuit.copy()

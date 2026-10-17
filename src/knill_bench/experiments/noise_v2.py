@@ -68,3 +68,51 @@ def parse_noise(value, kind):
     from hex_qec.circuit_generation import FactoryNoiseModel, IdleWindow, PlusPreparationIdle
     return "custom", FactoryNoiseModel(**multipliers, post_cnot_control=IdleWindow(**post),
                                        during_plus_preparation=PlusPreparationIdle(enabled=enabled, **prep))
+
+
+def execution_noise(point):
+    """Compact expected noise provenance; no circuit/decoder construction.
+
+    The native physical_noise_sha256 convention is audited at the pinned Hex
+    revision. It hashes p plus canonical native parameters, not circuit text.
+    """
+    if point.noise_model is None:
+        return {}
+    import hashlib
+    from .config_v2 import canonical
+
+    model = point.noise_model
+    text = canonical(model.as_dict())
+    post, prep = model.idle_probabilities(point.p, point.r_plus)
+    return dict(
+        noise="factory_operation_specific_v1", noise_parameters=noise_as_dict(model),
+        noise_model_json=text, noise_model_sha256=model.configuration_sha256,
+        physical_noise_sha256=hashlib.sha256(repr((point.p, text)).encode()).hexdigest(),
+        noise_operation_probabilities=model.operation_probabilities(point.p),
+        post_cnot_control_idle_probability=post, storage_idle_probability=prep,
+        idle_window_durations=dict(post_cnot_control=model.post_cnot_control.duration,
+            during_plus_preparation=(point.r_plus*model.during_plus_preparation.se_round_duration
+                                     if model.during_plus_preparation.enabled else 0.)),
+        idle_window_application_counts=dict(post_cnot_control=point.T_tel if post else 0,
+            during_plus_preparation=point.T_tel-1 if prep else 0),
+    )
+
+
+def validate_noise_execution(point, execution, *, create_codecapacity_dem):
+    """Cross-check custom saved provenance before publication/resume/analysis."""
+    if point.noise_model is None:
+        return
+    expected = execution_noise(point)
+    policy = "module_local_stim_dem" if create_codecapacity_dem else "hex_legacy_hamming"
+    if (not isinstance(execution, dict)
+            or any(execution.get(k) != v for k, v in expected.items())
+            or execution.get("prior_policy") != policy
+            or execution.get("teleportation_readout_error") != expected["noise_operation_probabilities"]["measurement"]):
+        raise ValueError("saved custom noise execution metadata changed or is missing")
+    if execution.get("prior_policy") == "module_local_stim_dem":
+        if (execution.get("post_cnot_control_idle_in_local_prior") is not True
+                or execution.get("storage_idle_errors_in_local_prior") is not False
+                or execution.get("preparation_residual_errors_in_prior") is not False
+                or execution.get("earlier_stage_residual_errors_in_prior") is not False
+                or execution.get("prior_scope") != "post_preparation_native_coupling_and_noisy_readout"):
+            raise ValueError("saved custom noise local-prior scope changed")

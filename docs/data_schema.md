@@ -139,3 +139,13 @@ not those compatibility placeholders. Metadata declares teleportations=0,
 full-circuit DEM/decoder/model hashes and complementary log-weight score scope.
 Same buffer, paired-publication and full-point restart rules apply. Existing
 schemas/filenames/hashes are unchanged. See [memory output](se_memory.md).
+
+
+
+
+Schema-v2 custom factory noise preserves both existing point tables, types,
+shot IDs and publication rules. Filenames use noisemodel=custom; the complete
+fixed noise mapping enters canonical config/physical identity and compact
+metadata with effective probabilities, idle durations/application counts,
+native hashes and the local prior's explicit included/excluded sources.
+See [custom noise](factory_custom_noise.md). V1 profiles/schemas are unchanged.

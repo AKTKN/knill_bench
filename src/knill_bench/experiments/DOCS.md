@@ -163,3 +163,22 @@ remain outside physical seeds. Provenance/bootstrap pin HEX-N2 86c9495 and
 inspect the optional noise_model builder interface. See
 [custom noise](../../../docs/factory_custom_noise.md). N1 explicitly refuses
 custom physical execution pending N2, while validate/prepare remain available.
+
+
+
+
+## BENCH-N2 custom factory execution/provenance
+
+The temporary N1 execution guard is removed. compile_point forwards the native
+noise object through adapters.hex_factory in both prior modes. Existing
+execution/adaptive_execution point transport and frozen keys carry full noise
+without new worker arguments or scheduling logic; theta remains absent.
+_prepare_point records native hashes plus full noise_parameters, actual
+operation/readout probabilities, normalized window durations/application
+counts and explicit post-control-in/storage-out local-prior flags.
+noise_v2.execution_noise/validate_noise_execution cross-check custom metadata
+without backend construction. RunStore checks it before parent completion and
+completed resume; saved analysis checks the same fields. Factory run rejects a
+mismatched external resume document before any incomplete-file cleanup.
+Uniform provenance/cache/identity semantics are preserved. See
+[the guide](../../../docs/factory_custom_noise.md) for exact fields and examples.

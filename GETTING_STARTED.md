@@ -255,3 +255,15 @@ noisy, and total noisy SE count is exactly rounds. Requested complementary
 gaps require 0<p<0.5 and a supported positive-weight graphlike circuit DEM;
 p0 works with the option false. The additional file uses the same shot IDs
 and gap_t001 for the entire memory experiment. See [memory guide](docs/se_memory.md).
+
+
+
+
+## Factory custom physical noise
+
+Copy [the seven-shot custom template](configs/templates/logical_zero_factory_custom_noise.yaml)
+and follow [the noise/timing guide](docs/factory_custom_noise.md). The ordinary
+factory shell wrapper/CLI runs it in both fixed and auto chunk modes. Custom
+noise is supported only by logical_zero_factory; Fig.4(d) and SE memory raise
+before output. Schema-v1 explicit profiles are unchanged. The guide separates
+physical idle exposure from the local inference window and documents resume.

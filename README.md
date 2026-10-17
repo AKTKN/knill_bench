@@ -141,3 +141,12 @@ Custom physical noise is factory-only: see
 [noise/timing configuration](docs/factory_custom_noise.md) and the
 [commented small template](configs/templates/logical_zero_factory_custom_noise.yaml).
 Full Knill/Fig.4(d) and SE memory continue to require hex_uniform; v1 is unchanged.
+
+
+
+
+The custom template executes through native Hex in both prior modes and both
+bounded scheduling modes. Effective parameters/window durations and hashes
+are saved with explicit local-prior scope and checked on resume/analysis.
+Post-CNOT survivor idle is inside the local body; earlier storage idle stays
+physical but outside that inference approximation.

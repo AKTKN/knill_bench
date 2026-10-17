@@ -67,3 +67,13 @@ metadata and original-input hashes disambiguate it from new auto-default runs;
 all existing config/schema/ID/count checks still run. Auto/fixed table schemas
 and scientific estimands are identical. No simulation or source-compatibility
 check is added to saved-only analysis.
+
+
+
+
+BENCH-N2 validates custom factory execution noise/configuration/finite-channel
+hashes and declared local-prior scope before reading saved rows. Per-shot
+schemas, conditional estimand and legacy uniform policy labels are unchanged.
+No backend is constructed. Uniform settings load without Hex; custom settings
+load native frozen noise classes for parameter/probability validation only.
+See [custom noise](../../../docs/factory_custom_noise.md).
