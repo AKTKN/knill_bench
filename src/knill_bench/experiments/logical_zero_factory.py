@@ -3,7 +3,7 @@
 import numpy as np
 
 from knill_bench.adapters.factory_frames import FRAME_IMPLEMENTATION
-from knill_bench.data.storage_v2 import PointWriter
+from knill_bench.data.storage_v2 import PointBuffer, PointWriter
 from .execution import execute_points
 from .run_v2 import RunStore
 
@@ -27,8 +27,7 @@ def compile_point(point, *, seed, create_codecapacity_dem=False, skip_circuit_va
                                  skip_circuit_validation=skip_circuit_validation)
 
 
-def _run_point(path, point, shots, batch_size, seed, *, create_codecapacity_dem=False,
-               skip_circuit_validation=False):
+def _prepare_point(point, seed, *, create_codecapacity_dem=False, skip_circuit_validation=False):
     bundle, compiled = compile_point(point, seed=seed, create_codecapacity_dem=create_codecapacity_dem,
                                     skip_circuit_validation=skip_circuit_validation)
     units = "log_weight" if create_codecapacity_dem else "hamming_weight"
@@ -64,20 +63,33 @@ def _run_point(path, point, shots, batch_size, seed, *, create_codecapacity_dem=
         sampling="one_point_seeded_stim_sampler_advanced_in_fixed_batches",
         zero_noise_gap_policy="finite_unit_hamming" if not create_codecapacity_dem else "unsupported",
     )
+    return bundle, compiled, execution
+
+
+def _decode_chunk(compiled, raw, start, point, units):
+    decoded = compiled.decode(raw, shot_id_start=start)
+    gaps = decoded.gaps
+    if (decoded.gap_units != units or gaps is None or gaps.dtype != np.float64
+            or gaps.shape != (len(raw), point.T_tel) or not np.isfinite(gaps).all()
+            or (gaps < 0).any()):
+        raise ValueError("Hex factory must return finite nonnegative per-stage gaps in declared units")
+    if not decoded.frame_resolved.all():
+        raise RuntimeError("Hex factory did not resolve every stage frame")
+    return decoded
+
+
+def _run_point(path, point, shots, batch_size, seed, *, create_codecapacity_dem=False,
+               skip_circuit_validation=False, buffer_shot=None):
+    _, compiled, execution = _prepare_point(point, seed,
+        create_codecapacity_dem=create_codecapacity_dem, skip_circuit_validation=skip_circuit_validation)
     with PointWriter(path, point, expected_shots=shots) as writer:
+        output = writer if buffer_shot is None else PointBuffer(writer, buffer_shot)
         for start in range(0, shots, batch_size):
             count = min(batch_size, shots - start)
             raw = compiled.sample_measurements(count)
-            decoded = compiled.decode(raw, shot_id_start=start)  # Offline, after sampling.
-            gaps = decoded.gaps
-            if (decoded.gap_units != units or gaps is None or gaps.dtype != np.float64
-                    or gaps.shape != (count, point.T_tel) or not np.isfinite(gaps).all()
-                    or (gaps < 0).any()):
-                raise ValueError("Hex factory must return finite nonnegative per-stage gaps in declared units")
-            if not decoded.frame_resolved.all():
-                raise RuntimeError("Hex factory did not resolve every stage frame")
-            writer.write_batch(decoded.shot_id, decoded.logical_error, gaps)
-        result = writer.commit()
+            decoded = _decode_chunk(compiled, raw, start, point, execution["score_units"])
+            output.write_batch(decoded.shot_id, decoded.logical_error, decoded.gaps)
+        result = output.commit()
     return result, execution
 
 

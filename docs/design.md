@@ -100,3 +100,12 @@ Both prior modes use composed packed preparation-frame maps, preserving all
 four native matching decisions and causal frame semantics. See
 [factory definitions](logical_zero_factory.md) for the model change, boundary,
 cache keys, initialization binding and legacy saved-data compatibility.
+
+## Current v2 parallel execution
+
+V2 omitted/auto batch_size uses measured-time chunk scheduling and a parent-
+owned bounded result buffer/writer. Workers cache physical models and decoders;
+chunk seeds are independent of scheduling identities, but automatic partitions
+depend on timing. Integer batch_size retains historical whole-point workers
+and fixed-partition replay. Physical protocols, v1 execution and dependency
+sources are unchanged. See [execution specification](parallel_execution.md).

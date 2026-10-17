@@ -109,3 +109,25 @@ keeping runtime decoding/sign/model checks. The parser rejects non-booleans
 and True for Fig.4(d). The scheduler forwards it to each worker; execution
 metadata declares the choice and frame implementation. False is omitted from
 canonical config JSON to preserve existing default hashes, True is included.
+
+## Current adaptive v2 execution (supersedes whole-point defaults above)
+
+`adaptive_execution.py` supplies ChunkSizer/ChunkTask/ChunkResult/run_chunk and
+execute_adaptive. Omitted/auto batch_size selects measured-time scheduling;
+integer batch_size selects unchanged legacy whole-point execution. Each process
+caches one point's physical model/decoder; chunk-seeded fresh samplers provide
+worker-independent assigned-task streams. The parent holds the sole paired
+PointWriter plus PointBuffer and an at-most-workers outstanding/reorder window.
+Buffer-sized row groups and final publication/restart rules are independent
+of compute chunk sizes. Auto timing can change partitions and actual samples;
+use fixed mode for exact replay or common-raw-record prior comparisons.
+`_prepare_point`/`_decode_chunk` share factory metadata and strict frame/gap
+validation between both paths. No quantum/decoder physics changes.
+
+Strict config adds buffer_shot (default auto=10000; fixed=batch_size) and
+positive finite target_chunk_seconds (default 1, auto only). Old explicit
+integer batch configs keep their canonical hash without the new options.
+load_config(path, workers=N), dispatch(path, workers=N) and the CLI
+run/prepare/validate-config --workers save effective YAML with source-input
+SHA256; no override preserves original bytes. Resume uses saved settings.
+See [full specification](../../../docs/parallel_execution.md).

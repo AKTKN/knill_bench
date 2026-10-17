@@ -279,3 +279,32 @@ Latest gates: 272 bench tests passed (744 warnings, 168.27 s) and 128 existing
 Hex tests passed read-only (320 warnings, 55.43 s). See TEST.md for commands
 and corrected test assumptions; docs/factory_frame_optimization.md reports
 exact-output comparison and measured setup/frame speed changes at d7/T3.
+
+## User-requested adaptive v2 execution and PBS launch
+
+The user explicitly authorized committing all incoming work (including the
+previously protected config/.gitignore edits) as a clean checkpoint before
+this revision. Checkpoint 4e1d684 was pushed to auxiliary-system. Subsequent
+changes implement time-adaptive v2 chunks, buffer_shot output and the supplied
+scripts/cluster_run_simualtion.sh PBS wrapper; this supersedes historical
+whole-point-only, fixed-batch and worker-owned-writer requirements in auto mode.
+Both v2 experiments default to auto; integer batch_size retains legacy exact
+fixed-partition execution. Hex H5 and v1 physics/execution remain unchanged.
+
+Auto workers cache physical models/decoders and use independent chunk-seeded
+samplers. Parent owns one ordered buffered writer per table plus metadata;
+outstanding and reordered chunks together are bounded by workers. Timing-
+dependent partitions can change actual records across runs/priors/workers;
+use fixed mode for paired-record comparisons and bitwise replay. buffer_shot
+sets result row groups, not checkpoints; unfinished points restart at zero.
+Old omitted-batch saved runs retain implicit 32 when loading saved data.
+CLI --workers saves effective YAML plus original-input SHA256, without editing
+source configs. PBS stays single-node and uses allocated CPUs with BLAS=1.
+See docs/parallel_execution.md and docs/cluster_setup.md. New physical tests
+stay d3 and <=7 shots. Production sweeps/real cluster submission remain outside
+this implementation request.
+
+Latest adaptive revision gates: 312 bench tests passed (772 warnings,
+173.96 s); 128 read-only Hex tests passed (320 warnings, 50.71 s). PBS shell
+unit/syntax checks, pip check and the real local Conda wrapper's three-shot
+run/resume/analysis pass. See TEST.md for exact commands and corrected checks.

@@ -113,3 +113,10 @@ packaging copies; installed wheels can run without Git checkouts.
 See [TEST.md](TEST.md) for regression results and
 [the package map](src/knill_bench/DOCS.md) and [v2 contract](docs/auxiliary_v2.md)
 for APIs, exact schemas, seeds, provenance, crash recovery and limits.
+
+V2 defaults to time-adaptive parallel chunks: set `workers`, optional
+`target_chunk_seconds` (default 1), and `buffer_shot` (default 10000).
+Multiple workers can share one d/p point; results append in buffer-sized
+Parquet groups. Integer `batch_size` retains the fixed execution/replay path.
+See [parallel execution](docs/parallel_execution.md) for memory bounds, seeds
+and [PBS / Anaconda clone instructions](docs/cluster_setup.md).

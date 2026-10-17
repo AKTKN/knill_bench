@@ -16,6 +16,8 @@ create_codecapacity_dem: false  # True is an explicit projected approximation.
 skip_circuit_validation: false # True skips full bundle checks; decoding stays active.
 decoder: mwpm
 shots: 64             # Fixed shots per d/p, not a target error count.
-batch_size: 32        # Keep fixed for exact seeded replay.
-workers: 1            # Whole-point processes; does not change physical seeds.
+batch_size: auto      # Time-adaptive compute chunks; integer retains fixed mode.
+buffer_shot: 10000    # Write this many result rows at a time (last group may be short).
+target_chunk_seconds: 1.0 # Target sampling + decoding time, excluding model setup.
+workers: 1            # Processes can share a single d/p point.
 master_seed: 12345

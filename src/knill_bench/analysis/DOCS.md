@@ -60,3 +60,10 @@ circuit_informed_projected for True runs, using the saved policy label in
 report rows. It never reinterprets old projected gaps as new local gaps,
 rebuilds a DEM or resumes a simulation. Current local priors exclude
 preparation/earlier-stage residuals; see the factory guide for that model change.
+
+Saved-data readers now use load_saved_config to preserve the historical
+implicit batch_size=32 when an old archived YAML omitted the field. Canonical
+metadata and original-input hashes disambiguate it from new auto-default runs;
+all existing config/schema/ID/count checks still run. Auto/fixed table schemas
+and scientific estimands are identical. No simulation or source-compatibility
+check is added to saved-only analysis.

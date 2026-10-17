@@ -54,3 +54,13 @@ Same-name collisions advance one second without data reuse; full hashes and
 actual ISO UTC timestamps remain in metadata. This changes only new directory
 names, not table names/schemas or legacy run loading. `run` starts fresh while
 `analyze-factory` reads only the specified saved run and its saved config.
+
+## Bounded result coalescing
+
+`PointBuffer(writer, buffer_shot)` validates contiguous uint64 IDs/bool labels
+and float64 gaps, copies decoded results into fixed-size buffers, and writes
+exactly buffer_shot rows per group except the final short group. commit flushes
+the tail then delegates to PointWriter. Auto mode owns both in the parent;
+fixed mode can use them inside its point worker. No raw histories are buffered.
+PointWriter remains the single owner of paired close/fsync/check/rename/abort.
+See [parallel execution](../../../docs/parallel_execution.md).

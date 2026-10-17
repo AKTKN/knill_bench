@@ -1,6 +1,6 @@
 """Small, strict schema-v2 configuration with exactly two sweep axes."""
 
-from dataclasses import asdict, dataclass
+from dataclasses import asdict, dataclass, replace
 from fractions import Fraction
 import hashlib
 import json
@@ -171,16 +171,27 @@ class ExperimentConfig:
     create_codecapacity_dem: bool = False
     decoder: str = "mwpm"
     shots: int = 64
-    batch_size: int = 32
+    batch_size: int | str = "auto"
     workers: int = 1
     master_seed: int = 12345
     skip_circuit_validation: bool = False
+    buffer_shot: int | None = None
+    target_chunk_seconds: float = 1.0
+
+    @property
+    def output_buffer_shots(self):
+        return self.buffer_shot or (10_000 if self.batch_size == "auto" else self.batch_size)
 
     def as_dict(self):
         result = asdict(self)
         # Preserve canonical hashes of existing configurations with full validation.
         if not result["skip_circuit_validation"]:
             result.pop("skip_circuit_validation")
+        # Explicit fixed-batch legacy documents retain their canonical hashes.
+        if self.buffer_shot is None:
+            result.pop("buffer_shot")
+        if self.target_chunk_seconds == 1.0:
+            result.pop("target_chunk_seconds")
         result["schema_version"] = 2
         result["sweep"] = {"d": list(result.pop("distances")), "p": list(result.pop("probabilities"))}
         return result
@@ -214,7 +225,8 @@ class ConfigDocument:
 
 def parse_config(raw) -> ExperimentConfig:
     _mapping(raw, "schema_version kind name output_root code noise sweep r_0 r_plus T_tel theta "
-             "create_codecapacity_dem decoder shots batch_size workers master_seed skip_circuit_validation".split(), "root")
+             "create_codecapacity_dem decoder shots batch_size workers master_seed skip_circuit_validation "
+             "buffer_shot target_chunk_seconds".split(), "root")
     if type(raw.get("schema_version")) is not int or raw["schema_version"] != 2:
         raise ValueError("schema_version must be 2")
     kind = _choice(raw.get("kind"), KINDS, "kind")
@@ -258,6 +270,15 @@ def parse_config(raw) -> ExperimentConfig:
         # Validate every distance now, before prepare/run creates any output.
         for d in ds:
             _resolve_rounds(rounds[round_name], d, round_name)
+    batch = raw.get("batch_size", "auto")
+    if batch != "auto":
+        batch = _integer(batch, "batch_size")
+    buffer = _integer(raw["buffer_shot"], "buffer_shot") if "buffer_shot" in raw else None
+    target = _number(raw.get("target_chunk_seconds", 1.0), "target_chunk_seconds")
+    if target <= 0:
+        raise ValueError("target_chunk_seconds must be positive")
+    if batch != "auto" and "target_chunk_seconds" in raw:
+        raise ValueError("target_chunk_seconds requires batch_size: auto")
     return ExperimentConfig(
         kind, name, ds, ps, output,
         _choice(raw.get("code", "rotated_surface"), {"rotated_surface"}, "code"),
@@ -265,18 +286,43 @@ def parse_config(raw) -> ExperimentConfig:
         rounds["r_0"], rounds["r_plus"],
         _integer(raw.get("T_tel", 8 if kind == "fig4d_reproduction" else 1), "T_tel"),
         theta, policy, _choice(raw.get("decoder", "mwpm"), {"mwpm"}, "decoder"),
-        _integer(raw.get("shots", 64), "shots"), _integer(raw.get("batch_size", 32), "batch_size"),
+        _integer(raw.get("shots", 64), "shots"), batch,
         _integer(raw.get("workers", 1), "workers"),
         _integer(raw.get("master_seed", 12345), "master_seed", 0, 2**64 - 1),
-        skip_validation,
+        skip_validation, buffer, target,
     )
 
 
-def load_config(path) -> ConfigDocument:
+def load_config(path, *, workers=None) -> ConfigDocument:
     source = Path(path).resolve()
     contents = source.read_bytes()
     try:
         raw = yaml.load(contents.decode("utf-8"), Loader=_UniqueSafeLoader)
     except (yaml.YAMLError, UnicodeError) as error:
         raise ValueError(f"invalid v2 YAML: {error}") from error
+    # Validate the original even when applying a CLI resource override.
+    parse_config(raw)
+    if workers is not None:
+        _integer(workers, "workers")
+        original_hash = hashlib.sha256(contents).hexdigest()
+        raw = dict(raw, workers=workers)
+        contents = (f"# CLI workers override; original input SHA256: {original_hash}\n"
+                    + yaml.safe_dump(raw, sort_keys=False)).encode("utf-8")
     return ConfigDocument(parse_config(raw), contents, source)
+
+
+def load_saved_config(run_path) -> ConfigDocument:
+    """Retain the old implicit batch_size=32 for already saved legacy runs.
+
+    New input defaults to auto. Saved canonical metadata disambiguates old
+    omitted defaults; callers still enforce full hash/config/provenance checks.
+    """
+    path = Path(run_path)
+    document = load_config(path / "config.yaml")
+    metadata = json.loads((path / "metadata.json").read_text())
+    if (document.config.batch_size == "auto"
+            and metadata.get("input_sha256") == document.input_hash
+            and metadata.get("config", {}).get("batch_size") == 32
+            and "batch_size" not in yaml.load(document.contents, Loader=_UniqueSafeLoader)):
+        document = replace(document, config=replace(document.config, batch_size=32))
+    return document

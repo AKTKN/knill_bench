@@ -134,3 +134,56 @@ wheel インストールでもソース/行列 hash、Hex H5、型/API の検証
 
 設定形式の参考: [Conda の環境管理](https://docs.conda.io/projects/conda/en/stable/user-guide/tasks/manage-environments.html)、
 [Setuptools の package data](https://setuptools.pypa.io/en/latest/userguide/datafiles.html)。
+
+## GitHub clone から PBS ジョブを実行する
+
+ログインノードで fork を含む環境を構築します。次の bootstrap は
+knill_system を作成し、既存環境があれば同名環境を更新します。
+
+```bash
+git clone --branch auxiliary-system https://github.com/AKTKN/knill_bench.git
+cd knill_bench
+# 必要ならサイト指定の Anaconda module をここで load する。
+bash scripts/bootstrap.sh
+conda activate knill_system
+python -m pip check
+cp configs/templates/logical_zero_factory.yaml configs/cluster_factory.yaml
+# configs/cluster_factory.yaml の d/p/T/shots、buffer_shot、出力先を編集。
+# 自動調整: batch_size: auto、target_chunk_seconds: 1.0
+python -m knill_bench.experiments.cli validate-config configs/cluster_factory.yaml
+```
+
+別の環境名にする場合は environments.yaml をコピーして name を変更するか、
+`conda env create -n my_knill_cluster -f environments.yaml` で作成し、上記の
+指定 SHA の依存 checkout と四パッケージの editable install を行ってください。
+bootstrap 自体の環境名は knill_system です。異なる環境を更新する操作は不要です。
+
+`scripts/cluster_run_simualtion.sh` はユーザー提供のファイル名を維持した
+PBS 用スクリプトです。先頭の select/ncpus/walltime/ログ出力先をクラスタの
+規約に合わせて編集し、リポジトリ直下から送信します。nodefile の fallback を
+使うため、例では mpiprocs と ncpus を同じ 96 にしています（MPI は起動しません）。
+
+```bash
+mkdir -p logs
+qsub -v CONFIG_FILE=configs/cluster_factory.yaml,KNILL_CONDA_ENV=knill_system \
+  scripts/cluster_run_simualtion.sh
+# 割当より少ない worker に制限する例:
+qsub -v CONFIG_FILE=configs/cluster_factory.yaml,WORKERS=8 \
+  scripts/cluster_run_simualtion.sh
+# 失敗・中断 run の再開（保存済み workers を収容できる CPU 割当が必要）:
+qsub -v RESUME_RUN=results/RUN_DIRECTORY scripts/cluster_run_simualtion.sh
+```
+
+CONFIG_FILE の既定値は小さな factory テンプレートです。Fig.4(d) YAML にも
+差し替えられます。実験予算を確認してから送信してください。PBS_NCPUS、未設定なら
+PBS_NODEFILE の行数を CPU 割当として読み取り、--workers で実効設定に保存します。
+両方が無ければ 1 worker です。WORKERS が割当を超えた場合、または nodefile が
+複数ノードを含む場合は停止します。単一ノードの process pool で、MPI ではありません。
+数値ライブラリのスレッド数は 1 に固定し、PBS_O_WORKDIR に移動してから実行します。
+
+非対話シェルで conda が見つからない場合は `CONDA_BASE=/path/to/anaconda3` を
+qsub -v で渡すか、サイトの Anaconda module をロードしてください。
+ジョブ内では環境作成・依存ダウンロードを行いません。保存用 buffer_shot と計算用
+チャンクは独立です。詳細・seed の再現性の限界は
+[並列実行仕様](parallel_execution.md)を参照してください。
+ローカルの模擬 PBS 環境で検証していますが、実クラスタでの qsub は未実施です。

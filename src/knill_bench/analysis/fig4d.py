@@ -9,7 +9,7 @@ import numpy as np
 import pyarrow.parquet as pq
 
 from knill_bench.data.storage_v2 import validate_point_files
-from knill_bench.experiments.config_v2 import load_config
+from knill_bench.experiments.config_v2 import load_saved_config
 
 
 def agresti_coull(errors, shots):
@@ -31,7 +31,7 @@ def summarize_saved(run_path):
     Incomplete runs, mismatched counts and invalid IDs raise before plotting.
     """
     path = Path(run_path)
-    document = load_config(path / "config.yaml")
+    document = load_saved_config(path)
     config = document.config
     metadata = json.loads((path / "metadata.json").read_text())
     if (config.kind != "fig4d_reproduction" or config.T_tel != 8

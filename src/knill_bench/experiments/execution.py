@@ -1,4 +1,4 @@
-"""Bounded whole-point execution shared by the independent v2 experiments."""
+"""Dispatch adaptive chunks or legacy bounded whole-point v2 execution."""
 
 from concurrent.futures import FIRST_COMPLETED, ProcessPoolExecutor, wait
 import multiprocessing
@@ -14,6 +14,11 @@ def execute_points(store, worker, **worker_options):
     bounded to workers tasks; each worker advances its sampler across chunks.
     """
     config = store.document.config
+    if config.batch_size == "auto":
+        from .adaptive_execution import execute_adaptive
+        return execute_adaptive(store, **worker_options)
+    if config.buffer_shot is not None:
+        worker_options["buffer_shot"] = config.buffer_shot
     completed_ids = {key for key, info in store.metadata["points"].items() if info["status"] == "complete"}
     pending = iter(p for p in config.points() if p.case_id not in completed_ids)
 

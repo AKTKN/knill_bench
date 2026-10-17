@@ -57,7 +57,10 @@ All other fields are fixed for a run:
 | `skip_circuit_validation` | Boolean, default false; true skips full physical bundle validation for factory only |
 | `decoder` | `mwpm` |
 | `theta` | Optional finite analysis cut; default null, never a sampling/selection rule |
-| `shots`, `batch_size`, `workers` | Positive integers, defaults 64/32/1 |
+| `shots`, `workers` | Positive integers, defaults 64/1 |
+| `batch_size` | `auto` (default) or positive integer for legacy fixed whole-point execution |
+| `buffer_shot` | Positive output-buffer row count; default 10000 in auto, batch_size in fixed mode |
+| `target_chunk_seconds` | Positive finite sampling/decode time target, default 1.0; auto mode only |
 | `master_seed` | uint64 integer, default 12345 |
 
 Positive integer settings fit signed int64; seeds fit uint64. Booleans are
@@ -140,20 +143,29 @@ No Python hash, PID, process scheduling or worker number enters a seed.
 Prior choice, theta, requested shots and worker count do not change the physical
 identity. Different prior choices can therefore compare shared physical records.
 
-Metadata stores master and per-point seeds, fixed batch size and derivation
-version; chunk seeds can be reconstructed without storing a long chunk list.
-B0 does not claim to have consumed either seed stream. B1 uses the point seed
-once to compile its continuing sampler, with fixed batch partition and no
-chunk-seed consumption. Other runners must
-record/use their actual stream and keep samplers/graphs cached once per case/
-worker. A continuing Stim sampler normally uses the point seed once and
-advances over batches; reproducibility requires the same library/platform and
-chunk partition. Deriving chunk seeds does not authorize recompiling a sampler
-or decoder per chunk/shot.
+Metadata stores master/per-point seeds and derivation version. Current auto
+execution consumes chunk_seed with stream=time_adaptive_chunks_v1, caching
+physical models/decoders but using a fresh sampler per assigned chunk. Actual
+partitioning depends on measured timing; stable seeds alone do not guarantee
+identical raw records across workers, runs or prior modes. Compact execution
+metadata includes the partition hash and chunk/timing summary. Integer
+batch_size retains the original continuing point-seeded sampler and fixed
+partition, with old explicit-integer config hashes preserved. Use fixed mode
+for bitwise replay and shared-raw-record prior comparisons. See
+[adaptive parallel execution](parallel_execution.md) for exact limits.
 
-B2 consumes the same continuing point-seeded sampler policy. Prior mode and
-theta do not enter the physical seed/circuit, and no chunks are skipped when
-scores fall below a cut. Actual full-trajectory data are saved in both tables.
+In auto mode the parent owns the paired PointWriter and bounded PointBuffer;
+workers return only labels/gaps, never native objects or measurement histories.
+Each full buffer_shot result group is appended to both tables, with a short
+final group. At most workers chunks can be outstanding/reordered. Fixed mode
+keeps worker-owned writers and can also set an independent buffer_shot.
+Publication/restart rules are unchanged: unfinished points restart at zero,
+not from a saved buffer. No extra mandatory files or simulation axes are added.
+
+The run/prepare/validate-config CLI accepts --workers N. An override saves
+exact effective YAML with the original source-input SHA256 in a comment;
+without an override the original YAML bytes remain exact. Source files are
+never modified. See [cluster usage](cluster_setup.md).
 
 `provenance.collect_environment()` stores actual Python/OS/CPU info, relevant
 dependency versions, and Git commit/branch/dirty/import path/source-resource
@@ -243,7 +255,8 @@ B2 uses that same nested descriptor for two-block sizes/alternating roles,
 T/depths, noisy teleportation readout and terminal ideal-oracle convention,
 actual gap units/policy, circuit and stage projected-model/configuration hashes.
 It adds no mandatory artifacts or per-chunk metadata. Both scientific runners
-use the bounded whole-point scheduler in experiments/execution.py.
+share experiments/execution.py, which selects time-adaptive chunks by default
+or the historical whole-point scheduler for integer batch_size.
 
 Point files stay hidden as `.<public-name>.incomplete` until their full
 expected shot counts are reached. BOTH writers close, fsync and pass schema/
@@ -289,7 +302,7 @@ The prior covers only native coupling/noisy destructive readout after an ideal
 +1 stabilizer boundary; noisy preparation and propagated frames remain physical.
 No extra boundary noise is inserted. Pauli observable input/output annotations
 are used only for DEM analysis. Local DEM/matching caches are bounded and
-worker-local; sampler state remains point-local. See [the factory guide](logical_zero_factory.md).
+worker-local; sampler state is never shared across points. See [the factory guide](logical_zero_factory.md).
 
 Existing `projected_prior_sha256`/`projected_model_sha256` execution keys now
 identify local configuration/DEM content, with additional local physical-module

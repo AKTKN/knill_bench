@@ -12,7 +12,7 @@ from knill_bench.data.storage_v2 import (
     PointResult, acquire_lock, atomic_json, clear_stale_lock,
     restart_incomplete_point, validate_point_files,
 )
-from .config_v2 import ConfigDocument, load_config, LOCAL_PRIOR_APPROXIMATION
+from .config_v2 import ConfigDocument, load_saved_config, LOCAL_PRIOR_APPROXIMATION
 from .provenance import collect_environment
 from .seeds import SEED_DERIVATION, point_seed
 
@@ -32,7 +32,7 @@ def _compatibility(environment):
 
 
 class RunStore:
-    """A single parent owns metadata; workers own their point-level writers.
+    """A single parent owns metadata; the scheduler assigns point-writer ownership.
 
     create/prepare never simulate. Point runners own physical execution.
     Metadata 'complete' for a point is its publication marker. A context exit
@@ -100,7 +100,7 @@ class RunStore:
     @classmethod
     def resume(cls, path):
         path = Path(path).resolve()
-        document = load_config(path / "config.yaml")
+        document = load_saved_config(path)
         clear_stale_lock(path / ".run.lock")
         store = cls(path, document)
         try:

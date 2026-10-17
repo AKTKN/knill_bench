@@ -435,3 +435,36 @@ User .gitignore/example config edits and the clean pinned Hex checkout are
 preserved. No production sweep, existing-run mutation, staging or push.
 Read-only Hex gate: 128 passed, 320 inherited warnings, 55.43 s. Exact commands
 and the corrected template-sharing test assumption are recorded in TEST.md.
+
+## 2026-10-17: adaptive v2 parallel execution and PBS/Conda launch
+
+User-requested clean checkpoint 4e1d684 committed/pushed all incoming work to
+auxiliary-system first. Current v2 defaults now use measured sampling/decode
+seconds per shot to adapt chunk sizes toward a configurable target (default
+1 s). All workers can share one d/p point; each caches its native model/decoder.
+Assigned chunks get stable independent seeds and fresh samplers. Timing-driven
+partitions need not produce identical records across runs/policies; explicit
+integer batch_size retains the original fixed path for bitwise/paired replay.
+
+buffer_shot independently groups decoded output into bounded, aligned Parquet
+row groups with an exact final tail. The parent owns auto-mode writers and
+metadata; outstanding/reordered results share a worker-count bound. Existing
+paired publication and whole-point restart rules remain. Old omitted-batch
+saved configs still analyze with their historical default 32. No physics,
+per-shot schema, theta-selection, v1 execution or dependency source changed.
+
+The supplied scripts/cluster_run_simualtion.sh is now a single-node PBS v2
+launcher with editable resources, Conda activation, BLAS/OpenMP=1, allocated
+worker counts, allocation/node guards and resume support. CLI --workers saves
+an effective configuration without modifying source YAML. Clone/bootstrap/
+qsub instructions and automatic-chunk limits live in docs/cluster_setup.md
+and docs/parallel_execution.md. Example budgets and physical settings remain;
+only execution/output settings select the requested new mode.
+
+Validation: **312 bench tests passed (772 warnings, 173.96 s)**;
+**128 read-only Hex tests passed (320 warnings, 50.71 s)**. PBS unit tests,
+shell syntax, pip check, and actual local Conda/PBS-wrapper run/resume/saved
+analysis also pass. The local smoke used d3/T1/3 shots and both allocated
+workers. TEST.md records all commands, the invalid overlapping-source baseline
+attempt and corrected report-key assertion. No production sweep, real cluster
+qsub, dependency edit or other Conda environment change was performed.

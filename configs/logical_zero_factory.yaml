@@ -16,6 +16,8 @@ theta: null  # Offline analysis only; all trajectories and gaps are saved.
 create_codecapacity_dem: false
 decoder: mwpm
 shots: 10000
-batch_size: 128
+batch_size: auto      # Time-adaptive compute chunks; integer retains fixed mode.
+buffer_shot: 10000    # Write this many result rows at a time (last group may be short).
+target_chunk_seconds: 1.0 # Target sampling + decoding time, excluding model setup.
 workers: 1
 master_seed: 12345

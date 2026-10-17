@@ -121,3 +121,14 @@ and the private H5 construction path that omits full validation. Opt-out means
 zero setup.bundle_validation calls. legacy-projected diagnostics require full
 validation and reject a config opting out. Runtime instrumentation is confined
 to the diagnostic process and is restored on exit, including timeout.
+
+## PBS cluster execution
+
+`cluster_run_simualtion.sh` (user's original spelling retained) now invokes the
+v2 CLI for either experiment after activating KNILL_CONDA_ENV (default
+knill_system). CONFIG_FILE defaults to the small factory template; RESUME_RUN
+selects saved-run continuation. PBS_NCPUS or nodefile slot count sets workers;
+WORKERS can lower it. Oversubscription/multi-node requests fail. BLAS/OpenMP
+threads are 1. run --workers saves effective YAML; resume retains saved workers
+and checks allocation. Setup stays on the login node, via the exact-ref Conda
+bootstrap. See [clone/setup/qsub instructions](../docs/cluster_setup.md).

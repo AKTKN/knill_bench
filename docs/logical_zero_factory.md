@@ -119,13 +119,15 @@ repair, general fault tolerance or improved error rates.
 
 ## Bounded execution and output
 
-`logical_zero_factory.run(document, resume_path=None)` uses the shared
-`experiments.execution.execute_points` scheduler also used by B1. A point
-worker builds one Hex bundle/compiled factory and caches all samplers, graphs,
-converters and correction maps there. One process handles an entire point,
-advancing one point-seeded sampler through bounded chunks. Workers > 1 use
-spawn with at most workers point tasks pending; no native object is pickled
-and no process is initialized per chunk. Workers=1 runs directly in the parent.
+`logical_zero_factory.run(document, resume_path=None)` uses the shared v2
+scheduler. Omitted/auto batch_size selects time-adaptive chunks with multiple
+workers sharing a point. Each worker caches one native physical model/decoder;
+independently seeded chunk samplers draw complete T-stage trajectories. Parent
+writers coalesce ordered label/gap results into buffer_shot row groups, with a
+bounded reorder window. Integer batch_size retains the historical whole-point
+worker, continuing point-seeded sampler path. See
+[parallel execution](parallel_execution.md) for exact timing, memory, seed and
+failure semantics. Workers=1 uses the same chunk code directly.
 
 True additionally has a bounded 16-entry worker-local LRU for DEMs and native
 gap graphs, keyed by the full canonical local circuit (including every noise
@@ -179,14 +181,15 @@ and compilation. All trajectories/gaps are saved, including ones below theta.
 There is no retry/early-abort branch. Acceptance, first rejection and production
 cost calculations are provided by [the separate B3 analysis](factory_analysis.md).
 
-Physical seeds exclude prior policy, validation flag, theta, workers and requested shots.
-Hamming and local modes on the same physical point use identical circuits
-and raw records for a fixed seed/chunk partition. Their inferred frames, gaps
-and final labels may differ. Reproduction requires the same library/platform
-and batch partition. B0 chunk seeds are unused; one continuing sampler consumes
-the point seed once.
+Physical seed derivation excludes prior policy, validation flag, theta, workers
+and requested shots. Auto mode uses independently chunk-seeded samplers; its
+wall-time feedback may change the partition across runs/policies. It does not
+promise identical raw trajectories between auto Hamming/local runs. Use the
+same integer batch_size and physical seed for paired physical-record studies.
+Fixed mode retains the point-seeded continuing sampler and requires the same
+Stim/platform/batch partition for exact replay. Theta never selects data.
 
-Per point the worker streams exactly these two B0 tables, using one writer
+Per point the output owner streams exactly these two B0 tables, using one writer
 each across chunks and the exact partial final chunk:
 
 | Table | Columns |
@@ -217,8 +220,9 @@ shot zero with the same seed after checking unchanged config/source/environment.
 Runs from the former True policy must start fresh under this code; resume
 rejects changed policy/source before altering files. Saved-only analysis can
 still read legacy `circuit_informed_projected` runs, retaining their old policy
-label rather than relabeling their gaps. Late chunk failures remove both incomplete files; tests replay that seed and
-compare both resumed tables exactly. No mandatory raw-array archive or log
+label rather than relabeling their gaps. Late chunk failures remove both incomplete files. Fixed-mode tests replay the
+same partition and compare both resumed tables exactly; auto restart can use
+a different measured-time partition. No mandatory raw-array archive or log
 is introduced. Large sweeps/resource costs were not measured in B2.
 
 ## Validation boundary

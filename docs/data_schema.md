@@ -112,3 +112,17 @@ Missing fields in historical results do not imply skipped validation. The
 default false flag is omitted from canonical config JSON to preserve old
 config hashes; true is included. Neither setting changes point IDs/seeds or
 per-shot table schemas. Exact input YAML remains archived without modification.
+
+## Adaptive v2 execution metadata and row groups
+
+Auto mode retains these exact table schemas/files and publication boundaries.
+The parent buffers ordered labels/gaps and appends buffer_shot rows to each
+aligned table per row group (last group may be short). No chunk files or logs
+are mandatory. Integer batch_size retains worker-owned writers; buffer_shot
+can independently coalesce their results too. Unfinished points restart at zero.
+Execution records parallel_execution=time_adaptive_chunks_v1, the actual
+sampling/seed stream, partition SHA256, chunk count/shot/duration ranges,
+aggregate worker setup/sampling-decode seconds, workers used, target and cap.
+Auto consumes chunk seeds; the saved point seed remains an identity. Config
+hashes describe the effective --workers override when present; saved YAML
+includes the original input SHA256 comment. See [execution](parallel_execution.md).

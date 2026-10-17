@@ -11,7 +11,7 @@ import pyarrow.parquet as pq
 import yaml
 
 from knill_bench.data.storage_v2 import validate_point_files
-from knill_bench.experiments.config_v2 import _UniqueSafeLoader, load_config, LEGACY_PRIOR_POLICY
+from knill_bench.experiments.config_v2 import _UniqueSafeLoader, load_saved_config, LEGACY_PRIOR_POLICY
 from knill_bench.experiments.seeds import point_seed
 from .factory_cost import FactoryCostModel, first_rejected_stage, summarize_cost
 from .fig4d import agresti_coull
@@ -110,7 +110,7 @@ def analyze_saved(run_path, settings=None):
     if not isinstance(settings, AnalysisSettings):
         raise ValueError("settings must be AnalysisSettings")
     path = Path(run_path).resolve()
-    document = load_config(path / "config.yaml")
+    document = load_saved_config(path)
     config = document.config
     meta = json.loads((path / "metadata.json").read_text())
     units = "log_weight" if config.create_codecapacity_dem else "hamming_weight"

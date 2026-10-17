@@ -44,7 +44,7 @@ Only supplied records enter Hex callbacks. Preparation repair, Bell frames
 and terminal decoding follow chronological module order. Packed local Pauli
 transitions from the existing bench native adapter replace Hex's much larger
 global correction-to-measurement maps. Preparation converters, sparse maps,
-decoder handles and the sampler are cached once per point/worker; one canonical
+decoder handles are cached once per point/worker; one canonical
 preparation template per basis shares handles across stages. Local transition
 construction precedes support remapping to bound temporary arrays to one block.
 The inherited transition LRU holds at most 16 entries. Native objects never
@@ -61,7 +61,7 @@ bit is Hex's final corrected logical value differing from expected zero.
 # Production sweep: deliberate and potentially expensive.
 bash scripts/run_fig4d.sh configs/fig4d.yaml
 
-# Smaller eight-cycle example (d=3/5, 64 shots); not paper validation.
+# Editable eight-cycle example; inspect its current shot budget before running.
 bash scripts/run_fig4d.sh configs/fig4d_v2_example.yaml
 
 knill-bench-v2 resume results/<fig4d-run>
@@ -72,15 +72,16 @@ The shell wrapper accepts one optional config path. Relative output_root is
 relative to the invocation working directory. KNILL_PYTHON may override the
 active `knill_system` Conda Python. No sweep is launched by bootstrap.
 
-`experiments.fig4d_reproduction.run(document)` uses the B0 RunStore and
-PointWriter contracts. Workers > 1 use a spawn pool with at most `workers`
-whole-point tasks pending; workers=1 executes directly in the parent. Each
-task builds one physical model, advances one point-seeded Stim sampler and
-decodes/writes bounded chunks, including the exact partial final batch.
-There is no legacy 256-shot rounding or error-target stopping. Seed identity
-does not depend on scheduling/worker count. Reproducible replay requires the
-same point seed, batch partition, Stim version and platform. Derived B0 chunk
-seeds are unused here.
+`experiments.fig4d_reproduction.run(document)` uses B0 RunStore/PointWriter
+publication rules. Omitted/auto batch_size uses the shared time-adaptive spawn
+scheduler: multiple workers share each point, cache native models locally and
+return decoded labels to a parent-owned buffer/writer. buffer_shot controls
+Parquet row groups independently of the measured-time chunk sizes. Integer
+batch_size retains the historical whole-point, continuing point-seeded sampler
+path. Fixed-partition replay remains exact under the same Stim/platform;
+auto partitioning depends on timing and does not promise identical records.
+See [parallel execution](parallel_execution.md) for caps, seeds, metadata and
+resume details. There is no error-target stopping or discarded calibration.
 
 Each completed point has exactly one B0 logical_error Parquet with non-null
 contiguous uint64 shot_id and bool logical_error. One writer stays open over

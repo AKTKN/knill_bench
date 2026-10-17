@@ -46,13 +46,22 @@ knill-bench-v2 validate-config my_factory.yaml
 knill-bench-v2 validate-config my_fig4d.yaml
 ```
 
-The simulation templates have d3/5, p0/.001, 64 shots per point, batches of 32
-and one worker. Edit only d and p as sweep axes. Round rules accept literal
+The simulation templates have d3/5, p0/.001, 64 shots per point, automatic
+time-adaptive chunks and one worker. Edit only d and p as sweep axes. Round rules accept literal
 `d`, a positive integer, or a quoted positive multiple such as `"2*d"`,
 `"2/3*d"` or `"1.5*d"`. Exact rational arithmetic floors the result for each
 distance: `"2/3*d"` gives 2 rounds at d=3 and 3 at d=5. A result below one
 is rejected. General expressions such as d-2 are unsupported. T, decoder, prior,
 workers, shots and seed are fixed per run. Unknown keys/duplicate YAML fail.
+
+Use `batch_size: auto` (or omit it), `target_chunk_seconds: 1.0` and
+`buffer_shot: 10000` to let measured sampling/decode time set chunk sizes while
+writing result rows in bounded groups. Multiple workers can share a single
+point. Integer batch_size keeps fixed partitioning for exact seeded replay;
+auto partitions depend on timing. See [parallel execution](docs/parallel_execution.md).
+For a cluster CPU allocation, `knill-bench-v2 run my_factory.yaml --workers 8`
+saves the effective worker setting without editing the input file. PBS/Conda
+clone, setup and submission instructions are in [cluster setup](docs/cluster_setup.md).
 
 Factory T defaults to one; set T_tel=2 or 3 for fixed role-swapping stages.
 r_0 applies once to initial zero preparation; r_plus applies to each initial/

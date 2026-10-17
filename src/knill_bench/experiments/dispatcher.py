@@ -3,7 +3,7 @@
 from importlib import import_module
 from pathlib import Path
 
-from .config_v2 import KINDS, load_config
+from .config_v2 import KINDS, load_config, load_saved_config
 
 
 def experiment_runner(kind):
@@ -20,13 +20,13 @@ def experiment_runner(kind):
     return module.run
 
 
-def dispatch(config_path):
-    document = load_config(config_path)
+def dispatch(config_path, *, workers=None):
+    document = load_config(config_path, workers=workers)
     # Resolve before creating a run, so unavailable runners leave no outputs.
     return experiment_runner(document.config.kind)(document)
 
 
 def resume(run_path):
     path = Path(run_path).resolve()
-    document = load_config(path / "config.yaml")
+    document = load_saved_config(path)
     return experiment_runner(document.config.kind)(document, resume_path=path)

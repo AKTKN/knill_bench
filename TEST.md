@@ -805,3 +805,115 @@ git diff --cached --stat
 user edits match the pre-task snapshot, Hex stays clean at H5, and the index
 is empty. No user job/run was interrupted, production sweep launched, or
 dependency source patched. All final code changes preceded the full gates.
+
+## 2026-10-17: adaptive v2 chunks, buffer_shot and PBS cluster launch
+
+First, all incoming bench changes (including the explicitly authorized user
+config/.gitignore edits and supplied cluster script) were committed and pushed
+as checkpoint 4e1d684 on auxiliary-system. Reference source was read at
+AKTKN/color_code_softoutput 1e88fc4633beb8e2741e8a16cd3554ed5a106732,
+plus the installed sinter 1.16.0 ramp-throttled sampler/collection worker.
+No dependency checkout was modified or new dependency installed.
+
+An initial full-suite attempt ran concurrently with package source edits:
+
+```bash
+bash scripts/python.sh -m pytest -q > /tmp/knill_baseline_tests.log 2>&1
+```
+
+271 passed and one v1 resume test rejected the changing source hash (736
+warnings, 137.96 s). This was an invalid baseline because edits were in flight;
+no compatibility check was relaxed and no v1 source was changed. The final
+full gate below runs after package source is frozen. Initial focused legacy
+gate passed: 132 tests, 212 warnings, 33.82 s:
+
+```bash
+bash scripts/python.sh -m pytest -q tests/test_v2_config.py tests/test_logical_zero_factory.py tests/test_fig4d.py > /tmp/knill_focused_tests.log 2>&1
+bash scripts/python.sh -m pytest -q tests/test_adaptive_execution.py > /tmp/knill_adaptive_tests.log 2>&1
+```
+
+The first adaptive gate passed 30 tests, 28 warnings, 11.20 s. After adding
+legacy omitted-default and PBS cases, a focused run had 39 passes and one
+incorrect test assertion using factory report key points rather than rows
+(28 warnings, 12.44 s). The assertion was corrected; analysis numerics were
+unchanged. All added physical fixtures are d3, <=7 shots, factory T=2/full
+Knill T=8. Synthetic timing/data tests do not benchmark physics.
+
+Coverage includes EMA chunk sizing/ramp/caps/tails, useful one-shot probes,
+bounded out-of-order windows, exact buffer-sized row groups, paired IDs/gaps,
+invalid worker results, failure/restart with complete-point preservation,
+worker-local model reuse and explicit chunk-seed replay. Auto partitions can
+change actual samples with timing; existing fixed-mode serial/spawn equality
+and theta/prior-independent raw-record tests are retained. Legacy saved YAML
+with omitted batch_size continues to analyze using its old implicit 32.
+CLI worker overrides save effective input/hash without changing source YAML.
+
+PBS tests stub the Conda hook/Python executable and check quoted paths,
+environment activation, one-thread libraries, allocated/default/limited CPU
+counts, oversubscription, single-node nodefiles and saved-run worker checks.
+The supplied filename cluster_run_simualtion.sh is retained, now executable;
+PBS mpiprocs equals ncpus in its editable example so nodefile slot fallback
+matches the allocation. Logs target the ignored logs directory, which must
+exist before qsub.
+
+```bash
+bash -n scripts/cluster_run_simualtion.sh
+bash scripts/python.sh -m pytest -q tests/test_cluster_script.py > /tmp/knill_pbs_script_final_tests.log 2>&1
+bash scripts/python.sh -m pip check
+git diff --check
+```
+
+Shell syntax passed; final PBS unit gate: 8 passed, 0.56 s. pip check reports
+No broken requirements found. Local real-script smoke used a temporary YAML
+at /tmp/knill_pbs_smoke_p2tc8ual/input.yaml: d3, p=.002, r0=rplus=2, T=1,
+True local prior, 3 shots, buffer_shot=2, initial YAML workers=1. Its output
+root was temporary; the edited user examples and production sweeps were not run.
+
+```bash
+PBS_O_WORKDIR="$PWD" PBS_NCPUS=2 CONFIG_FILE="$(cat /tmp/knill_pbs_smoke_path)/input.yaml" bash scripts/cluster_run_simualtion.sh > /tmp/knill_pbs_smoke.log 2>&1
+knill_smoke_run=$(tail -n 1 /tmp/knill_pbs_smoke.log)
+PBS_O_WORKDIR="$PWD" PBS_NCPUS=2 RESUME_RUN="$knill_smoke_run" bash scripts/cluster_run_simualtion.sh > /tmp/knill_pbs_resume.log 2>&1
+bash scripts/python.sh -m knill_bench.experiments.cli analyze-factory "$knill_smoke_run" --settings configs/templates/factory_analysis.yaml --output /tmp/knill_pbs_analysis.json
+```
+
+Run, completed resume and saved analysis passed. Metadata reports complete,
+3 shots, effective workers=2, workers_used=2 and time_adaptive_chunks_v1.
+This validates the installed editable CLI and actual Conda/PBS wrapper locally;
+no real qsub/cluster-host execution or production performance measurement was
+performed. Source/hash resume checks remain strict.
+
+Extended focused command (including the corrected assertion described above):
+
+```bash
+bash scripts/python.sh -m pytest -q tests/test_adaptive_execution.py tests/test_cluster_script.py > /tmp/knill_adaptive_cluster_tests.log 2>&1
+```
+
+Final full bench gate (all package source changes completed before starting):
+
+```bash
+bash scripts/python.sh -m pytest -q > /tmp/knill_full_adaptive_tests.log 2>&1
+```
+
+**312 passed, 772 existing-category warnings, 173.96 s**. This retains every
+272 pre-existing test plus 40 adaptive/PBS cases. Warnings are inherited SciPy
+sparse migration / plotting categories; no decoder fallback was added.
+
+Read-only H5 regression gate:
+
+```bash
+bash scripts/python.sh -m pytest -q external/Hex/tests/test_factory_circuit.py external/Hex/tests/test_factory_batch.py external/Hex/tests/test_surface_gap.py external/Hex/tests/test_codecapacity_public.py > /tmp/knill_adaptive_hex_tests.log 2>&1
+git -C external/Hex status --short
+git -C external/lomatching status --short
+git -C external/surface-sim status --short
+git diff --name-only -- src/knill_bench/adapters src/knill_bench/circuits src/knill_bench/decoding src/knill_bench/simulation
+git diff --check
+```
+
+**128 passed, 320 inherited warnings, 50.71 s**. All three dependency checkouts
+remain clean at their exact pinned refs; adapters/circuits/decoding/v1 simulation
+have no diff from checkpoint 4e1d684. The original user experiment budgets,
+d/p/depth/T/prior settings and .gitignore content are preserved; v2 configs
+change only batch policy/output buffer/target settings and explanatory comments.
+Package source is unchanged since the final full gate began. Only documentation
+and PBS directives changed afterward; the final shell unit/syntax gate above
+covers those final directives. No simulation outputs/caches/virtualenvs are staged.

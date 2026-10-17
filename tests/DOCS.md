@@ -115,3 +115,14 @@ explicit validate() on returned native bundles, template sharing, strict flag
 parsing and config-hash/physical-seed compatibility. Runner tests cover both
 validation modes under serial/spawn and saved execution metadata; profiler
 tests count the skipped/full checks and packed-map/frame calls.
+
+## Adaptive parallel execution
+
+`test_adaptive_execution.py` covers strict new config/default/hash behavior,
+CLI worker overrides, deterministic synthetic throughput adaptation, bounded
+out-of-order windows, exact buffer row groups/alignment, invalid-result abort,
+whole-point restart/completed preservation, real d3 seven-shot serial/spawn
+runs for full Knill and both factory priors, worker-cache reuse and explicit
+chunk-seed replay. Existing fixed-mode serial/spawn equality is retained.
+`test_cluster_script.py` exercises PBS/Conda invocation and allocation guards
+with stub executables. No production or throughput benchmarks run in tests.

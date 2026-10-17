@@ -196,6 +196,59 @@ class PointWriter:
             self.abort()
 
 
+class PointBuffer:
+    """Coalesce compute chunks into bounded, exactly buffer_shot row groups.
+
+    The wrapped PointWriter retains all publication/abort ownership. Only the
+    last group can be short. No raw measurement histories enter this buffer.
+    """
+
+    def __init__(self, writer, buffer_shot):
+        if type(buffer_shot) is not int or buffer_shot < 1:
+            raise ValueError("buffer_shot must be a positive integer")
+        self.writer = writer
+        self.capacity = min(buffer_shot, writer.expected_shots)
+        self.labels = np.empty(self.capacity, dtype=bool)
+        self.gaps = (np.empty((self.capacity, writer.point.T_tel), dtype=np.float64)
+                     if "logical_gaps" in writer.point.tables else None)
+        self.rows = self.used = 0
+
+    def write_batch(self, shot_id, logical_error, gaps=None):
+        ids, labels = np.asarray(shot_id), np.asarray(logical_error)
+        if (ids.ndim != 1 or ids.dtype != np.uint64 or not len(ids)
+                or labels.dtype != bool or labels.shape != ids.shape
+                or self.rows + len(ids) > self.writer.expected_shots
+                or not np.array_equal(ids, np.arange(len(ids), dtype=np.uint64) + np.uint64(self.rows))):
+            raise ValueError("buffer requires aligned contiguous uint64 IDs and bool labels")
+        values = None if gaps is None else np.asarray(gaps)
+        if values is not None and (self.gaps is None or values.dtype != np.float64
+                                   or values.shape != (len(ids), self.writer.point.T_tel)
+                                   or np.isinf(values).any() or (values < 0).any()):
+            raise ValueError("buffer requires aligned nonnegative float64 gaps")
+        offset = 0
+        while offset < len(ids):
+            take = min(self.capacity - self.used, len(ids) - offset)
+            self.labels[self.used:self.used + take] = labels[offset:offset + take]
+            if self.gaps is not None:
+                self.gaps[self.used:self.used + take] = (np.nan if values is None else values[offset:offset + take])
+            self.used += take
+            self.rows += take
+            offset += take
+            if self.used == self.capacity:
+                self.flush()
+
+    def flush(self):
+        if self.used:
+            ids = np.arange(self.rows - self.used, self.rows, dtype=np.uint64)
+            self.writer.write_batch(ids, self.labels[:self.used],
+                                    None if self.gaps is None else self.gaps[:self.used])
+            self.used = 0
+
+    def commit(self):
+        self.flush()
+        return self.writer.commit()
+
+
 def validate_point_files(run: Path, point: ExperimentPoint, expected_shots: int):
     for name, schema in schemas(point).items():
         info = pq.ParquetFile(run / point.filename(name))

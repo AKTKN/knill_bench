@@ -100,3 +100,11 @@ calls. ExperimentConfig.skip_circuit_validation defaults to false and can skip
 the full construction-time bundle check for factory only. Runtime checks and
 physical/seed/model semantics remain unchanged; execution metadata declares
 the validation mode and frame implementation. V1/B1 and Hex stay unchanged.
+
+Current v2 execution defaults to adaptive_execution's time-adaptive chunks,
+with per-worker native model caches and parent-owned buffered paired output.
+Integer batch_size retains the legacy fixed path. See
+[parallel execution](../../docs/parallel_execution.md) for exact seed/partition,
+memory and restart limits. CLI --workers supports PBS allocations; saved
+config.yaml describes the effective setting without editing the source input.
+V1, native adapters and Hex source remain unchanged in this revision.

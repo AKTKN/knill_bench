@@ -15,7 +15,9 @@ def main(argv=None):
         ("prepare", "Create a new run directory without sampling."),
         ("run", "Create a new run directory and simulate the supplied config."),
     ):
-        sub.add_parser(name, help=help_text, description=help_text).add_argument("config")
+        command = sub.add_parser(name, help=help_text, description=help_text)
+        command.add_argument("config")
+        command.add_argument("--workers", type=int, help="Override process count; save the effective YAML in the run.")
     sub.add_parser("resume", help="Continue an existing run directory.").add_argument("run")
     plot = sub.add_parser("plot-fig4d")
     plot.add_argument("run")
@@ -34,17 +36,17 @@ def main(argv=None):
     args = parser.parse_args(argv)
     try:
         if args.command == "validate-config":
-            config = load_config(args.config).config
+            config = load_config(args.config, workers=args.workers).config
             print(json.dumps(dict(config=config.as_dict(), config_hash=config.config_hash,
                                   points=[dict(p.sampling_identity, case_id=p.case_id) for p in config.points()]),
                              sort_keys=True, indent=2, allow_nan=False))
         elif args.command == "prepare":
             from .run_v2 import RunStore
-            with RunStore.create(load_config(args.config)) as run:
+            with RunStore.create(load_config(args.config, workers=args.workers)) as run:
                 print(run.path)
         elif args.command == "run":
             from .dispatcher import dispatch
-            print(dispatch(args.config))
+            print(dispatch(args.config, workers=args.workers))
         elif args.command == "resume":
             from .dispatcher import resume
             print(resume(args.run))
