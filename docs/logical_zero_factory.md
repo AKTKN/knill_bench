@@ -244,3 +244,15 @@ equivalence, injected faults and exhaustive d3 sector weights. No physical
 circuit or causal frame algorithm was copied into bench. See [TEST.md](../TEST.md) for commands,
 results and any failures. B2 checks do not run production Monte Carlo; B3 now
 adds separate saved-data analysis and a [getting-started guide](../GETTING_STARTED.md).
+
+
+
+
+## Custom physical noise
+
+The separate user-authorized BENCH-N1/N2 integration accepts factory-only
+[custom-noise YAML](factory_custom_noise.md), using Hex HEX-N2 86c9495.
+Legacy scalar hex_uniform behavior stays exact. The guide defines each
+multiplier, normalized durations, the two disjoint windows, early validation,
+physical/local-prior scope and short custom filenames. Start with the
+[commented seven-shot template](../configs/templates/logical_zero_factory_custom_noise.yaml).

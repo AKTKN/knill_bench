@@ -29,7 +29,8 @@ knill_system ...`; the shell wrappers select this environment automatically.
 See [the cluster/Conda guide](docs/cluster_setup.md) for `environments.yaml`,
 research locks, resource-complete wheels and offline cluster installation.
 
-Hex is pinned to H5 `4278d2900626f1d120d611f209340b20a9370f91`.
+Hex is pinned to factory-noise HEX-N2 `86c9495094801012b9912bd41935ae48b08d8f92`,
+on the H5 lineage.
 LOM is pinned to `b55a7a65969a106a547622287b620f0da2cb5e39`, surface-sim to
 `493f800a3b4e9f80a6a569eb92d3c962dd6b09ad`. Do not reset the user's other
 dependency worktrees. Bench phase history is B0 `4446bc2`, B1 `58cff21`,

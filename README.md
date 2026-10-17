@@ -95,7 +95,8 @@ simulation config, rerun it and update the saved run-path variable.
 `analyze-factory RUN --settings ANALYSIS_YAML` only reanalyzes the data already
 inside RUN; it does not execute a changed simulation config or resume sampling.
 
-Hex is pinned to completed H5 `4278d29`; its source/version is untouched.
+Hex is pinned to factory custom-noise HEX-N2 `86c9495` on the H5 lineage.
+Dependency sources remain read-only during bench integration.
 Factory `create_codecapacity_dem: true` now uses cached **module-local Stim
 DEMs** in the bench adapter. Preparation/earlier-stage residual errors are
 excluded from this prior only; noisy physical preparation and native frame
@@ -132,3 +133,11 @@ execution, buffers, seed/provenance and restart rules are shared.
 Start from [the template](configs/templates/se_memory.yaml), run
 `bash scripts/run_se_memory.sh my_memory.yaml`, or set PBS CONFIG_FILE to it.
 See [memory protocol, score definition and output](docs/se_memory.md).
+
+
+
+
+Custom physical noise is factory-only: see
+[noise/timing configuration](docs/factory_custom_noise.md) and the
+[commented small template](configs/templates/logical_zero_factory_custom_noise.yaml).
+Full Knill/Fig.4(d) and SE memory continue to require hex_uniform; v1 is unchanged.

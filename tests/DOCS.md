@@ -137,3 +137,13 @@ native-cost validation, cached graphs, optional paired schemas/IDs/buffers,
 serial/spawn (auto and fixed), p0 plain decoding and failure/restart. Invalid
 requested gaps and changed-option resume are rejected. No production sweep,
 new large Monte Carlo, dependency edit or benchmark is included.
+
+
+
+
+BENCH-N1 test_v2_factory_noise.py covers strict custom nesting/defaults,
+finite numeric/domain checks at every point, explicit unsupported-kind errors
+before output, duplicate YAML keys, native frozen/pickled objects, canonical
+roundtrip, short filenames, complete noise/seed identity and legacy uniform
+config/point/seed goldens. It constructs no physical circuit. Existing v1/
+Fig.4(d)/memory/factory regression suites remain required at the new Hex pin.

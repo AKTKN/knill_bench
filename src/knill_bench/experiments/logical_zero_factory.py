@@ -21,6 +21,8 @@ def compile_point(point, *, seed, create_codecapacity_dem=False, skip_circuit_va
     from knill_bench.adapters.hex_factory import compile_local_factory
     if point.kind != "logical_zero_factory":
         raise ValueError("factory compilation requires a logical_zero_factory point")
+    if point.noise_model is not None:
+        raise NotImplementedError("custom-noise physical execution requires BENCH-N2 integration")
     if type(create_codecapacity_dem) is not bool:
         raise ValueError("create_codecapacity_dem must be bool")
     return compile_local_factory(point, seed=seed, create_codecapacity_dem=create_codecapacity_dem,
@@ -96,6 +98,8 @@ def _run_point(path, point, shots, batch_size, seed, *, create_codecapacity_dem=
 def run(document, *, resume_path=None):
     if document.config.kind != "logical_zero_factory":
         raise ValueError("factory runner requires kind logical_zero_factory")
+    if document.config.noise_model is not None:
+        raise NotImplementedError("custom-noise physical execution requires BENCH-N2 integration")
     with (RunStore.create(document) if resume_path is None else RunStore.resume(resume_path)) as store:
         if store.document.config != document.config:
             raise ValueError("resume document must match the saved run configuration")

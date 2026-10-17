@@ -18,8 +18,8 @@ figure, or implement a worker pool. The dispatcher raises an explicit
 The existing schema-v1 CLI, configurations, scientific builders, decoder
 adapters, table schemas and resume engine remain separate and unchanged.
 Hex is imported read-only from the H5 `auxiliary-system` lineage, pinned in
-bench to `4278d2900626f1d120d611f209340b20a9370f91`; B0 changes no Hex
-version/source. Export/signature/lineage validation never constructs a
+bench to HEX-N2 `86c9495094801012b9912bd41935ae48b08d8f92` after the
+separately requested factory-noise extension. B0 itself changed no Hex source. Export/signature/lineage validation never constructs a
 physical circuit, sampler, decoder or matching graph.
 
 ## Configuration and commands
@@ -323,3 +323,13 @@ weights; without it p0 is supported. Native physics, boundary conventions,
 first/opposite-class inference and exact table/filename meaning are in
 [the memory guide](se_memory.md). New default fields are omitted from old
 canonical configs/point identities, preserving prior hashes and seeds.
+
+
+
+
+Factory custom-noise YAML is added in BENCH-N1/N2, documented in
+[the custom-noise guide](factory_custom_noise.md). The scalar hex_uniform form
+retains all canonical identities; custom is factory-only, with full fixed
+parameters in config/physical hashes and pre-output probability/domain checks.
+Only d/p sweep. Result schemas/publication rules are unchanged, with the short
+noisemodel=custom filename label. v1 explicit profiles are unaffected.

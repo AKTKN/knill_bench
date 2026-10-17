@@ -25,7 +25,7 @@ The workspace originally contained only the implementation prompt. Existing clea
 
 | Package | Upstream | User fork | Integration revision |
 |---|---|---|---|
-| Hex | https://github.com/ewanmurphy/Hex | https://github.com/AKTKN/Hex | `4278d2900626f1d120d611f209340b20a9370f91` (`auxiliary-system`, H5) |
+| Hex | https://github.com/ewanmurphy/Hex | https://github.com/AKTKN/Hex | `86c9495094801012b9912bd41935ae48b08d8f92` (`auxiliary-system`, HEX-N2) |
 | lomatching | https://github.com/MarcSerraPeralta/lomatching | https://github.com/AKTKN/lomatching | `b55a7a65969a106a547622287b620f0da2cb5e39` |
 | surface-sim | https://github.com/MarcSerraPeralta/surface-sim | https://github.com/AKTKN/surface-sim | `493f800a3b4e9f80a6a569eb92d3c962dd6b09ad` |
 
@@ -72,3 +72,20 @@ introduced. [TEST.md](../TEST.md) records commands and versions.
 V2 stores a compact allowlist of relevant dependency versions and actual bench/
 Hex source provenance in one metadata file. It does not reuse v1 environment
 archives, source tarballs or extra tables; see [the B0 guide](auxiliary_v2.md).
+
+
+
+
+## BENCH-N1 factory-noise dependency audit
+
+The user-authorized integration updates only the bench pin/bootstrap/API check
+to existing Hex HEX-N2 86c9495094801012b9912bd41935ae48b08d8f92. This is a
+clean auxiliary-system descendant of H5, supplying frozen FactoryNoiseModel,
+IdleWindow/PlusPreparationIdle and optional builder noise_model. Uniform
+circuits/decoding were retained in Hex with golden tests. Private builder type
+binding and decoder slots retain their interfaces; bench regression gates
+re-audit them. Wheel manifests now require the new pinned revision/ancestor
+marker and resource hashes. Numeric locks, package versions, other fork refs
+and all dependency source checkouts are unchanged by bench. Old saved data
+remain analyzable; strict source/environment rules require fresh runs for
+simulation after upgrading. Bootstrap still refuses to reset any checkout.

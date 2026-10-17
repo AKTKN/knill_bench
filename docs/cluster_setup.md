@@ -127,7 +127,7 @@ conda run --no-capture-output -n knill_system knill-bench-v2 run my_factory.yaml
 
 単一マシンの複数プロセスが現在の実装範囲です。workers は複数ノードへの自動配分や
 MPI ジョブではありません。複数のジョブで一つの run に同時書込みしないでください。
-wheel インストールでもソース/行列 hash、Hex H5、型/API の検証と出典記録を保ちます。
+wheel インストールでもソース/行列 hash、Hex HEX-N2 (H5 lineage)、型/API の検証と出典記録を保ちます。
 環境の変更前に作成した run の resume は、既存の厳密な互換性チェックで拒否され得ます。
 
 設定・実験・解析の説明は [Getting started](../GETTING_STARTED.md) を参照してください。

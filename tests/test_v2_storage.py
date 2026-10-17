@@ -321,7 +321,7 @@ def test_stale_crash_locks_cleared_and_foreign_locks_refused(document, monkeypat
     with pytest.raises(RuntimeError, match="stale lock ownership"): RunStore.resume(path)
 
 
-def test_real_imported_hex_h5_api_provenance_without_sampler_or_decoder(monkeypatch):
+def test_real_imported_hex_n2_api_provenance_without_sampler_or_decoder(monkeypatch):
     from knill_bench.experiments import provenance
     import pymatching
     def forbidden(*args, **kwargs): raise AssertionError("infrastructure constructed a scientific backend")
@@ -337,4 +337,4 @@ def test_real_imported_hex_h5_api_provenance_without_sampler_or_decoder(monkeypa
     assert env["cpu"]["count"] > 0
     actual = env["hex"]
     monkeypatch.setattr(provenance, "source_info", lambda module: dict(actual, commit="5de58f2f80791054411ad3c0885a4fe3671ed56a"))
-    with pytest.raises(RuntimeError, match="must descend from H5"): provenance.validate_hex()
+    with pytest.raises(RuntimeError, match="must descend from HEX-N2"): provenance.validate_hex()

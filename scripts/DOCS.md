@@ -63,7 +63,7 @@ notes below describe the earlier B0-B3 setup.
 `bootstrap.sh` safely verifies the designated dependency worktree revisions,
 installs `requirements.lock` plus the three editable forks and bench into
 `.venv`, then validates the original smoke config. B0 updates only the Hex pin
-to H5 4278d2900626f1d120d611f209340b20a9370f91; no dependency checkout is
+to HEX-N2 86c9495094801012b9912bd41935ae48b08d8f92; no dependency checkout is
 reset or modified. `run_simulation.py/.sh` and `benchmark_latency.sh` retain
 v1 behavior. Existing `verify_*`, `benchmark_refactor.py`, `compare_performance.py`
 and `stress_memory.py` remain opt-in v1 diagnostic/performance utilities;
@@ -140,3 +140,11 @@ is configs/se_memory_v2_example.yaml (small d3/5 example, not launched by tests)
 PBS cluster_run_simualtion.sh already accepts this kind via CONFIG_FILE.
 Same Conda selection/worker overrides apply; no extra dependencies or cluster
 script changes are required. See [memory guide](../docs/se_memory.md).
+
+
+
+
+BENCH-N1 advances only Hex's exact source pin to existing HEX-N2 86c9495;
+bootstrap still preserves/refuses mismatched checkouts. Both other fork refs,
+Conda/numeric locks and package versions are unchanged. Custom factory example
+validation uses the existing v2 CLI/wrappers; no production job is launched.

@@ -342,3 +342,29 @@ Latest memory revision gates: 369 bench tests passed (928 warnings,
 Three-shot direct/PBS-wrapper run and completed resume, shell syntax and
 pip check pass. TEST.md records the corrected native-method monkeypatch
 assumption, exact commands and unchanged user/dependency scope.
+
+
+
+
+## BENCH-N1 / BENCH-N2 factory custom physical noise
+
+The user authorized these two scoped commits/pushes on auxiliary-system after
+Hex HEX-N1/N2. This supersedes the historical H5 pin for this integration:
+require HEX-N2 86c9495094801012b9912bd41935ae48b08d8f92; all dependency sources
+remain read-only. N1 supplies strict factory-only YAML parsing, frozen native
+noise parameters, identities, validation and pin/API audit. N2 supplies actual
+native factory execution, local-DEM noise scope, metadata and small physical
+checks. Never duplicate Hex physical circuit construction. Only d/p sweep;
+reject custom noise for Fig.4(d)/SE memory before output with the specified
+explicit error. Preserve all uniform hashes/seeds and v1 explicit profiles.
+
+Read docs/factory_custom_noise.md. Multipliers/durations are fixed finite
+nonnegative numerics, never arbitrary expressions. Validate operation and
+resolved idle probabilities at every swept point before creating a run.
+Physical identities include full parameters; theta/prior/workers/shots remain
+nonphysical. Include post-CNOT control idle inside local body; exclude earlier
+storage/preparation residuals only from the local prior, never simulation.
+Do not invent a generic hardware schedule, extra idle channel or retry path.
+Use Conda and d3/5 <=7-shot physical fixtures; retain paired bounded output,
+strict metadata/resume and worker-local native caching. Update STATUS/TEST and
+all affected guides each stage; stop after N2 commit/push. No production sweep.

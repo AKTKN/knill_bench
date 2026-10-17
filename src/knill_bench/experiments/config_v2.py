@@ -7,8 +7,14 @@ import json
 import math
 from pathlib import Path
 import re
+from typing import TYPE_CHECKING
 
 import yaml
+
+from .noise_v2 import noise_as_dict, parse_noise, validate_noise
+
+if TYPE_CHECKING:
+    from hex_qec.circuit_generation import FactoryNoiseModel
 
 
 KINDS = {"fig4d_reproduction", "logical_zero_factory", "se_memory"}
@@ -112,11 +118,12 @@ class ExperimentPoint:
     noise: str = "hex_uniform"
     rounds: int | None = None
     get_logicalgap: bool = False
+    noise_model: "FactoryNoiseModel | None" = None
 
     def __post_init__(self):
         _choice(self.kind, KINDS, "kind")
         _choice(self.code, {"rotated_surface"}, "code")
-        _choice(self.noise, {"hex_uniform"}, "noise")
+        validate_noise(self.kind, self.noise, self.noise_model)
         _integer(self.d, "d", 3)
         if self.d % 2 != 1:
             raise ValueError("d must be odd")
@@ -136,6 +143,7 @@ class ExperimentPoint:
                 _integer(getattr(self, name), name)
             if self.rounds is not None or self.get_logicalgap:
                 raise ValueError("rounds/get_logicalgap are supported only for se_memory")
+        validate_noise(self.kind, self.noise, self.noise_model, p=p, r_plus=self.r_plus)
 
     @property
     def final_readout(self):
@@ -147,6 +155,8 @@ class ExperimentPoint:
         # Decoder policy, theta, workers and requested shots cannot change the
         # identity of the physical circuit or its sampling seed.
         result = asdict(self)
+        if self.noise_model is None:
+            result.pop("noise_model")  # Preserve every uniform physical ID/seed.
         result.pop("get_logicalgap")  # An output/inference option, never physical identity.
         if self.kind == "se_memory":
             for name in ("r_0", "r_plus", "T_tel"):
@@ -201,6 +211,15 @@ class ExperimentConfig:
     target_chunk_seconds: float = 1.0
     rounds: int | str = "d"
     get_logicalgap: bool = False
+    noise_model: "FactoryNoiseModel | None" = None
+
+    def __post_init__(self):
+        validate_noise(self.kind, self.noise, self.noise_model)
+        if self.noise_model is not None:
+            for d in self.distances:
+                r_plus = _resolve_rounds(self.r_plus, d, "r_plus")
+                for p in self.probabilities:
+                    validate_noise(self.kind, self.noise, self.noise_model, p=p, r_plus=r_plus)
 
     @property
     def output_buffer_shots(self):
@@ -208,6 +227,9 @@ class ExperimentConfig:
 
     def as_dict(self):
         result = asdict(self)
+        result.pop("noise_model")
+        if self.noise_model is not None:
+            result["noise"] = noise_as_dict(self.noise_model)
         # Preserve canonical hashes of existing configurations with full validation.
         if not result["skip_circuit_validation"]:
             result.pop("skip_circuit_validation")
@@ -253,7 +275,7 @@ class ExperimentConfig:
                     continue
                 yield ExperimentPoint(self.kind, d, p, _resolve_rounds(self.r_0, d, "r_0"),
                                       _resolve_rounds(self.r_plus, d, "r_plus"), self.T_tel,
-                                      self.code, self.noise)
+                                      self.code, self.noise, noise_model=self.noise_model)
 
 
 @dataclass(frozen=True)
@@ -274,6 +296,7 @@ def parse_config(raw) -> ExperimentConfig:
     if type(raw.get("schema_version")) is not int or raw["schema_version"] != 2:
         raise ValueError("schema_version must be 2")
     kind = _choice(raw.get("kind"), KINDS, "kind")
+    noise, noise_model = parse_noise(raw.get("noise", "hex_uniform"), kind)
     if kind != "se_memory" and {"rounds", "get_logicalgap"} & raw.keys():
         raise ValueError("rounds/get_logicalgap are supported only for se_memory")
     if kind == "se_memory" and {"r_0", "r_plus", "T_tel", "theta", "create_codecapacity_dem"} & raw.keys():
@@ -338,14 +361,14 @@ def parse_config(raw) -> ExperimentConfig:
     return ExperimentConfig(
         kind, name, ds, ps, output,
         _choice(raw.get("code", "rotated_surface"), {"rotated_surface"}, "code"),
-        _choice(raw.get("noise", "hex_uniform"), {"hex_uniform"}, "noise"),
+        noise,
         rounds["r_0"], rounds["r_plus"],
         _integer(raw.get("T_tel", 8 if kind == "fig4d_reproduction" else 1), "T_tel"),
         theta, policy, _choice(raw.get("decoder", "mwpm"), {"mwpm"}, "decoder"),
         _integer(raw.get("shots", 64), "shots"), batch,
         _integer(raw.get("workers", 1), "workers"),
         _integer(raw.get("master_seed", 12345), "master_seed", 0, 2**64 - 1),
-        skip_validation, buffer, target, memory_rounds, get_gap,
+        skip_validation, buffer, target, memory_rounds, get_gap, noise_model,
     )
 
 

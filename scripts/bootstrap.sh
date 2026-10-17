@@ -17,7 +17,7 @@ checkout() {
         exit 1
     fi
 }
-checkout Hex https://github.com/AKTKN/Hex.git 4278d2900626f1d120d611f209340b20a9370f91
+checkout Hex https://github.com/AKTKN/Hex.git 86c9495094801012b9912bd41935ae48b08d8f92
 checkout lomatching "${KNILL_LOMATCHING_URL:-https://github.com/AKTKN/lomatching.git}" b55a7a65969a106a547622287b620f0da2cb5e39
 checkout surface-sim "${KNILL_SURFACE_SIM_URL:-https://github.com/AKTKN/surface-sim.git}" 493f800a3b4e9f80a6a569eb92d3c962dd6b09ad
 # Conda owns Python/pip; all scientific and notebook packages use pip locks.

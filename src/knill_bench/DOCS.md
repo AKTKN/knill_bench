@@ -14,7 +14,7 @@ filename, seed, metadata, shape, crash policy and phase boundary. Other packages
 [circuits](circuits/DOCS.md), [decoding](decoding/DOCS.md) and
 [simulation](simulation/DOCS.md).
 
-Hex is pinned to H5 4278d2900626f1d120d611f209340b20a9370f91.
+Hex is pinned to HEX-N2 86c9495094801012b9912bd41935ae48b08d8f92 (H5 lineage).
 B0 verifies actual exported interfaces and Git lineage read-only; it does not
 build a sampler/decoder or implement science runners. Fig.4(d) full Knill and
 the ideal terminal factory oracle remain distinct experiments. No oracle truth
@@ -118,3 +118,12 @@ get_logicalgap adds one cached opposite-observable-class graph via
 or exposing truth to inference. All original v1/B1/B2 numerical sources and
 Hex remain unchanged. [Memory guide](../../docs/se_memory.md) defines noisy
 boundaries, rounds, scores, compatibility filename keys and validation limits.
+
+
+
+
+BENCH-N1 adds factory-only custom physical-noise YAML, native immutable
+parameters and strict pre-output validation. Uniform identities remain exact;
+Fig.4(d)/SE memory reject the custom mapping explicitly. See
+[custom noise](../../docs/factory_custom_noise.md) for channels/timing,
+configuration, inference boundaries and the two-stage integration contract.

@@ -510,3 +510,58 @@ failure/restart pass. Real local three-shot direct/PBS wrappers and completed
 resume, shell syntax and pip check pass. TEST.md records exact commands and
 the corrected invalid monkeypatch test. No production sweep, performance
 claim or real cluster qsub was performed.
+
+
+## BENCH-N1 factory custom noise schema (2026-10-17)
+
+Starting bench checkout: clean auxiliary-system e0a5481, matching origin after
+fetch. Existing Hex worktree is clean at separately committed/pushed HEX-N2
+86c9495094801012b9912bd41935ae48b08d8f92. Updated the bench's exact pin,
+bootstrap and provenance/API audit to that existing revision. No dependency
+source/version, other fork ref, numerical lock or unrelated protocol changed.
+
+noise_v2 maps strict YAML to native frozen FactoryNoiseModel/idle-window
+objects without a physical backend. Added optional typed parameters to v2
+config/points and complete custom physical/config identities. Uniform None
+is omitted from canonical forms, retaining all old hashes/IDs/seeds (golden
+checks for factory/Fig.4(d)/memory). Unknown/duplicate keys, unsafe/malformed
+noise, bool/expression/nonfinite/negative numerics and invalid resolved
+probabilities/domains at every d/p point fail before output. Fig.4(d)/SE memory
+raise the exact required factory-only custom-noise error. Only d/p sweep.
+Threshold/prior/workers/shots remain outside physical seed identity. Custom
+filenames use noisemodel=custom; paired table schemas are unchanged.
+
+Added a commented seven-shot template and noise/timing/inference guide. N1
+explicitly refuses custom physical run/compile pending N2, preventing silent
+uniform execution at this checkpoint; validate/prepare support the new schema.
+N2 is the next authorized stage, with no production sweep authorized.
+
+Validation so far:
+- `bash scripts/python.sh -m pytest -q tests/test_v2_factory_noise.py tests/test_v2_config.py`
+  — 124 passed, 1.52 s.
+- Initial `bash scripts/python.sh -m pytest -q` — 407 passed, 2 failed,
+  928 inherited-category warnings, 193.22 s. Both failures were old test regexes
+  expecting 'must descend from H5' after the deliberately updated provenance
+  message identifies HEX-N2. The actual rejection behavior was correct.
+  Updated only the two pin/audit test names/messages; no physics assertion or
+  production algorithm was weakened. The isolated old cluster test similarly
+  gave 3 passed/1 failed in 1.26 s before correction.
+- `bash scripts/python.sh -m pytest -q tests/test_cluster_packaging.py tests/test_v2_factory_noise.py tests/test_v2_config.py`
+  — 128 passed, 2.20 s after the first regex fix.
+- `bash scripts/python.sh -m pytest -q tests/test_cluster_packaging.py tests/test_v2_storage.py tests/test_v2_factory_noise.py tests/test_v2_config.py`
+  — 153 passed, 4.12 s after both regex fixes.
+- `bash scripts/python.sh -m knill_bench.experiments.cli validate-config configs/templates/logical_zero_factory_custom_noise.yaml`
+  passes, showing canonical full noise/defaults and compact custom filenames.
+- `bash -n scripts/bootstrap.sh` and `git diff --check` pass.
+
+Full clean rerun result will be appended before the N1 commit. All original
+v1/Fig.4(d)/memory/factory physical tests and user example budgets remain;
+new N1 cases construct no physical circuit. No .venv, source reset, dependency
+edit, production run or cluster submission was performed.
+
+Final BENCH-N1 full gate: `bash scripts/python.sh -m pytest -q` — **409 passed**,
+928 existing-category warnings, **185.19 s**. This includes all 369 inherited
+bench cases plus 40 new schema cases, with uniform physics/seed and pin/API
+binding checks. Both obsolete error-message assertions are fixed and no test
+is deselected. N1 is complete; N2 integration is next. All dependency source
+checkouts remain unchanged by bench.

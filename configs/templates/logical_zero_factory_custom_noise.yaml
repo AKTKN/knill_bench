@@ -1,0 +1,38 @@
+# Small runnable custom-noise factory example (BENCH-N2 physical integration).
+# All multipliers scale p; durations are normalized real times, not d rules.
+schema_version: 2
+kind: logical_zero_factory
+name: custom_idle_factory
+output_root: results
+code: rotated_surface
+noise:
+  model: custom
+  multipliers:
+    one_qubit: 0.1     # DEPOLARIZE1 after each native one-qubit gate.
+    two_qubit: 1.0     # DEPOLARIZE2 after each native two-qubit gate.
+    idle: 0.2          # Base idle rate multiplier, before window scaling.
+    measurement: 2.0   # Basis-appropriate Pauli readout flip.
+    reset: 1.0         # Basis-appropriate post-reset Pauli flip.
+  idle_windows:
+    post_cnot_control:
+      duration: 2.0       # On survivor data after the COMPLETE CNOT.
+      rate_multiplier: 5.0
+    during_plus_preparation:
+      enabled: true      # Stored memory waits only at stages after the first.
+      se_round_duration: 1.0 # Total duration = resolved r_plus * this value.
+      rate_multiplier: 1.0
+# No generic hardware schedule/idles beyond these two disjoint windows.
+sweep:
+  d: [3]
+  p: [0.001]
+r_0: d
+r_plus: d
+T_tel: 2
+theta: null              # Saved-data analysis only, never sampling selection.
+create_codecapacity_dem: false # True uses the existing restricted LOCAL prior.
+decoder: mwpm
+shots: 7
+batch_size: auto         # Use an integer for exact fixed-partition replay.
+buffer_shot: 3
+workers: 1
+master_seed: 12345

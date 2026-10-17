@@ -48,11 +48,11 @@ def test_wheel_rejects_changed_or_missing_scientific_resources(tmp_path, change)
         provenance.source_info(module)
 
 
-def test_installed_hex_still_requires_pinned_h5_provenance(monkeypatch):
+def test_installed_hex_still_requires_pinned_hex_n2_provenance(monkeypatch):
     info = dict(checkout=None, commit=provenance.HEX_REVISION,
                 verified_ancestor=provenance.HEX_REVISION, install_kind="wheel")
     monkeypatch.setattr(provenance, "source_info", lambda module: info.copy())
     assert provenance.validate_hex()["required_revision"] == provenance.HEX_REVISION
     info["commit"] = "a"*40
-    with pytest.raises(RuntimeError, match="must descend from H5"):
+    with pytest.raises(RuntimeError, match="must descend from HEX-N2"):
         provenance.validate_hex()

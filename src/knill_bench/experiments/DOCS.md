@@ -86,7 +86,7 @@ The active research interpreter is Conda knill_system (Python 3.12.15), not
 .venv. `provenance.source_info` preserves checkout provenance and additionally
 accepts the cluster builder's _build_info.json after hashing every installed
 Python/matrix resource. Wheel mode records checkout:null and install_kind:wheel.
-Hex wheel mode requires the exact pinned H5 commit and verified H5 marker plus
+Hex wheel mode requires the exact pinned HEX-N2 commit and verified ancestor marker plus
 existing API checks; ordinary unstamped wheels are not silently trusted.
 Source resume hashes remain strict. See [cluster setup](../../../docs/cluster_setup.md).
 
@@ -146,3 +146,20 @@ contracts, with strict requested-score checks. adaptive_execution now compiles
 HexMemory and accepts its optional gap table; no old runner physics changes.
 Point labels and gaps are returned only after full physical sampling. See
 [memory guide](../../../docs/se_memory.md) for CLI/config/output semantics.
+
+
+
+
+## BENCH-N1 factory custom noise schema
+
+noise_v2.py maps strict custom YAML to Hex's frozen FactoryNoiseModel and
+canonical nested YAML form without circuit construction. config_v2 adds optional
+noise_model to configs/points while keeping noise as the short filename label.
+Uniform None is omitted from canonical config/physical identity, retaining old
+hashes/seeds. Custom full parameters enter both identities and pickle safely
+for spawn. Probability products/idle domains are checked at every resolved
+point before output; only factory accepts custom. Threshold/prior/workers/shots
+remain outside physical seeds. Provenance/bootstrap pin HEX-N2 86c9495 and
+inspect the optional noise_model builder interface. See
+[custom noise](../../../docs/factory_custom_noise.md). N1 explicitly refuses
+custom physical execution pending N2, while validate/prepare remain available.
