@@ -160,25 +160,26 @@ bootstrap 自体の環境名は knill_system です。異なる環境を更新�
 
 `scripts/cluster_run_simualtion.sh` はユーザー提供のファイル名を維持した
 PBS 用スクリプトです。先頭の select/ncpus/walltime/ログ出力先をクラスタの
-規約に合わせて編集し、リポジトリ直下から送信します。nodefile の fallback を
-使うため、例では mpiprocs と ncpus を同じ 96 にしています（MPI は起動しません）。
+規約に合わせて編集し、リポジトリ直下から送信します。ワーカー数は YAML の
+`workers` に指定し、PBS で予約する CPU 数に合わせてください。スクリプトは
+Conda の有効化と CLI の起動だけを行い、CPU 数の推定・ワーカー数の上書きは
+行いません。nodefile を使わないため、このランチャーに mpiprocs 指定は不要です。
 
 ```bash
 mkdir -p logs
 qsub -v CONFIG_FILE=configs/cluster_factory.yaml,KNILL_CONDA_ENV=knill_system \
   scripts/cluster_run_simualtion.sh
-# 割当より少ない worker に制限する例:
-qsub -v CONFIG_FILE=configs/cluster_factory.yaml,WORKERS=8 \
-  scripts/cluster_run_simualtion.sh
+# 例: configs/cluster_factory.yaml に workers: 96 を指定。
 # 失敗・中断 run の再開（保存済み workers を収容できる CPU 割当が必要）:
 qsub -v RESUME_RUN=results/RUN_DIRECTORY scripts/cluster_run_simualtion.sh
 ```
 
 CONFIG_FILE の既定値は小さな factory テンプレートです。Fig.4(d) YAML にも
-差し替えられます。実験予算を確認してから送信してください。PBS_NCPUS、未設定なら
-PBS_NODEFILE の行数を CPU 割当として読み取り、--workers で実効設定に保存します。
-両方が無ければ 1 worker です。WORKERS が割当を超えた場合、または nodefile が
-複数ノードを含む場合は停止します。単一ノードの process pool で、MPI ではありません。
+差し替えられます。実験予算を確認してから送信してください。PBS_NCPUS、
+PBS_NODEFILE、WORKERS は参照せず、`run CONFIG` を直接起動します。
+YAML は元のバイト列で保存されます。再開時は既存 RUN の保存済み workers を
+使います。過去に workers: 1 で保存された RUN は再開しても 1 のままです。
+単一ノードの process pool で、MPI ではありません。
 数値ライブラリのスレッド数は 1 に固定し、PBS_O_WORKDIR に移動してから実行します。
 
 非対話シェルで conda が見つからない場合は `CONDA_BASE=/path/to/anaconda3` を

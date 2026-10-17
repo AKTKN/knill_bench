@@ -654,3 +654,20 @@ schema/parallel/getting-started guides. The commented config was added in N1.
 There are no known failing bench tests. Model/graph restrictions and the
 specified local preparation/storage approximation remain. Stop after N2
 commit/push; no production sweep or further protocol extension is authorized.
+
+## 2026-10-17 — Simple PBS launcher
+
+The requested PBS simplification removes CPU/nodefile inference, WORKERS and
+automatic --workers overrides, allocation guards and the separate preflight
+CLI invocation. The wrapper activates Conda and invokes one run/resume command.
+Workers come from input/saved YAML; the PBS example requests one 96-CPU node
+without mpiprocs. BLAS/OpenMP threads remain one. Cluster/getting-started and
+parallel-execution guides now describe this contract. Python CLI, schedulers,
+simulation configuration/data schemas and dependency sources are unchanged.
+
+All eight updated shell-interface regressions pass. An actual local Conda
+wrapper smoke used d3/T1/three shots and YAML workers=2 with a one-entry
+nodefile and WORKERS=1; exact saved YAML, workers=2 and completed resume pass.
+TEST.md records commands and the full regression result.
+Full gate: `bash scripts/python.sh -m pytest -q` — **443 passed**, 1112
+inherited-category warnings, **221.51 s**. No failures or exclusions.

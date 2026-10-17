@@ -127,18 +127,20 @@ to the diagnostic process and is restored on exit, including timeout.
 `cluster_run_simualtion.sh` (user's original spelling retained) now invokes the
 v2 CLI for either experiment after activating KNILL_CONDA_ENV (default
 knill_system). CONFIG_FILE defaults to the small factory template; RESUME_RUN
-selects saved-run continuation. PBS_NCPUS or nodefile slot count sets workers;
-WORKERS can lower it. Oversubscription/multi-node requests fail. BLAS/OpenMP
-threads are 1. run --workers saves effective YAML; resume retains saved workers
-and checks allocation. Setup stays on the login node, via the exact-ref Conda
-bootstrap. See [clone/setup/qsub instructions](../docs/cluster_setup.md).
+selects saved-run continuation. Worker count comes directly from the input
+YAML (or saved YAML on resume); set it to match the single-node PBS allocation.
+The wrapper runs one CLI command without --workers, allocation inference or
+nodefile checks. PBS_NCPUS/PBS_NODEFILE/WORKERS do not affect its invocation;
+mpiprocs is not required. BLAS/OpenMP threads are 1. Setup stays on the login
+node, via the exact-ref Conda bootstrap. See
+[clone/setup/qsub instructions](../docs/cluster_setup.md).
 
 ## Ordinary SE memory launcher
 
 run_se_memory.sh [CONFIG] invokes the v2 run command through python.sh; default
 is configs/se_memory_v2_example.yaml (small d3/5 example, not launched by tests).
 PBS cluster_run_simualtion.sh already accepts this kind via CONFIG_FILE.
-Same Conda selection/worker overrides apply; no extra dependencies or cluster
+Same Conda selection/YAML worker settings apply; no extra dependencies or cluster
 script changes are required. See [memory guide](../docs/se_memory.md).
 
 

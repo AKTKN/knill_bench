@@ -95,13 +95,15 @@ fresh runs under the strict resume provenance rules.
 
 See [cluster setup](cluster_setup.md) and
 [scripts/cluster_run_simualtion.sh](../scripts/cluster_run_simualtion.sh).
-The script uses the allocated CPUs (or WORKERS up to that allocation) through
-`knill-bench-v2 run CONFIG --workers N`. validate-config and prepare also accept
-this override. The original file is never edited. With an override, the exact
-**effective** YAML is saved in the run, prefixed by the original input SHA256;
-metadata/config hashes describe the effective settings. With no override,
-original input bytes, including comments, are preserved as before. Resume uses
-the saved workers/config and checks the allocation can accommodate them.
+The script activates Conda and invokes `run CONFIG` directly. Set workers in
+the YAML to match the single-node PBS allocation. The launcher does not infer
+CPUs from PBS_NCPUS/PBS_NODEFILE, read WORKERS, or pass --workers; mpiprocs is
+not needed by this launcher. Original YAML bytes, including comments, are
+preserved. RESUME_RUN invokes resume directly with the saved workers/config.
+
+For direct CLI use, run/prepare/validate-config still accept --workers N.
+That explicit override saves the effective YAML prefixed by the original
+input SHA256; metadata/config hashes describe the effective settings.
 
 ## Reference and validation scope
 

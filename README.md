@@ -119,7 +119,8 @@ V2 defaults to time-adaptive parallel chunks: set `workers`, optional
 `target_chunk_seconds` (default 1), and `buffer_shot` (default 10000).
 Multiple workers can share one d/p point; results append in buffer-sized
 Parquet groups. Integer `batch_size` retains the fixed execution/replay path.
-See [parallel execution](docs/parallel_execution.md) for memory bounds, seeds
+The PBS launcher uses the YAML worker count directly. See
+[parallel execution](docs/parallel_execution.md) for memory bounds, seeds
 and [PBS / Anaconda clone instructions](docs/cluster_setup.md).
 
 ## Ordinary SE memory

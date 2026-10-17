@@ -387,3 +387,19 @@ gap gate: 199 passed, 348 warnings, 36.91 s. Three-shot custom True shell/CLI
 run/completed-resume/saved-analysis, pip check and compile/link integrity pass.
 TEST.md records exact commands and the N1 provenance-message assertion fixes.
 Both bench stages are complete after the N2 commit/push; no production runs.
+
+## User-requested simple PBS launcher
+
+The user explicitly requested removing PBS CPU inference and worker overrides.
+scripts/cluster_run_simualtion.sh now activates Conda and calls run CONFIG or
+resume RUN directly. Workers come from input/saved YAML. PBS_NCPUS,
+PBS_NODEFILE and WORKERS are not read; mpiprocs is not required by the wrapper.
+Keep select=1 and choose YAML workers to match the requested CPU allocation.
+This supersedes the historical PBS allocation/node guards and automatic
+--workers behavior above. BLAS/OpenMP threads remain one. Direct CLI --workers
+is still available explicitly; scheduler/physics/resume contracts are unchanged.
+
+Latest gate: `bash scripts/python.sh -m pytest -q` — 443 passed, 1112 existing-
+category warnings, 221.51 s. Eight shell-interface cases and an actual local
+three-shot run/completed-resume verify exact YAML and worker preservation with
+a one-entry nodefile. No production sweep or real cluster submission ran.

@@ -124,8 +124,10 @@ out-of-order windows, exact buffer row groups/alignment, invalid-result abort,
 whole-point restart/completed preservation, real d3 seven-shot serial/spawn
 runs for full Knill and both factory priors, worker-cache reuse and explicit
 chunk-seed replay. Existing fixed-mode serial/spawn equality is retained.
-`test_cluster_script.py` exercises PBS/Conda invocation and allocation guards
-with stub executables. No production or throughput benchmarks run in tests.
+`test_cluster_script.py` exercises Conda activation, quoted config paths,
+single-command run/resume and YAML worker preservation with stub executables.
+PBS CPU environment variables and a one-entry nodefile cannot inject a worker
+override. No production or throughput benchmarks run in tests.
 
 ## Ordinary memory and complementary gap
 

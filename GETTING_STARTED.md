@@ -60,9 +60,11 @@ Use `batch_size: auto` (or omit it), `target_chunk_seconds: 1.0` and
 writing result rows in bounded groups. Multiple workers can share a single
 point. Integer batch_size keeps fixed partitioning for exact seeded replay;
 auto partitions depend on timing. See [parallel execution](docs/parallel_execution.md).
-For a cluster CPU allocation, `knill-bench-v2 run my_factory.yaml --workers 8`
-saves the effective worker setting without editing the input file. PBS/Conda
-clone, setup and submission instructions are in [cluster setup](docs/cluster_setup.md).
+For PBS, set `workers` in the YAML to match the single-node CPU allocation;
+the launcher passes the config directly to `run`. Direct CLI use also supports
+`knill-bench-v2 run my_factory.yaml --workers 8` as an explicit override.
+PBS/Conda clone, setup and submission instructions are in
+[cluster setup](docs/cluster_setup.md).
 
 Factory T defaults to one; set T_tel=2 or 3 for fixed role-swapping stages.
 r_0 applies once to initial zero preparation; r_plus applies to each initial/

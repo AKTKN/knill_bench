@@ -1166,3 +1166,32 @@ schema/parallel/getting-started guides. The commented config was added in N1.
 There are no known failing bench tests. Model/graph restrictions and the
 specified local preparation/storage approximation remain. Stop after N2
 commit/push; no production sweep or further protocol extension is authorized.
+
+## 2026-10-17 — Simple PBS launcher
+
+The user requested a Conda/CLI launcher whose worker count comes from YAML.
+Removed PBS_NCPUS/PBS_NODEFILE inference, WORKERS handling, automatic --workers,
+allocation/node guards, saved-worker helper and redundant validate-config
+invocation. run still validates configs through the existing strict parser.
+The example keeps select=1:ncpus=96, without mpiprocs. Resume calls the existing
+CLI directly and preserves saved settings. No Python runtime/physics source,
+simulation config, dependency, environment or result schema was changed.
+
+- `bash scripts/python.sh -m pytest -q tests/test_cluster_script.py`
+  — **8 passed**, **0.81 s**. Stub-executable cases verify Conda/quoting/threads,
+  one-command run/resume, absence of worker overrides under conflicting/missing
+  CPU environment variables and a one-entry nodefile with YAML workers=96.
+- `bash -n scripts/cluster_run_simualtion.sh` and `git diff --check` pass.
+- An actual local smoke harness via `bash scripts/python.sh -` used a
+  TemporaryDirectory and a spaced config path copied from the factory template:
+  d3/p=.001/T1/three shots, workers=2, buffer_shot=3, auto batches. It invoked
+  `bash scripts/cluster_run_simualtion.sh` with PBS_O_WORKDIR set to the checkout,
+  CONFIG_FILE set to that YAML, PBS_NCPUS unset, a one-entry PBS_NODEFILE and
+  WORKERS=1. The completed metadata retained workers=2 and three shots; input
+  and saved config bytes matched exactly. A second identical shell invocation
+  with RESUME_RUN set and PBS_NCPUS=not-used completed successfully. All smoke
+  files were temporary; no production sweep or real cluster submission ran.
+- `bash scripts/python.sh -m pytest -q`
+  — **443 passed**, **1112 inherited-category warnings**, **221.51 s**, no
+  exclusions or failures. All existing science, saved-analysis and resume tests
+  remain green. Hex checkout remains clean; final `git diff --check` passes.
