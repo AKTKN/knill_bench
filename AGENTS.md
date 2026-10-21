@@ -404,6 +404,79 @@ category warnings, 221.51 s. Eight shell-interface cases and an actual local
 three-shot run/completed-resume verify exact YAML and worker preservation with
 a one-entry nodefile. No production sweep or real cluster submission ran.
 
+## User-requested saved-data notebook figures
+
+The user authorized a schema-v2 lazy keyed dataset reader, six notebook figure
+APIs and a shared plotting_lib APS style (300 dpi). See
+[notebook plotting](docs/notebook_plotting.md) and notebooks/saved_figures.ipynb.
+RunRegistry registration must not access files. Figure calls validate selected
+published points and stream saved data only, without simulation/resume. A run
+may still be running; selected unfinished points warn and are excluded.
+Notebook cuts reject gap<=threshold, accepting strictly >; historical B3's
+>= rule remains unchanged. Lifetime counts passed stages 0..T, factory only.
+LER reduction is 1-selected/raw, undefined with zero baseline or no acceptance.
+Factory labels retain their terminal evaluation-oracle meaning.
+
+plotting_lib 0.1.0 is installed editable from the user's external/plotting_lib
+checkout in knill_system. It is optional for notebooks, not a new simulation
+runtime/cluster-wheel dependency. Preserve that checkout, existing data,
+.gitignore edits and notebooks/basics.ipynb. No production sampling is
+requested. Synthetic new tests use six rows; real-data checks are read-only.
+Full gate: 465 passed, 1112 inherited-category warnings, 146.41 s. See TEST.md.
+
+## User-requested reference typography, LaTeX and rounded gap analysis
+
+The notebook style now uses plotting_lib APS as its base with 6x3.6 inch
+figures, 14pt axis labels, 13pt ticks, 12pt legends and 300 dpi. FigureStyle
+supports centralized label overrides, MathText mathrm/mathsf and optional
+actual LaTeX with an explicit minimal preamble. Keep external plotting_lib
+read-only. NotebookPlots round_digit defaults to None; integer values apply
+Decimal ROUND_HALF_UP to all stage gaps before every statistic/cut and both
+lifetime passes. Per-figure overrides include explicit None. Raw validation
+must precede rounding; explicit thresholds and saved tables remain unchanged.
+Optional gap-frequency return_unique adds per-group/per-stage sorted lists.
+See docs/notebook_plotting.md. Full gate: 474 passed, 1112 inherited warnings,
+147.57 s. Real saved-data notebook and actual LaTeX PNG/PDF smokes pass.
+
+## User-requested lifetime fractions and capped mean
+
+plot_lifetime now shows all-shot 100% stacked lifetime fractions (color=L,
+group=hatch) and default dashed mean lifetime curves on an independently
+scaled right axis. This supersedes the earlier notebook boxplot. All means
+are empirical over 0..T, with T for full survivors; no unobserved long-time
+lifetime is inferred. show_mean=False hides the second axis; return_summary=True
+adds grouped thresholds/T/shots/counts/fractions/mean_lifetime. Strict cuts,
+round_digit, bounded histograms and saved-data-only behavior are unchanged.
+See docs/notebook_plotting.md. Keep user-chosen notebook thresholds intact.
+Full gate: 478 passed, 1112 inherited warnings, 239.53 s. Real-data exports and
+all notebook cells pass; only lifetime-related source outputs were refreshed.
+
+## User-requested postselected-LER x tick spacing
+
+The postselected-LER p axis now uses about five regular 1/2/5 intervals,
+concise ScalarFormatter labels without additive offsets, and major-label
+padding. Shared 13pt ticks and existing curves/cuts remain unchanged. The
+notebook's user-selected settings/thresholds are preserved. Full gate:
+478 passed, 1112 inherited warnings, 99.35 s. Actual PNG/PDF and notebook-cell
+renders pass, with renderer-confirmed non-overlapping x labels.
+
+## User-requested pointwise Wilson shades
+
+WilsonInterval in analysis/confidence.py is the shared scalar/broadcast score
+interval class, default confidence=.95. Five non-lifetime notebook figure types
+now shade their intervals by default; the stacked lifetime figure, including
+its mean, stays unshaded. Preserve point estimates, raw counts, strict cuts,
+rounding, seeds and simulation/legacy CLI behavior. Conditional intervals use
+accepted denominators; frequency count bounds are N times category-probability
+bounds; per-round normalization transforms both endpoints. Undefined cases
+stay NaN. Reduction is not binomial: use a=P(accept), b=P(accept|error), paired
+ratio=b/a and a two-component Bonferroni Wilson envelope (97.5% each at the
+default). State this is Wilson-derived/nominal, without independent-sample,
+exact finite-sample or simultaneous/data-selected-cut coverage claims.
+FigureStyle.shade_alpha defaults .18. See docs/notebook_plotting.md for the
+formula and primary references. Full gate: 501 passed, 1112 inherited warnings,
+109.71 s. Preserve user notebook parameters and unrelated/lifetime outputs.
+
 ## User-authorized general Knill EC and physical noise (2026-10-22)
 
 The user authorized editing both Hex/bench, small tests/smokes, documentation

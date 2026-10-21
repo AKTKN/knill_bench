@@ -11,3 +11,5 @@ AFT
 implementation
 cluster
 scripts/cluster.sh
+scripts/extract.sh
+scripts/fetch_cluster.sh

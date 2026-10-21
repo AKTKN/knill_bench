@@ -1,5 +1,37 @@
 # Bench regression tests
 
+`test_notebook_plotting.py` uses only six-row synthetic v2 tables (no physical
+sampling). It checks lazy keyed registration, scalar/membership/alias filters,
+unambiguous grouping, all six editable figure APIs, APS/300-dpi context/export,
+rounds/T normalization, exact frequencies, strict gap<=cut rejection,
+label-independent selection, negative/undefined reduction, first-rejection
+lifetimes, stacked fraction conservation and capped means, explicit threshold grids/automatic ten-cut
+limit, color/marker/line-style mappings, incomplete-run complete-point reading,
+and schema/paired-ID/null/nonfinite/negative/count/config/unit corruption.
+The optional plotting_lib package must be installed for these rendering tests;
+see [installation](../docs/notebook_plotting.md).
+Additional cases cover optional per-group/all-stage unique returns, Decimal
+half-up ties, shared/per-figure rounding and None overrides across every gap
+plot, both lifetime passes, rounded automatic-grid limits, partition-invariant
+summaries, unchanged raw data and validation of corrupt negative scores before
+rounding. Actual TeX/PDF rendering is a separate environment smoke, not a unit
+test dependency on a TeX installation.
+Lifetime cases check exact all-shot counts/fractions/means at strict-equality
+and infinite cuts, monotone mean versus threshold, grouped stack heights,
+mean-axis opt-out/default returns, label and batch-partition independence,
+and invalid options before I/O. No boxplot/outlier semantics remain in this API.
+Wilson plot cases verify all five shade types, observed versus accepted
+denominators, per-round endpoint transforms, frequency count units, omitted
+undefined/zero-baseline bands, and exclusion of both lifetime axes. Observed
+zero errors retain a positive Wilson upper bound on log plots.
+
+`test_confidence.py` cross-checks Wilson against SciPy's independent score
+implementation across 90/95/99% levels and analytic small integer counts.
+It covers boundaries, broadcast shapes, empty denominators, count units,
+per-round transforms, paired reduction/error-retention identity with Bonferroni
+adjustment, structural no-cut versus observed all-pass, undefined estimates
+and invalid counts/paired cells/options. No Monte Carlo or storage fixture.
+
 The original `test_circuits`, `test_decoding`, `test_execution` and
 `test_analysis_plotting` files exercise v1 signed circuit/DEM invariants,
 native comparisons, bounded execution/resume/streaming, statistical summaries

@@ -212,6 +212,14 @@ require today's environment to match the simulation environment.
 - `analysis.factory_cost.first_rejected_stage(gaps, theta)` -> 0 accepted or first rejected stage 1..T.
 - `analysis.factory.write_report(report, output)` -> optional artifact path.
 - `analysis.fig4d.summarize_saved(path)` / `plot_saved(path, output)` -> saved full-Knill statistics/figure.
+- `analysis.RunRegistry({key: run_path})`, `NotebookPlots(data)` and `FigureStyle()`
+  -> lazy saved-data comparisons and six editable APS/300-dpi figure types.
+  See [the notebook guide](docs/notebook_plotting.md) and
+  [executable examples](notebooks/saved_figures.ipynb); install the optional
+  local `external/plotting_lib` package in the notebook kernel environment.
+- `analysis.WilsonInterval().bounds(successes, trials)` -> pointwise score bounds;
+  notebook plots apply default 95% shades to the five non-stacked figure types.
+  Reduction uses the paired Wilson-derived construction in the notebook guide.
 
 ```bash
 python -m pytest -q

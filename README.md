@@ -2,6 +2,12 @@
 
 Reproducible physical Stim memory experiments comparing repeated surface-code syndrome extraction with three Knill strategies. The package uses the requested Hex checkout and user-owned LOM/surface-sim forks. It keeps circuit identity, decoder choice, classical work, and live hardware resources separate.
 
+Saved v2 datasets can also be compared from notebooks with lazy keyed path
+registration, six editable figure types and `plotting_lib` APS styling at
+300 dpi. Five non-stacked figures include pointwise 95% Wilson shades
+(paired Wilson-derived bounds for LER reduction). See [the notebook guide](docs/notebook_plotting.md) and
+[the example notebook](notebooks/saved_figures.ipynb).
+
 The research environment is now **Conda `knill_system`**. Run bootstrap below
 or see [Conda/cluster setup](docs/cluster_setup.md) for environments.yaml,
 locked notebook/analysis tools and resource-complete offline wheel bundles.

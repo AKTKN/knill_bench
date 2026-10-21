@@ -1196,6 +1196,246 @@ simulation config, dependency, environment or result schema was changed.
   exclusions or failures. All existing science, saved-analysis and resume tests
   remain green. Hex checkout remains clean; final `git diff --check` passes.
 
+## 2026-10-21 — Lazy saved-data notebook plots
+
+Scope: new analysis/saved_data.py, notebook_plotting.py and figure_style.py,
+lazy public exports, six-row synthetic tests, the new saved_figures notebook,
+and documentation. No circuit, decoder, runner, schema, dependency pin,
+numerical lock, original experiment data or v1/B3 numerical source changed.
+Incoming .gitignore and untracked notebooks/basics.ipynb remain untouched.
+
+- `bash scripts/python.sh -m pip install --no-deps --no-build-isolation -e external/plotting_lib`
+  installed plotting_lib 0.1.0 in Conda knill_system from the user's existing
+  clean checkout f0837a9d2f7f20268ebf705a00731a10c648ad3c. No dependency upgrade.
+- `bash scripts/python.sh -m pytest -q tests/test_notebook_plotting.py`
+  initially produced 3 failures / 19 passes. Two assertions incorrectly treated
+  the sole gap>2 survivor as error-free; its label is True, so accepted_errors=1
+  and reduction=-1. The third expected default key/d/p groups to be ambiguous,
+  though those groups each contain one point. Corrected the expected values
+  and made the ambiguity test explicitly group_by=d. No selection rule changed.
+  Rerun: **22 passed, 5.51 s**. The tests validate lazy/no-IO registration and
+  key exclusion, aliases/membership, all six editable figures, exact strict
+  cuts/abort and label-independent acceptance, unequal batch/row-group bounds,
+  rounds/T normalization, frequency, lifetime quartiles, >10 unique-cut error,
+  negative/undefined reductions, group/threshold style mapping, incomplete-run
+  publication and missing/null/nonfinite/negative/schema/ID/count/config/unit
+  rejection. Synthetic points contain six rows; no physical sampling added.
+- `bash scripts/python.sh -m pytest -q`
+  — **465 passed**, **1112 inherited-category warnings**, **146.41 s**.
+  No failures, exclusions or new warning category.
+- `bash scripts/python.sh -m pip check` — no broken requirements.
+- A `bash scripts/python.sh -` saved-only import check verifies that importing
+  NotebookPlots/RunRegistry/FigureStyle loads no stim, hex_qec, pymatching or
+  experiments.run_v2. No source/environment compatibility check or native
+  constructor is invoked by saved-only plotting.
+- A read-only `bash scripts/python.sh -` rendering harness validated the new
+  notebook with nbformat and generated all six figures as PNG/PDF under
+  ignored results/notebook_plotting_smoke. It used the supplied saved fig4d/
+  memory d9 data for the per-round comparison and factory d5/p=.001 (plus d5's
+  p sweep for the sixth figure). Factory d5/p=.001 contains 1,000,000 shots,
+  609 labels, 20 exact unique all-stage scores and 17 first-stage scores.
+  Tested strict-cut curves, T_idx frequency, explicit lifetime cuts [0,2,4],
+  unnormalized selected LER, editable axes and 300-dpi exports. Viewed rendered
+  lifetime/postselection images. Exact near-equal floating gaps remain distinct.
+- `bash scripts/python.sh -m jupyter kernelspec list --json` confirmed the
+  existing knill_system kernel uses the intended Conda interpreter.
+- Exploratory JSON inspection of the pre-existing basics.ipynb failed because
+  that user file is empty; it was preserved and a separate valid notebook was
+  created. `git diff --check` initially caught a documentation EOF blank line;
+  removed it. Final checks and notebook execution are recorded below.
+- Executed every cell against supplied saved data, using the intended kernel:
+
+  ```bash
+  bash scripts/python.sh - <<'PY'
+  from pathlib import Path
+  import nbformat
+  from nbclient import NotebookClient
+  notebook = nbformat.read('notebooks/saved_figures.ipynb', as_version=4)
+  nbformat.validate(notebook)
+  NotebookClient(notebook, timeout=120, kernel_name='knill_system').execute()
+  nbformat.write(notebook, Path('results/notebook_plotting_smoke/saved_figures.executed.ipynb'))
+  PY
+  ```
+
+  All cells passed, including all distances in the notebook's factory figures
+  and [0,6,8] explicit lifetime/postselection thresholds. Only saved data was
+  read. The executed notebook is ignored; the source notebook retains no output.
+- Final `bash scripts/python.sh -m compileall -q src`, `git diff --check`, local
+  Markdown-link checks and dependency `git status --short` checks pass. Hex and
+  plotting_lib checkouts remain clean. No new sweep or physical timing run.
+
+## 2026-10-21 — Reference typography / LaTeX / round_digit
+
+- `bash scripts/python.sh -m pytest -q tests/test_notebook_plotting.py`
+  first ran **30 passed / 1 failed**. The new raw-negative validation fixture
+  attempted to save -.01 through PointWriter, whose existing writer correctly
+  rejects negative scores. Changed the fixture to corrupt the Parquet column
+  after a valid publication, as in existing corruption cases. The selected-LER
+  zero-error fixture explicitly captures the expected log-axis warning.
+  Rerun: **31 passed, 7.21 s**, no uncaptured warnings.
+  Added cases cover per-group/per-stage unique-list return/old tuple arity,
+  half-up ties (1.25, 2.675, .005), negative digits, raw-array preservation,
+  shared/per-plot/None rounding overrides for every gap figure, both lifetime
+  passes, rounded automatic-grid limits, partition-invariant summaries,
+  invalid options before I/O and raw-negative validation before rounding.
+- `bash scripts/python.sh -m pytest -q` — **474 passed**, **1112 inherited-
+  category warnings**, **147.57 s**. No failures or exclusions. No new physical
+  fixtures or Monte Carlo runs; new cases use six-row synthetic saved data.
+- `bash scripts/python.sh -m pip check` — no broken requirements.
+- A read-only `bash scripts/python.sh -` render harness used FigureStyle with
+  reference typography and labels mapping Physical error rate to a mathrm
+  label and logical error rate to p_L. Actual Fig.4(d) saved data rendered to
+  results/notebook_plotting_refinement/reference_style.png/.pdf; separately
+  `FigureStyle(usetex=True, labels=...)` rendered mathrm/mathsf labels to
+  latex_style.png/.pdf using the system latex/dvipng and minimal amsmath
+  preamble. Viewed both images. No TeX/package/dependency sources were edited.
+- The same harness used factory d5/p=.001 with NotebookPlots(round_digit=6)
+  and gap-frequency return_unique=True. Each of eight stages has nine rounded
+  unique values; the original first stage has seventeen exact values. Saved
+  rounded_gap_frequency.png as a read-only data smoke, not a simulation.
+- Executed the updated notebook with:
+
+  ```bash
+  bash scripts/python.sh - <<'PY'
+  from pathlib import Path
+  import nbformat
+  from nbclient import NotebookClient
+  notebook = nbformat.read('notebooks/saved_figures.ipynb', as_version=4)
+  nbformat.validate(notebook)
+  NotebookClient(notebook, timeout=120, kernel_name='knill_system').execute()
+  nbformat.write(notebook, Path('results/notebook_plotting_refinement/saved_figures.executed.ipynb'))
+  PY
+  ```
+
+  All cells pass with round_digit=6 and per-group/all-stage unique-list output.
+  Existing notebook source outputs were preserved; the new executed copy is
+  ignored. Local kernel transport and existing font metadata messages are
+  environment diagnostics, not failed tests. No input data was modified.
+- Final `bash scripts/python.sh -m compileall -q src`, `git diff --check`, local
+  Markdown-link checks and dependency `git status --short` checks pass.
+  Incoming .gitignore/basics.ipynb, dependency source and numerical locks remain
+  untouched. No production sampling, new scientific model or cluster job.
+
+## 2026-10-21 — Stacked lifetime fractions / mean
+
+- `bash scripts/python.sh -m pytest -q tests/test_notebook_plotting.py`
+  — **35 passed, 9.89 s** initially; after legend layout refinement,
+  **35 passed, 9.62 s**. No test failures. Replaced private quartile assertions
+  with exact all-shot counts/fractions/means, including strict equality,
+  -/+infinity (all T/all zero), monotone mean, per-group stack height=100%,
+  opt-out of the mean axis, default/optional return arity, row-batch/row-group
+  and truth-label independence, both rounding passes and invalid flags before
+  I/O. New fixtures remain synthetic six-row data; no physical sampling.
+- `bash scripts/python.sh -m pytest -q` — **478 passed**, **1112 inherited-
+  category warnings**, **239.53 s**. No failures or exclusions. No v1/B3,
+  simulator, decoder, dependency or simulation-config changes.
+- A read-only `bash scripts/python.sh -` render used the supplied factory data,
+  p=.001, group_by=d, round_digit=6 and thresholds [0,6,8]. Exact means were
+  d5 [8,7.972604,7.881825], d7 [8,7.99548,7.977105], d11
+  [8,7.99978,7.998529]. The first external-axis legend layout emitted a
+  constrained_layout collapse warning. Replaced it with figure-level outside
+  upper/lower legends and shortened the right-axis label. PNG/PDF exports
+  then pass with layout warnings treated as errors. Viewed the final plot.
+  Independent automatic right-axis limits expose small mean changes; raw
+  fractions stay on a full 0..100% left axis.
+- The first full `NotebookClient(...).execute()` smoke failed on the example's
+  new three-variable return: the keyword insertion assumed the old literal
+  [0,6,8] cut list, while the user's latest cell had [0,10,30]. Added
+  return_summary=True independently of the cut values, preserving the user's
+  list. No package numerical/source fix was needed. Rerunning all cells passes.
+- Full notebook smoke via `bash scripts/python.sh -` used
+  nbformat.read/validate('notebooks/saved_figures.ipynb') and
+  `NotebookClient(notebook, timeout=120, kernel_name='knill_system').execute()`.
+  An in-memory export-check cell saved the current lifetime Figure to
+  results/notebook_lifetime_stacked/lifetime.png and lifetime.pdf; the entire
+  executed copy is results/notebook_lifetime_stacked/saved_figures.executed.ipynb.
+  Only source cells saved-figures-09 and saved-figures-lifetime-means received
+  refreshed execution counts/outputs, after checking that their sources still
+  matched. All unrelated source cells/outputs were preserved. Every cell passes
+  against saved data, with the user's [0,10,30] thresholds unchanged.
+- `bash scripts/python.sh -m pip check` reports no broken requirements.
+  `bash scripts/python.sh -m compileall -q src`, `git diff --check`, local
+  Markdown-link checks and clean Hex/plotting_lib Git checks pass. New outputs
+  are ignored; incoming .gitignore/basics.ipynb and dependency sources remain
+  untouched. No production sampling or cluster execution was performed.
+- A separate `bash scripts/python.sh -` saved-data smoke used
+  FigureStyle(usetex=True), d5/p=.001, round_digit=6 and [0,10,30] cuts, saving
+  results/notebook_lifetime_stacked/lifetime_tex.pdf. Actual LaTeX percent ticks,
+  dual axes, hatches and figure legends render successfully with layout
+  warnings treated as errors.
+
+## 2026-10-21 — Postselected-LER horizontal tick spacing
+
+This is a presentation-only change in analysis/notebook_plotting.py. Existing
+common font sizes, saved-data reading, cut masks, rates and all other plots
+remain unchanged. No new unit fixture, sampling, dependency or config edit.
+
+- `bash scripts/python.sh -m pytest -q` — **478 passed**, **1112 inherited-
+  category warnings**, **99.35 s**. No failures or exclusions.
+- Read-only `bash scripts/python.sh -` rendering used the user's supplied
+  factory run, round_digit=0 and exact call
+  `plot_postselected_logical_error_rate(filter_by={"key":"factory"}, group_by="d", gap_threshold=[0,5,10])`.
+  Before: half-step labels 0.0010, 0.0015, etc. After: five visible labels
+  0.001, 0.002, 0.003, 0.004, 0.005. After fig.canvas.draw(), renderer bounds
+  confirm every adjacent label has >8 pixels separation (actual minimum
+  200.36 pixels at 300 dpi), while all retain fontsize=13. Saved/viewed
+  results/notebook_postselected_ticks/postselected_ler.png and .pdf.
+- A `bash scripts/python.sh -` NotebookClient smoke executed a temporary
+  notebook containing the existing saved-figures-01 initialization and
+  saved-figures-13 postselected plot plus an in-memory export-check cell,
+  with timeout=120 and kernel_name=knill_system. It passes and saves the
+  ignored postselected.executed.ipynb. Only saved-figures-13 output/execution
+  count was refreshed in the source notebook after a source-equality guard;
+  parameters, initialization and every other cell remain unchanged.
+- `bash scripts/python.sh -m compileall -q src`, `git diff --check`, local
+  Markdown-link checks and clean Hex/plotting_lib status checks pass. No
+  dependency source or incoming .gitignore/basics.ipynb change.
+
+## 2026-10-21 — Shared Wilson intervals and notebook shades
+
+- `bash scripts/python.sh -m pytest -q tests/test_confidence.py tests/test_notebook_plotting.py`
+  — **58 passed, 7.43 s**. No failures or uncaptured warnings. The independent
+  SciPy binomtest(...).proportion_ci(method="wilson") implementation agrees
+  across 90/95/99% confidence and analytic integer counts. Checks cover zero/
+  full successes, zero trials, broadcasting, count units, per-round endpoint
+  transforms, invalid counts/shapes/options, paired 2x2 conservation, the
+  error-retention/acceptance ratio identity, Bonferroni-adjusted bounds,
+  structural no-cut versus finite-cut observed all-pass and undefined cases.
+  Plot tests verify every included shade and both excluded lifetime axes,
+  selected denominators and undefined-band omission. Removed the former
+  expected zero-positive-data log warning: zero observed errors now have a
+  positive Wilson upper band. No pseudocount changes the plotted estimate.
+- `bash scripts/python.sh -m pytest -q` — **501 passed**, **1112 inherited-
+  category warnings**, **109.71 s**, no failures/exclusions. New storage/plot
+  cases retain six synthetic rows; statistical count checks do not sample.
+- A read-only `bash scripts/python.sh -` harness ran all six notebook APIs
+  against the supplied factory data, round_digit=0, p=.001 for gap/abort/
+  reduction/lifetime, [0,5,10] selected-LER cuts and [0,10,30] lifetime cuts.
+  Saved PNG/PDF files under ignored results/notebook_wilson_intervals.
+  FillBetweenPolyCollection counts were raw LER=3, frequency=3, abort=3,
+  reduction=3, selected LER=9, lifetime=0. Viewed selected-LER/reduction renders.
+- Full notebook smoke via `bash scripts/python.sh -` used nbformat.read/validate
+  and NotebookClient(notebook, timeout=120, kernel_name='knill_system').execute().
+  In-memory export cells after each non-lifetime plot saved its current
+  Figure (including user semilogy changes) as PNG/PDF. Every cell passed;
+  the executed copy is results/notebook_wilson_intervals/saved_figures.executed.ipynb.
+  Only saved-figures-03/05/07/11/13 output/execution counts were copied back,
+  after checking source equality. Their source code and user parameters,
+  plus every other/lifetime cell and output, were preserved. A short Markdown
+  note documents default shades; no simulation config was edited.
+- `bash scripts/python.sh -m pip check` — no broken requirements.
+  `bash scripts/python.sh -m compileall -q src`, `git diff --check`, local
+  Markdown-link checks and clean Hex/plotting_lib checks pass. A documentation
+  patch initially rejected a stale context; reapplied it against current text.
+  No test/science failure or source fallback resulted.
+
+Statistical definitions follow NIST's Wilson score description, with the
+paired reduction algebra/Bonferroni construction derived and documented in
+[the notebook guide](docs/notebook_plotting.md). These are pointwise nominal
+intervals, without simultaneous or selected-cut coverage claims. V1/B3/CLI
+Wilson/adjusted-Wald contracts, all simulation schemas, physical adapters and
+fork pins are unchanged. No resampling, new experiment or production sweep.
+
 ## General Knill EC memory and physical-noise revision (2026-10-22)
 
 Implemented `kind: knill_ec_memory` with positive T_tel (default 8), while

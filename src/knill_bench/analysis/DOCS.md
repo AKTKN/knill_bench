@@ -1,5 +1,92 @@
 # Saved-data analysis (schema v1)
 
+## Notebook figures (schema v2)
+
+`RunRegistry` (`saved_data.py`) registers keyed run paths without filesystem
+access. At plot time, `select(filter_by)` validates saved config/metadata and
+selects published complete points, warning on selected unfinished points.
+`SavedPoint.batches` streams bounded, schema/ID/count-checked label/gap pairs,
+including different row-group boundaries. Existing uniform/historical prior
+labels and custom-noise execution checks are retained. It never resumes or
+modifies a run. Each plot reloads data; no all-shot cache is kept.
+
+`NotebookPlots` (`notebook_plotting.py`) returns editable Matplotlib `(fig, ax)`
+for LER versus p, exact stage-gap frequencies, abort versus threshold,
+first-rejection lifetime fractions/means, LER reduction, and postselected LER versus p.
+Scalar/membership `filter_by` and scalar/list `group_by` accept key and resolved
+experimental conditions. Ambiguous physical groups raise rather than pool.
+`per_rounds=True` normalizes with `1-(1-LER)**(1/r)` using rounds or T.
+Reduction is `1-selected_LER/raw_LER`; no acceptance or zero baseline gives
+undefined values. Default threshold grids contain all exact unique stage gaps;
+automatic lifetime grids with >10 values raise and request `gap_threshold`.
+Lifetime uses all shots and counts passed stages (0..T), factory only. It now
+shows 100% stacked fractions by lifetime, grouped/hatch-coded bars per cut,
+and default dashed means on an independently scaled right axis. These means
+are capped at the saved T, with no extrapolation beyond the observation window.
+`show_mean=False` hides that axis. Optional `return_summary=True` adds grouped
+thresholds/T/shots/counts/fractions/mean_lifetime arrays. Legends are figure-level
+(`fig.legends`); the primary returned axis shows fractions, `fig.axes[-1]` means
+when show_mean=True.
+Postselected p plots allow exactly one grouping field, color groups and use
+both marker/dashes for up to 12 explicit thresholds, without per-round scaling.
+Their physical-error x axis uses a sparse 1/2/5 regular locator (about five
+intervals), concise ScalarFormatter labels without additive offsets and extra
+major-label padding, retaining the shared tick font size. No data/curve changes.
+
+`WilsonInterval` (`confidence.py`, also lazily exported from analysis) provides
+default 95% two-sided, uncorrected Wilson score bounds for scalar/broadcast
+integer counts. All five non-lifetime notebook plots now draw same-color
+pointwise shades. Frequency uses category count/total shots, scaling bounds
+back to expected-count units unless normalized; abort uses rejected/shots;
+conditional LER uses accepted_errors/accepted. Per-round normalization applies
+the same monotone transform to both endpoints. Zero successes retains a positive
+upper bound; zero denominators remain NaN and receive no shade. FigureStyle's
+shade_alpha defaults to .18. Default plot returns, counts and lines are unchanged.
+
+Reduction is not binomial: let a=P(accept) and b=P(accept|error), so the paired
+LER ratio is b/a. Two 97.5% Wilson intervals at default confidence yield the
+Bonferroni rectangle [1-b_upper/a_lower, 1-b_lower/a_upper]. This avoids assuming
+independence of overlapping samples. The band is Wilson-derived/conservative
+relative to its component intervals, not an exact finite-sample 95% guarantee.
+Zero acceptance or zero baseline errors is undefined; structural no-cut
+(negative threshold, since scores are nonnegative) has exactly zero reduction
+when defined. Observed all-pass at a finite cut is not treated as structural.
+No simultaneous/adaptively selected-threshold coverage is claimed. No CI is
+added to the stacked lifetime figure, including its mean curve. Legacy v1,
+B3 and CLI adjusted-Wald/Wilson choices remain unchanged. See the notebook
+guide for equations, sources and the optional NotebookPlots(interval=...) API.
+
+These notebook cuts reject **gap <= threshold**, as requested, whereas the
+historical B3 helper below accepts gap >= theta. Neither changes the other.
+Factory labels remain terminal evaluation-oracle labels, never online LER.
+Exact aggregate memory scales with distinct scores, not trajectory count;
+lifetimes use a second bounded pass and integer histograms. No simulator or
+native decoder is constructed. New lazy package exports preserve old imports.
+
+`FigureStyle` (`figure_style.py`) calls the locally installed `plotting_lib`
+APS style inside rc contexts, with reference-sized serif labels (14 pt),
+ticks (13 pt), legends (12 pt) and 6x3.6 inch figures. Default display/export
+dpi is 300. MathText defaults to Computer Modern; `labels` supports raw
+mathsf/mathrm overrides for every axis/legend, while `usetex=True` and
+`latex_preamble` provide actual LaTeX with a minimal amsmath preamble. It supports
+figsize/rc overrides, existing axes and PDF/PNG export with `save`. Install the
+optional package from `external/plotting_lib` in the notebook environment; the
+simulation runtime locks and cluster wheels remain unchanged. See
+[equations, all six APIs and examples](../../../docs/notebook_plotting.md).
+
+`NotebookPlots(round_digit=None)` preserves exact scores; integers opt into
+Decimal ROUND_HALF_UP before every gap frequency/unique/minimum/cut/lifetime/
+selected-LER calculation. All gap plots accept per-call overrides, including
+explicit None to disable the shared policy. `gap_processing.py` transforms
+bounded batches using distinct scores and a 4096-entry scalar cache. Raw
+validation runs first; explicit thresholds and saved files are unchanged.
+Both lifetime passes use the same rounding. `plot_gap_frequency(return_unique=True)`
+adds a third return `{group_tuple: {one_based_stage: sorted_gap_list}}` for all
+stages, while the figure still displays only T_idx. Other/default returns stay
+`(fig, ax)` and unselected LER is unaffected.
+
+## Original v1 API
+
 `report.py` aggregates existing v1 tables, Wilson intervals, timing and paired
 statistics, then writes optional report/plots. `plotting.py` loads v1 LERs,
 validates grouping/filter choices and plots saved summaries. It does not

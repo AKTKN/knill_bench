@@ -672,6 +672,100 @@ TEST.md records commands and the full regression result.
 Full gate: `bash scripts/python.sh -m pytest -q` — **443 passed**, 1112
 inherited-category warnings, **221.51 s**. No failures or exclusions.
 
+## 2026-10-21 — Saved-data notebook figures / APS style
+
+Implemented lazy RunRegistry path/key registration and validated schema-v2
+streaming reads, NotebookPlots' six requested editable Matplotlib figure APIs,
+and FigureStyle using the user-owned plotting_lib APS package at 300 dpi.
+Notebook cuts follow the requested strict acceptance gap>threshold; historical
+B3/CLI remains unchanged. Exact unique-score grids/frequencies, per-round
+normalization, abort, passed-stage lifetimes, undefined/negative LER reduction,
+and color/marker/dash threshold comparisons are documented. Unfinished runs
+expose only published complete points with warnings; corrupt complete points
+raise. No all-shot arrays, simulation, decoder construction or data mutation.
+
+Added notebooks/saved_figures.ipynb and docs/notebook_plotting.md, updated all
+relevant package/test/schema/getting-started guides. Installed plotting_lib
+0.1.0 editable in knill_system without changing numerical locks, simulation
+wheel bundles or dependency source. Existing .gitignore and basics.ipynb are
+preserved. Full regression: 465 passed, 1112 inherited-category warnings,
+146.41 s. All six figures render/export from actual saved data; artifacts are
+ignored under results/notebook_plotting_smoke. TEST.md records checks/fixes.
+The full example notebook also executed successfully under the existing
+knill_system kernel against the supplied saved runs; its executed copy stays
+under ignored results/. No new simulation or experiment was launched.
+
+## 2026-10-21 — Reference typography, LaTeX and gap rounding
+
+Adjusted all notebook figures through FigureStyle: APS base, 6x3.6 inch,
+14pt axis labels, 13pt ticks, 12pt framed legends, serif/Computer Modern math,
+300 dpi and marker-safe x margins. labels mappings support mathrm/mathsf;
+actual usetex=True uses a minimal customizable amsmath preamble. Verified
+actual TeX and MathText PNG/PDF exports in the current Conda environment.
+
+Added optional return_unique to gap frequency, returning sorted unique values
+for every group and one-based stage. Added shared/per-figure round_digit:
+decimal half-up rounding precedes all gap statistics, cuts and both lifetime
+passes, with raw validation first. None preserves exact behavior. Bounded
+batch transforms and a 4096-entry distinct-value cache retain streaming; no
+saved data, simulation physics or B3 convention is changed. Updated notebook
+sources while preserving incoming outputs, and updated the analysis/schema
+and user guides. Full gate: 474 passed, 1112 inherited warnings, 147.57 s.
+The full updated example executes with round_digit=6 and all-stage unique
+returns. New rendered/executed artifacts stay under ignored results/.
+
+## 2026-10-21 — Stacked lifetime distribution and mean
+
+Replaced the notebook lifetime boxplot with per-threshold/group 100% stacked
+fractions for L=0..T. Colors identify L, hatches identify groups; dashed grouped
+mean curves use a separate automatically scaled right axis so small changes
+near T are visible. Means include every shot and remain capped by the saved
+T-stage observation window. show_mean=False hides them; return_summary=True
+returns exact histogram counts, fractions and means. Default (fig, ax), strict
+cuts, shared/per-figure rounding, grid limits and bounded read-only processing
+are retained. Removed unused private quartile/outlier helper.
+
+Updated guides and notebook lifetime cells. Preserved the latest user-selected
+[0,10,30] thresholds and unrelated notebook sources/outputs. Executed all cells
+and refreshed only the lifetime plot/mean output; optional PNG/PDF artifacts
+remain under ignored results/notebook_lifetime_stacked. Full gate: 478 passed,
+1112 inherited-category warnings, 239.53 s. No new physical simulation or
+science/dependency/config change. TEST.md records the layout and notebook
+keyword corrections and the read-only rendering checks.
+
+## 2026-10-21 — Readable postselected-LER horizontal ticks
+
+Reduced postselected-LER physical-error x ticks to a regular 1/2/5 grid of
+about five intervals, with concise spacing-derived precision, no additive
+offset and additional label padding. The supplied .001..005 range displays
+.001/.002/.003/.004/.005, keeping the common 13pt font. Other figures and all
+numerical/group/threshold behavior remain unchanged. Updated guides and
+refreshed only the notebook's postselected plot output, preserving its
+[0,5,10] thresholds, round_digit=0 and other cells. Actual PNG/PDF renders and
+label-bounds verification pass; full gate: 478 passed, 1112 inherited warnings,
+99.35 s. Artifacts stay under ignored results/notebook_postselected_ticks.
+
+## 2026-10-21 — Wilson interval class and five notebook shades
+
+Added analysis.WilsonInterval with vector/scalar score bounds, frequency-count
+units, monotone per-round transforms and paired Wilson-derived reduction
+bounds. Default 95% pointwise shades now appear on raw LER, stage-gap frequency,
+abort, LER reduction and postselected LER; the stacked lifetime figure and
+its mean remain unshaded. Selected LER uses accepted shot counts. Zero observed
+errors retain positive upper bounds, while undefined denominators/reductions
+receive no invented band. Reduction uses error-retention/acceptance with two
+Bonferroni-adjusted component Wilson intervals, without assuming independent
+samples. Coverage interpretation/equations/primary sources are documented.
+FigureStyle adds shade_alpha=.18; existing calls/point estimates are retained.
+
+Updated the example and affected package/schema/user/test guides. All notebook
+cells execute against saved data; only the five CI figure outputs were refreshed.
+User round_digit, threshold and semilogy settings plus lifetime/other outputs
+are preserved. All six read-only PNG/PDF renders pass (bands 3/3/3/3/9/0).
+Full gate: 501 passed, 1112 inherited-category warnings, 109.71 s. New numeric
+checks cross-validate SciPy score intervals; no new physical sampling, dependency
+source edits, simulation fields or production run. TEST.md records commands.
+
 ## General Knill EC memory and physical-noise revision (2026-10-22)
 
 Canonical v2 kind is knill_ec_memory with positive T_tel (default 8); old

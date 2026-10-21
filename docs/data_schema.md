@@ -150,6 +150,25 @@ metadata with effective probabilities, idle durations/application counts,
 native hashes and the local prior's explicit included/excluded sources.
 See [custom noise](factory_custom_noise.md). V1 profiles/schemas are unchanged.
 
+## Notebook saved-data views
+
+The [notebook plotting API](notebook_plotting.md) adds no saved schema or
+mandatory output. Keyed run paths are loaded at figure time. Only complete
+point markers permit reading; schemas, paired contiguous IDs and metadata
+counts are verified. Notebook threshold cuts accept strictly gap > threshold
+(reject <=), independently of the existing B3 >= convention. Factory selected
+LER still describes terminal oracle labels. Unique gap aggregates (exact by
+default, or after optional round_digit half-up rounding) and integer lifetime
+histograms are in-memory analysis products only. Rounding and optional unique
+lists never rewrite the per-shot tables or change B3's original convention.
+Notebook lifetime figures normalize each all-shot histogram to a 100% stack
+and compute its mean over 0..T. Optional returned summaries are transient
+analysis products, with no new mandatory file or simulation schema.
+Notebook 95% Wilson shades also use saved aggregate counts only; conditional
+LER intervals use accepted denominators and reduction uses paired
+acceptance/error-retention bounds. Legacy CLI/B3 intervals and table schemas
+remain unchanged. See the notebook guide for the pointwise interpretation.
+
 ## General Knill EC memory
 
 The v2 kind knill_ec_memory has only the existing logical_error table and all

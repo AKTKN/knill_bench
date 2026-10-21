@@ -1,5 +1,19 @@
 # knill_bench package map
 
+`analysis.RunRegistry`, `NotebookPlots` and `FigureStyle` provide saved-only
+v2 notebook comparisons with deferred keyed loading, six editable Matplotlib
+figures and optional local plotting_lib APS/300-dpi style. See
+[the notebook guide](../../docs/notebook_plotting.md) and
+[analysis interfaces](analysis/DOCS.md). Simulation/CLI/B3 schemas are unchanged.
+The shared style supplies reference-sized serif/LaTeX labels and ticks;
+round_digit optionally applies decimal half-up rounding before all gap
+analysis, and gap frequency can return per-group/per-stage unique lists.
+Lifetime uses all-shot stacked fractions and capped means on a separate axis,
+with optional returned numerical summaries of both.
+WilsonInterval supplies pointwise 95% score shades on the other five notebook
+figures, including transformed per-round and paired reduction bounds. This
+saved-analysis extension changes neither simulation nor legacy CLI estimands.
+
 The original schema-v1 path remains `config.py` -> `cli.py` ->
 `simulation.runner`; its dataclasses in `models.py` describe compiled physical
 experiments, raw samples and predictions. `codes.py` loads/validates the
