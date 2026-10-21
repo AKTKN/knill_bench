@@ -1,0 +1,20 @@
+# Tiny Hex-based Knill EC memory example; no paper/threshold inference.
+schema_version: 2
+kind: knill_ec_memory
+name: knill_code_capacity_noise_smoke
+output_root: results
+code: rotated_surface
+noise: code_capacity_noise
+sweep:
+  d: [3]
+  p: [0.0, 0.01]
+r_0: d
+r_plus: d
+T_tel: 2  # Any positive integer; the Fig.4(d) baseline uses 8.
+create_codecapacity_dem: false  # Physical capacity noise is a separate option.
+decoder: mwpm
+shots: 3
+batch_size: 3  # Fixed partition for reproducible raw records.
+buffer_shot: 3
+workers: 1
+master_seed: 12345

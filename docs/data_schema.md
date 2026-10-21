@@ -149,3 +149,14 @@ fixed noise mapping enters canonical config/physical identity and compact
 metadata with effective probabilities, idle durations/application counts,
 native hashes and the local prior's explicit included/excluded sources.
 See [custom noise](factory_custom_noise.md). V1 profiles/schemas are unchanged.
+
+## General Knill EC memory
+
+The v2 kind knill_ec_memory has only the existing logical_error table and all
+existing filename keys. The noise filename label is hex_uniform,
+noiseless_bellpair or code_capacity_noise. Special models declare
+final_readout=ideal_destructive_Z; uniform remains noisy_destructive_Z.
+Execution metadata includes noise_probabilities and
+noise_scope_version=knill_ec_physical_noise_v1 with actual T/depths. Complete
+publication/resume/saved analysis validate these fields. Legacy kind hashes
+and schemas stay unchanged. See [contract](knill_ec_noise_plan.md).

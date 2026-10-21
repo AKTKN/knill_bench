@@ -1,6 +1,6 @@
-"""Per-shot adapter for Hex's fixed full Knill protocol, with noisy readout.
+"""Per-shot adapter for Hex fixed full Knill with explicit physical noise policy.
 
-Module construction follows protocols/knill_online_offline.py at pinned H5.
+Module construction follows protocols/knill_online_offline.py on the pinned H5 lineage.
 The existing bench local-frame machinery replaces Hex's much larger global
 correction maps. Hex itself supplies every physical fragment and c_func.
 """
@@ -14,13 +14,13 @@ from scipy.sparse import csc_matrix
 
 from hex_qec.circuit_generation import noiseless_unitary_state_prep
 from hex_qec.modularisation import (
-    css_detector_module, logical_measurement_module, modularised_circuit,
+    KnillNoiseModel, css_detector_module, logical_measurement_module, modularised_circuit,
     no_measurement_module, generate_state_prep_modules,
     generate_transversal_cnot_module, generate_bell_measurement_and_correction_module,
     generate_logical_measurement_module,
 )
 from knill_bench.codes import Code
-from knill_bench.experiments.config_v2 import ExperimentPoint
+from knill_bench.experiments.config_v2 import ExperimentPoint, KNILL_KINDS
 from .hex_native import PackedFrame, _transition
 
 
@@ -34,13 +34,16 @@ class HexFullKnill:
     """Compile once, sample raw batches, then decode those batches offline.
 
     T=1 is supported here for small protocol tests; the Fig.4(d) runner requires
-    T=8. No postselection, terminal ideal oracle, or code-capacity reweighting.
+    T=8. knill_ec_memory accepts arbitrary positive T and native noise models.
+    No postselection, terminal factory oracle, or code-capacity reweighting.
     Native handles and templates belong to this point in this process only.
     """
 
     def __init__(self, point: ExperimentPoint, *, seed: int):
-        if point.kind != "fig4d_reproduction":
-            raise ValueError("full Knill requires Fig.4(d) points")
+        if point.kind not in KNILL_KINDS:
+            raise ValueError("full Knill requires knill_ec_memory / Fig.4(d) points")
+        noise = KnillNoiseModel(point.noise)
+        rates = noise.probabilities(point.p)
         code = Code.rotated(point.d)
         pcm, blocks = code.matrices, code.blocks(2 * point.T_tel + 1)
         matching = pymatching.Matching.from_check_matrix  # Legacy Hamming online weights.
@@ -61,7 +64,7 @@ class HexFullKnill:
                                       for key in ("data_qubits", "x_ancillas", "z_ancillas")), [])
                                  for j in range(point.T_tel)]
             canonical = list(range(len(resource_supports[0])))
-            template = generate_state_prep_modules(pcm, rounds, basis, point.p,
+            template = generate_state_prep_modules(pcm, rounds, basis, rates["preparation"],
                                                   [canonical], matching, matchable=True,
                                                   surface_code=True)[0]
             # The callback closes over local circuits, maps and decoder handles.
@@ -82,13 +85,16 @@ class HexFullKnill:
                 module, support, transition = families[basis][j]
                 append(module, support, "prepare_zero" if basis == "z" else "prepare_plus", transition)
             previous, zero, plus = (blocks[q]["data_qubits"] for q in (2*j, 2*j+1, 2*j+2))
-            append(generate_transversal_cnot_module(point.p, plus, zero), plus + zero, "bell_entangle")
-            append(generate_bell_measurement_and_correction_module(pcm, point.p, previous, zero, plus,
+            append(generate_transversal_cnot_module(rates["bell_pair_cnot"], plus, zero), plus + zero, "bell_entangle")
+            data_noise = noise.data_noise_module(point.p, previous)
+            if data_noise is not None:
+                append(data_noise, previous, "data_code_capacity_noise")
+            append(generate_bell_measurement_and_correction_module(pcm, rates["teleportation"], previous, zero, plus,
                                                                    decoder_generator=matching),
                    previous + zero + plus, "bell_measure_and_correct")
         final = blocks[-1]["data_qubits"]
-        append(generate_logical_measurement_module(pcm, point.p, "z", final, matching),
-               final, "noisy_final_Z")
+        append(generate_logical_measurement_module(pcm, rates["final_readout"], "z", final, matching),
+               final, "noisy_final_Z" if point.noise == "hex_uniform" else "ideal_final_Z")
         self.engine = modularised_circuit(modules)
         self.supports, self.roles = supports, roles
         self.transitions = transitions
@@ -98,8 +104,8 @@ class HexFullKnill:
             protocol="hex_fixed_full_knill", T_tel=point.T_tel,
             r_0=[point.r_0] * point.T_tel, r_plus=[point.r_plus] * point.T_tel,
             initial_data="ideal_encoded_zero", memory_basis="z",
-            noise="hex_uniform", physical_error=point.p,
-            final_readout="noisy_destructive_Z", final_readout_error=point.p,
+            noise=point.noise, physical_error=point.p,
+            final_readout=point.final_readout, final_readout_error=rates["final_readout"],
             create_codecapacity_dem=False, prior_policy="hex_legacy_hamming",
             offline_decoder="pymatching_mwpm", online_decoder="pymatching_mwpm",
             postselection=False, frame_processing="cached_local_pauli_transitions",
@@ -109,6 +115,10 @@ class HexFullKnill:
             resource_measurements=[m.num_measurements for m in modules if isinstance(m, css_detector_module)],
             sampling="one_point_seeded_stim_sampler_advanced_in_fixed_batches",
         )
+
+        if point.kind == "knill_ec_memory":
+            self.metadata.update(noise_probabilities=rates, terminal_ideal_oracle=False,
+                noise_scope_version="knill_ec_physical_noise_v1")
 
     def sample(self, shots):
         return self.sampler.sample(shots=shots)

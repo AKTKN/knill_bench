@@ -107,3 +107,19 @@ Uniform calls/hashes are unchanged. The 16-entry worker-local LRU remains
 bounded and caches no sampler RNG. See
 [custom noise](../../../docs/factory_custom_noise.md) for the target-syndrome
 invisibility of survivor errors, analytic weights and exact scope/limits.
+
+## General Knill physical noise
+
+HexFullKnill now accepts canonical knill_ec_memory points as well as legacy
+Fig.4(d). It uses native KnillNoiseModel rates for both preparation templates,
+auxiliary CX, Bell coupling/readout and final measurement. Capacity inserts
+the native data-only noise module directly before each Bell coupling. Local
+frame transitions and all decoding callbacks are reused. Metadata explicitly
+records rates and ideal/noisy boundaries; no per-shot construction or truth
+feedback. See [contract](../../../docs/knill_ec_noise_plan.md).
+
+Current Knill-noise dependency pin: Hex HEX-K1 `8fa2200315cc4feaccf341a461f91739233de08a` on
+`auxiliary-system`, descending from HEX-N2/H5. This supersedes the earlier
+HEX-N2 pin. Bootstrap/bundles require that clean exact checkout; runtime
+checks the new native policy and fixed Knill API, with strict source/resource
+hashes for installed wheels.

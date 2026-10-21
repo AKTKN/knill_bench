@@ -9,7 +9,8 @@ import numpy as np
 import pyarrow.parquet as pq
 
 from knill_bench.data.storage_v2 import validate_point_files
-from knill_bench.experiments.config_v2 import load_saved_config
+from knill_bench.experiments.config_v2 import KNILL_KINDS, load_saved_config
+from knill_bench.experiments.noise_v2 import validate_noise_execution
 
 
 def agresti_coull(errors, shots):
@@ -34,14 +35,17 @@ def summarize_saved(run_path):
     document = load_saved_config(path)
     config = document.config
     metadata = json.loads((path / "metadata.json").read_text())
-    if (config.kind != "fig4d_reproduction" or config.T_tel != 8
+    if (config.kind not in KNILL_KINDS
+            or (config.kind == "fig4d_reproduction" and config.T_tel != 8)
             or config.theta is not None or config.create_codecapacity_dem
+            or (config.kind == "knill_ec_memory"
+                and metadata.get("final_readout") != next(config.points()).final_readout)
             or metadata.get("kind") != config.kind
             or metadata.get("schema_version") != 2 or metadata.get("status") != "complete"
             or metadata.get("config_hash") != config.config_hash
             or metadata.get("input_sha256") != document.input_hash
             or metadata.get("config") != config.as_dict()):
-        raise ValueError("require a complete, unchanged Fig.4(d) run")
+        raise ValueError("require a complete, unchanged Knill EC / Fig.4(d) run")
     points = list(config.points())
     if set(metadata["points"]) != {p.case_id for p in points}:
         raise ValueError("saved point identities changed")
@@ -50,9 +54,10 @@ def summarize_saved(run_path):
         info = metadata["points"][point.case_id]
         if (info["status"] != "complete" or info["files"] != [point.filename("logical_error")]
                 or any(info.get(k) != v for k, v in point.sampling_identity.items())):
-            raise ValueError("require complete aligned Fig.4(d) points")
+            raise ValueError("require complete aligned Knill EC / Fig.4(d) points")
         if not (path / point.filename("logical_error")).is_file():
             raise ValueError("missing logical_error file for a complete point")
+        validate_noise_execution(point, info.get("execution"), create_codecapacity_dem=False)
         validate_point_files(path, point, config.shots)
         shots, errors = 0, 0
         for batch in pq.ParquetFile(path / point.filename("logical_error")).iter_batches(batch_size=65536):
@@ -85,8 +90,11 @@ def plot_saved(run_path, output):
         errors = np.array([[r["conditional_ler"] - r["lower"] for r in rows],
                            [r["upper"] - r["conditional_ler"] for r in rows]])
         axis.errorbar([r["p"] for r in rows], y, yerr=errors, marker="o", capsize=3, label=f"d={distance}")
+    document = load_saved_config(run_path)
+    title = ("Eight-cycle full Knill memory" if document.config.kind == "fig4d_reproduction" else
+             f"Knill EC memory · T={document.config.T_tel} · {document.config.noise}")
     axis.set(xlabel="Physical error probability p", ylabel="logical error rate",
-             title="Eight-cycle full Knill memory · 95% Agresti–Coull")
+             title=f"{title} · 95% Agresti–Coull")
     axis.legend()
     axis.grid(alpha=.25)
     figure.tight_layout()

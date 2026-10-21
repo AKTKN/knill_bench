@@ -109,6 +109,9 @@ class RunStore:
             if (value.get("schema_version") != 2 or value.get("config_hash") != config.config_hash
                     or value.get("input_sha256") != document.input_hash or value.get("config") != config.as_dict()):
                 raise ValueError("saved v2 config changed; resume rejected")
+            if (config.kind == "knill_ec_memory"
+                    and value.get("final_readout") != next(config.points()).final_readout):
+                raise ValueError("saved Knill final readout changed")
             if (value.get("prior_policy") != config.prior_policy
                     or (config.create_codecapacity_dem
                         and value.get("projected_approximation") != LOCAL_PRIOR_APPROXIMATION)):

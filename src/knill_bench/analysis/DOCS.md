@@ -77,3 +77,11 @@ schemas, conditional estimand and legacy uniform policy labels are unchanged.
 No backend is constructed. Uniform settings load without Hex; custom settings
 load native frozen noise classes for parameter/probability validation only.
 See [custom noise](../../../docs/factory_custom_noise.md).
+
+## General Knill saved-data analysis
+
+fig4d.summarize_saved/plot_saved now also accept knill_ec_memory at positive
+arbitrary T and check its noise execution metadata. plot-knill and the
+plot-fig4d alias share this saved-only path, actual T/noise title, existing
+summary keys and Agresti-Coull statistics. See
+[noise contract](../../../docs/knill_ec_noise_plan.md).

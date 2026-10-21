@@ -89,3 +89,9 @@ marker and resource hashes. Numeric locks, package versions, other fork refs
 and all dependency source checkouts are unchanged by bench. Old saved data
 remain analyzable; strict source/environment rules require fresh runs for
 simulation after upgrading. Bootstrap still refuses to reset any checkout.
+
+Current Knill-noise dependency pin: Hex HEX-K1 `8fa2200315cc4feaccf341a461f91739233de08a` on
+`auxiliary-system`, descending from HEX-N2/H5. This supersedes the earlier
+HEX-N2 pin. Bootstrap/bundles require that clean exact checkout; runtime
+checks the new native policy and fixed Knill API, with strict source/resource
+hashes for installed wheels.

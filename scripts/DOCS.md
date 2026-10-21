@@ -150,3 +150,17 @@ BENCH-N1 advances only Hex's exact source pin to existing HEX-N2 86c9495;
 bootstrap still preserves/refuses mismatched checkouts. Both other fork refs,
 Conda/numeric locks and package versions are unchanged. Custom factory example
 validation uses the existing v2 CLI/wrappers; no production job is launched.
+
+## General Knill EC wrapper
+
+run_knill_ec_memory.sh [CONFIG] uses python.sh and the v2 run command; its
+default is the tiny configs/templates/knill_ec_memory.yaml. The legacy
+run_fig4d.sh retains its filename/default config and uses the new kind in that
+config. plot-knill is the saved-data plotting CLI, with plot-fig4d alias.
+See [noise revision](../docs/knill_ec_noise_plan.md). PBS remains unchanged.
+
+Current Knill-noise dependency pin: Hex HEX-K1 `8fa2200315cc4feaccf341a461f91739233de08a` on
+`auxiliary-system`, descending from HEX-N2/H5. This supersedes the earlier
+HEX-N2 pin. Bootstrap/bundles require that clean exact checkout; runtime
+checks the new native policy and fixed Knill API, with strict source/resource
+hashes for installed wheels.

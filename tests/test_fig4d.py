@@ -48,7 +48,8 @@ def test_production_config_is_explicit_approximate_grid_only():
     assert doc.config.T_tel == 8 and doc.config.r_0 == doc.config.r_plus == "d"
     assert not doc.config.create_codecapacity_dem
     assert "NOT unpublished exact paper" in doc.contents.decode()
-    runner.validate_experiment(doc.config)  # No large circuits or shots.
+    from knill_bench.experiments.knill_ec_memory import validate_experiment
+    validate_experiment(doc.config)  # No large circuits or shots.
 
 
 @pytest.mark.parametrize("updates", [dict(T_tel=1), dict(theta=0.)])

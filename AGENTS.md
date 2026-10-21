@@ -403,3 +403,20 @@ Latest gate: `bash scripts/python.sh -m pytest -q` — 443 passed, 1112 existing
 category warnings, 221.51 s. Eight shell-interface cases and an actual local
 three-shot run/completed-resume verify exact YAML and worker preservation with
 a one-entry nodefile. No production sweep or real cluster submission ran.
+
+## User-authorized general Knill EC and physical noise (2026-10-22)
+
+The user authorized editing both Hex/bench, small tests/smokes, documentation
+and commit/push on both auxiliary-system branches. This supersedes prior
+read-only-Hex, T=8-only and mandatory-noisy-final rules for this scoped revision.
+Read [plan/contract](docs/knill_ec_noise_plan.md). knill_ec_memory is canonical;
+legacy fig4d_reproduction preserves its hashes and T=8/uniform contract.
+Special noise models have ideal final readout and False inference option.
+Preserve unrelated incoming notebook, plotting source and .gitignore changes;
+no production sweep or other Hex worktree edits are authorized.
+
+Latest scoped gate: 532 bench tests passed (1208 warnings, 151.11 s);
+372 Hex tests passed (3 historical exclusions, 708 warnings, 68.49 s).
+Hex is pinned to HEX-K1 8fa2200315cc4feaccf341a461f91739233de08a; native
+sources are clean after their authorized commit. See TEST.md for the initial
+dirty-fork integration failure, corrected tests and tiny fixed/auto smokes.

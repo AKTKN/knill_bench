@@ -671,3 +671,26 @@ nodefile and WORKERS=1; exact saved YAML, workers=2 and completed resume pass.
 TEST.md records commands and the full regression result.
 Full gate: `bash scripts/python.sh -m pytest -q` — **443 passed**, 1112
 inherited-category warnings, **221.51 s**. No failures or exclusions.
+
+## General Knill EC memory and physical-noise revision (2026-10-22)
+
+Canonical v2 kind is knill_ec_memory with positive T_tel (default 8); old
+fig4d_reproduction remains compatible with its original IDs/hashes and
+T=8/uniform contract. Shipped Fig.4(d) YAMLs now use the new name with the
+same budgets/physics. Hex-owned noiseless_bellpair idealizes preparations and
+auxiliary CX; code_capacity_noise inserts only current-data DEPOLARIZE1(p)
+before each teleportation. Both have ideal final measurement. Uniform, v1,
+factory and SE physics remain unchanged. New kinds use shared fixed/auto
+bounded execution, explicit validated noise metadata and saved-only plot-knill
+(with plot-fig4d alias). Tiny templates and docs/knill_ec_noise_plan.md added.
+
+Hex 8fa2200315cc4feaccf341a461f91739233de08a was committed/pushed to its
+auxiliary-system; bench bootstrap/package/runtime pins and API audit updated.
+Final Conda gate: 532 passed, 1208 warnings, 151.11 s. Hex broad gate:
+372 passed, 3 historical exclusions, 708 warnings, 68.49 s. Four tiny CLI/shell
+smokes cover both new models, fixed/auto and complete resume/PNG analysis.
+TEST.md records exact commands, corrected assumptions and the initial
+dirty-dependency gate failures resolved by committing Hex before bench's final
+gate. No v1 provenance or numerical behavior changed. Incoming unrelated
+notebook/.gitignore work is preserved and excluded from this scoped commit.
+No production sweep or other worktree edit ran.

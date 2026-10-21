@@ -41,7 +41,7 @@ module = "hex_qec"
 path = "external/Hex"
 package-dir = "src/hex_qec"
 url = "https://github.com/AKTKN/Hex.git"
-revision = "86c9495094801012b9912bd41935ae48b08d8f92"
+revision = "8fa2200315cc4feaccf341a461f91739233de08a"
 
 [tool.knill-bench.sources.lomatching]
 distribution = "lomatching"

@@ -19,7 +19,8 @@ def main(argv=None):
         command.add_argument("config")
         command.add_argument("--workers", type=int, help="Override process count; save the effective YAML in the run.")
     sub.add_parser("resume", help="Continue an existing run directory.").add_argument("run")
-    plot = sub.add_parser("plot-fig4d")
+    plot = sub.add_parser("plot-knill", aliases=["plot-fig4d"],
+                          help="Plot saved Knill EC memory labels without simulation.")
     plot.add_argument("run")
     plot.add_argument("--output", required=True)
     analysis_text = ("Analyze saved data in RUN using analysis settings. This does not simulate; "
@@ -50,7 +51,7 @@ def main(argv=None):
         elif args.command == "resume":
             from .dispatcher import resume
             print(resume(args.run))
-        elif args.command == "plot-fig4d":
+        elif args.command in {"plot-knill", "plot-fig4d"}:
             from knill_bench.analysis.fig4d import plot_saved
             print(plot_saved(args.run, args.output))
         else:

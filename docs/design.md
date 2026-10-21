@@ -120,3 +120,11 @@ decoder; optional opposite-class decoding uses a graphlike two-boundary lift
 on the spacetime graph. Truth evaluates labels only after inference/scoring.
 This has no teleportations or ideal factory oracle. Existing physical sources
 are unchanged. See [memory definition and proof](se_memory.md).
+
+## General Knill EC memory noise revision
+
+The v2 canonical kind is now knill_ec_memory, with arbitrary positive T_tel.
+[The current noise contract](knill_ec_noise_plan.md) adds noiseless_bellpair
+and code_capacity_noise with ideal final measurement, superseding the noisy
+final boundary above for these explicit options only. Uniform/v1/factory/SE
+physics are unchanged. Hex owns the shared policy and data noise fragment.

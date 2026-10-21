@@ -151,3 +151,19 @@ bounded scheduling modes. Effective parameters/window durations and hashes
 are saved with explicit local-prior scope and checked on resume/analysis.
 Post-CNOT survivor idle is inside the local body; earlier storage idle stays
 physical but outside that inference approximation.
+
+## General Knill EC memory and physical noise
+
+Use `kind: knill_ec_memory` for Hex-based full Knill EC, with positive T_tel
+(default 8). `noise: noiseless_bellpair` idealizes both auxiliary preparations
+and Bell-pair CNOT; `noise: code_capacity_noise` inserts only data
+DEPOLARIZE1(p) before each teleportation. Both have ideal final readout.
+hex_uniform retains noisy readout. See [the plan and implemented contract](docs/knill_ec_noise_plan.md)
+and [tiny templates](configs/templates/knill_ec_memory.yaml). The old kind and
+plot-fig4d command remain compatible; plot-knill is the general saved-data command.
+
+Current Knill-noise dependency pin: Hex HEX-K1 `8fa2200315cc4feaccf341a461f91739233de08a` on
+`auxiliary-system`, descending from HEX-N2/H5. This supersedes the earlier
+HEX-N2 pin. Bootstrap/bundles require that clean exact checkout; runtime
+checks the new native policy and fixed Knill API, with strict source/resource
+hashes for installed wheels.

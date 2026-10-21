@@ -1,7 +1,7 @@
 # Deliberate production sweep: never launched by tests or bootstrap.
 # Approximate explicit p grid, NOT unpublished exact paper sample locations.
 schema_version: 2
-kind: fig4d_reproduction
+kind: knill_ec_memory
 name: fig4d
 output_root: results
 code: rotated_surface

@@ -1,4 +1,4 @@
-"""Strict factory-only YAML boundary for Hex's immutable noise configuration.
+"""Strict YAML boundary for native factory and fixed Knill noise policies.
 
 Hex owns channel mathematics and physical construction. This module validates
 YAML structure/types and translates it to the native object, without circuits.
@@ -17,6 +17,14 @@ def noise_as_dict(model):
 
 
 def validate_noise(kind, name, model, *, p=None, r_plus=None):
+    if isinstance(name, str) and name in {"noiseless_bellpair", "code_capacity_noise"} and model is None:
+        if kind != "knill_ec_memory":
+            raise ValueError("special Knill noise is supported only for kind=knill_ec_memory")
+        from hex_qec.modularisation import KnillNoiseModel
+        policy = KnillNoiseModel(name)
+        if p is not None:
+            policy.probabilities(p)
+        return
     if name == "hex_uniform" and model is None:
         return
     if name == "custom":
@@ -29,13 +37,14 @@ def validate_noise(kind, name, model, *, p=None, r_plus=None):
             model.operation_probabilities(p)
             model.idle_probabilities(p, r_plus)
         return
-    raise ValueError("noise must be hex_uniform or a custom noise mapping")
+    raise ValueError("noise must be hex_uniform, a Knill noise name, or a custom noise mapping")
 
 
 def parse_noise(value, kind):
     from .config_v2 import _mapping, _number
 
-    if isinstance(value, str) and value == "hex_uniform":
+    if isinstance(value, str):
+        validate_noise(kind, value, None)
         return value, None
     if isinstance(value, dict) and kind != "logical_zero_factory":
         raise ValueError(CUSTOM_KIND_ERROR)
@@ -99,7 +108,25 @@ def execution_noise(point):
 
 
 def validate_noise_execution(point, execution, *, create_codecapacity_dem):
-    """Cross-check custom saved provenance before publication/resume/analysis."""
+    """Cross-check native noise provenance before publication/resume/analysis."""
+    if point.kind == "knill_ec_memory":
+        from hex_qec.modularisation import KnillNoiseModel
+        expected = KnillNoiseModel(point.noise).probabilities(point.p)
+        if (not isinstance(execution, dict)
+                or execution.get("noise") != point.noise
+                or execution.get("noise_probabilities") != expected
+                or execution.get("final_readout") != point.final_readout
+                or execution.get("final_readout_error") != expected["final_readout"]
+                or execution.get("prior_policy") != "hex_legacy_hamming"
+                or execution.get("noise_scope_version") != "knill_ec_physical_noise_v1"
+                or execution.get("terminal_ideal_oracle") is not False
+                or execution.get("create_codecapacity_dem") is not False
+                or execution.get("physical_error") != point.p
+                or execution.get("T_tel") != point.T_tel
+                or execution.get("r_0") != [point.r_0] * point.T_tel
+                or execution.get("r_plus") != [point.r_plus] * point.T_tel):
+            raise ValueError("saved Knill noise execution metadata changed or is missing")
+        return
     if point.noise_model is None:
         return
     expected = execution_noise(point)

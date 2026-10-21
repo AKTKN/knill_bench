@@ -1195,3 +1195,69 @@ simulation config, dependency, environment or result schema was changed.
   — **443 passed**, **1112 inherited-category warnings**, **221.51 s**, no
   exclusions or failures. All existing science, saved-analysis and resume tests
   remain green. Hex checkout remains clean; final `git diff --check` passes.
+
+## General Knill EC memory and physical-noise revision (2026-10-22)
+
+Implemented `kind: knill_ec_memory` with positive T_tel (default 8), while
+retaining legacy fig4d_reproduction input/saved identities and T=8/uniform
+semantics. Both new physical models use the native Hex policy and ideal
+terminal destructive readout. Capacity inserts exactly current-data
+DEPOLARIZE1(p) before every teleportation; it is not a projected-prior option.
+See docs/knill_ec_noise_plan.md for the plan, region table and limitations.
+
+Commands and corrected checks:
+
+- `bash scripts/python.sh -m pytest -q tests/test_fig4d.py tests/test_v2_config.py --disable-warnings`
+  initially 2 failed, 105 passed, 64 warnings, 11.57 s: two shipped-config
+  expectations still used the old kind after migration. Updated only those
+  expectations; all legacy protocol/identity tests remain.
+- The first combined new/native run had 2 failed, 124 passed: the new target
+  assertion assumed native Stim CX instructions were coalesced despite
+  intervening noise(0). Collecting every native CX control fixed the test;
+  no physical construction changed for this correction.
+- `bash scripts/python.sh -m pytest -q tests/test_knill_ec_memory.py external/Hex/tests/test_knill_noise.py --disable-warnings`
+  — 56 passed, 168 warnings, 12.33 s. New physical fixtures are d3/5,
+  <=7 shots, T=1/2/3. Coverage includes actual native circuit/raw/global-frame
+  decode parity, cached native handles, p0 labels, noise identities/seeds,
+  protocol/parser rejection, fixed/auto output, metadata checks, complete
+  resume, fixed serial/spawn equality and failed-point restart.
+- Native capacity validation compares direct MWPM with all 512 d3 masks in
+  each pure X/Y/Z pattern family and each X/Z memory basis, using synthetic
+  records in <=7-row batches, not Monte Carlo or all 4^9 mixed patterns.
+- `bash scripts/python.sh -m pytest -q --disable-warnings`
+  before the Hex dependency commit: 11 failed, 521 passed, 1180 warnings,
+  118.32 s. Ten inherited v1 execution cases hit its pre-existing dirty-fork
+  provenance mismatch (prepare attaches a patch field, execute does not);
+  the remaining check explicitly required clean Hex. A focused
+  `bash scripts/python.sh -m pytest -q tests/test_execution.py -x --disable-warnings`
+  reproduced the same mismatch (1 failed, 16 warnings, 3.11 s).
+  Fixed integration order: commit tested Hex, update exact pin/API audit,
+  and rerun with clean dependency; no v1 code or test behavior was weakened.
+- **Final full gate:** `bash scripts/python.sh -m pytest -q --disable-warnings`
+  — **532 passed**, 1208 existing-category/new-call-site SciPy warnings,
+  **151.11 s**. Includes all incoming notebook/Wilson tests unchanged.
+- Hex gate: `bash scripts/python.sh -m pytest -q external/Hex/tests -k 'not ler_is_statistically_compatible and not test_real_cluster_llr_threshold_produces_mixed_short_long_batch' --disable-warnings`
+  — **372 passed**, **3 deselected**, 708 warnings, **68.49 s**. Excludes the
+  same two 2048-shot statistical cases and previously reproduced adaptive
+  BP-LSD seed assertion as N2. Native old tests were not edited.
+
+Installed CLI/shell smoke: `bash scripts/python.sh /tmp/smoke_knill_noise.py`
+(with final output captured as results/knill_ec_noise_smoke/final_smoke_output.json).
+For each new model: d3, p=0/.02, r=(1,2), T=2, three shots per point,
+fixed batch=3/workers=1 and auto/workers=2. Four runs, 24 trajectories total,
+completed resume with byte-identical Parquet, exact IDs [0,1,2], complete
+metadata with ideal boundary, saved counts and `plot-knill` PNGs all pass.
+Final Hex was clean at 8fa2200315cc4feaccf341a461f91739233de08a.
+Raw outputs/configs/figures/summary remain ignored under
+results/knill_ec_noise_smoke. All eight tiny points observed zero errors;
+these observations provide no threshold or statistical accuracy evidence.
+Use the committed three-shot templates and run/resume/plot-knill commands in
+the guide to reproduce the checks without the temporary orchestration script.
+
+`bash scripts/python.sh -m pip check` passes. Shell syntax passes for bootstrap,
+run_knill_ec_memory, run_fig4d and the unchanged PBS wrapper. `bash scripts/python.sh -m compileall -q src external/Hex/src`, local new-guide links and both
+`git diff --check` gates pass. Incoming unrelated .gitignore, notebooks,
+plotting sources/tests and guide are byte-identical to their initial contents;
+shared guide updates are append-only and their incoming portions remain unstaged.
+Other dependencies and the hex-parallel worktree are untouched. No production
+sweep, statistical paper-agreement, performance or threshold claim is made.

@@ -333,3 +333,17 @@ retains all canonical identities; custom is factory-only, with full fixed
 parameters in config/physical hashes and pre-output probability/domain checks.
 Only d/p sweep. Result schemas/publication rules are unchanged, with the short
 noisemodel=custom filename label. v1 explicit profiles are unaffected.
+
+## General Knill EC memory (supersedes B1 kind/T restriction)
+
+Use kind=knill_ec_memory with positive T_tel (default 8); fig4d_reproduction
+is retained as the legacy T=8/uniform kind. noise accepts hex_uniform or the
+Knill-only noiseless_bellpair/code_capacity_noise policies, both with ideal
+final readout. Prior mode must remain False and theta null. Only d/p sweeps
+and fixed prep-depth rules remain. See [full API/noise/metadata contract](knill_ec_noise_plan.md).
+
+Current Knill-noise dependency pin: Hex HEX-K1 `8fa2200315cc4feaccf341a461f91739233de08a` on
+`auxiliary-system`, descending from HEX-N2/H5. This supersedes the earlier
+HEX-N2 pin. Bootstrap/bundles require that clean exact checkout; runtime
+checks the new native policy and fixed Knill API, with strict source/resource
+hashes for installed wheels.

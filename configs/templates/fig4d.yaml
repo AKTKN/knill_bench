@@ -1,7 +1,7 @@
 # SMALL B1 execution template, not statistical paper validation.
 # Deliberate production d=9/11/15/21, approximate p=.004..010 is configs/fig4d.yaml.
 schema_version: 2
-kind: fig4d_reproduction
+kind: knill_ec_memory
 name: my_fig4d
 output_root: results
 code: rotated_surface
@@ -11,7 +11,7 @@ sweep:
   p: [0.0, 0.001]
 r_0: d                # Standard paper depth; also accepts "2*d" or "2/3*d" (floor).
 r_plus: d             # Plus resource depth; same round-rule syntax, result >=1.
-T_tel: 8              # Required for this runner; fixed across the run.
+T_tel: 8              # Fig.4(d) baseline; general Knill memory accepts positive T.
 theta: null           # Fig.4(d) retains every shot.
 create_codecapacity_dem: false  # Required original Hamming online priors.
 decoder: mwpm

@@ -12,7 +12,7 @@ import re
 import subprocess
 import sys
 
-HEX_REVISION = "86c9495094801012b9912bd41935ae48b08d8f92"
+HEX_REVISION = "8fa2200315cc4feaccf341a461f91739233de08a"
 
 
 def _git(path, *args):
@@ -52,7 +52,7 @@ def source_info(module):
 
 
 def validate_hex():
-    """Require actual HEX-N2-lineage checkout and inspect the exported interfaces."""
+    """Require actual Knill-noise-lineage checkout and inspect the exported interfaces."""
     module = importlib.import_module("hex_qec")
     info = source_info(module)
     if info["checkout"] is None:
@@ -61,14 +61,16 @@ def validate_hex():
         valid = subprocess.run(["git", "-C", info["checkout"], "merge-base", "--is-ancestor",
                                 HEX_REVISION, info["commit"]], capture_output=True).returncode == 0
     if not valid:
-        raise RuntimeError(f"imported Hex must descend from HEX-N2 {HEX_REVISION}; got {info['commit']}")
-    from hex_qec.protocols import FactoryCircuitBuilder, FactoryCircuitBundle, RotatedSurfaceCodeAdapter
-    from hex_qec.modularisation import PreparationPlan
+        raise RuntimeError(f"imported Hex must descend from HEX-K1 {HEX_REVISION}; got {info['commit']}")
+    from hex_qec.protocols import FactoryCircuitBuilder, FactoryCircuitBundle, RotatedSurfaceCodeAdapter, knill_online_offline
+    from hex_qec.modularisation import PreparationPlan, KnillNoiseModel
     from hex_qec.simulation import CompiledFactory, FactoryBatchResult
     from hex_qec.decoders import EffectivePriorBuilder, ProjectedDEMBuilder
     required = {
         FactoryCircuitBuilder: {"adapter", "preparation", "T_tel", "noise_model"},
         PreparationPlan: {"r_0", "r_plus"},
+        KnillNoiseModel: {"name"},
+        knill_online_offline: {"noise_model", "create_codecapacity_dem"},
         CompiledFactory.from_bundle: {"bundle", "seed", "create_codecapacity_dem"},
     }
     for function, names in required.items():

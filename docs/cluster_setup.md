@@ -193,3 +193,9 @@ The same PBS script also accepts ordinary SE memory configurations. Copy
 configs/templates/se_memory.yaml, edit rounds/d/p/shots/get_logicalgap and pass
 that file as CONFIG_FILE. No environment/dependency change is required.
 See [memory configuration and output](se_memory.md).
+
+Current Knill-noise dependency pin: Hex HEX-K1 `8fa2200315cc4feaccf341a461f91739233de08a` on
+`auxiliary-system`, descending from HEX-N2/H5. This supersedes the earlier
+HEX-N2 pin. Bootstrap/bundles require that clean exact checkout; runtime
+checks the new native policy and fixed Knill API, with strict source/resource
+hashes for installed wheels.

@@ -25,7 +25,7 @@ def raw_config(**updates):
                 sweep={"d": [3, 5], "p": [0., .001]}, r_0="d", r_plus=2, T_tel=3, **updates)
 
 
-@pytest.mark.parametrize("filename,kind", [("fig4d_v2_example.yaml", "fig4d_reproduction"),
+@pytest.mark.parametrize("filename,kind", [("fig4d_v2_example.yaml", "knill_ec_memory"),
                                          ("logical_zero_factory_v2_example.yaml", "logical_zero_factory")])
 def test_examples_parse_without_v1_changes(filename, kind):
     doc = load_config(ROOT / "configs" / filename)

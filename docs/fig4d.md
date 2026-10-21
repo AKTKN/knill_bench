@@ -130,3 +130,13 @@ have not been measured. They do not establish a threshold, general fault
 tolerance, or new decoder accuracy/performance. Hex and v1 numerical sources
 remain unchanged. See [B2](logical_zero_factory.md) for the separate factory;
 [B3](factory_analysis.md) analyzes saved factory acceptance/costs separately.
+
+## General Knill EC memory naming and noise revision
+
+The shipped Fig.4(d) configs now use kind=knill_ec_memory and retain T=8,
+hex_uniform, d-round preparation and noisy final readout. The new kind also
+supports arbitrary positive T and two special physical noise models with
+ideal final readout. These variants are not the Fig.4(d) paper model. The
+legacy fig4d_reproduction kind and plot-fig4d alias retain compatibility.
+See [plan and implemented contract](knill_ec_noise_plan.md). plot-knill uses
+the same saved-only statistics at the actual experiment T.

@@ -337,4 +337,4 @@ def test_real_imported_hex_n2_api_provenance_without_sampler_or_decoder(monkeypa
     assert env["cpu"]["count"] > 0
     actual = env["hex"]
     monkeypatch.setattr(provenance, "source_info", lambda module: dict(actual, commit="5de58f2f80791054411ad3c0885a4fe3671ed56a"))
-    with pytest.raises(RuntimeError, match="must descend from HEX-N2"): provenance.validate_hex()
+    with pytest.raises(RuntimeError, match="must descend from HEX-K1"): provenance.validate_hex()

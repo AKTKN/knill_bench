@@ -17,7 +17,8 @@ if TYPE_CHECKING:
     from hex_qec.circuit_generation import FactoryNoiseModel
 
 
-KINDS = {"fig4d_reproduction", "logical_zero_factory", "se_memory"}
+KNILL_KINDS = {"knill_ec_memory", "fig4d_reproduction"}
+KINDS = KNILL_KINDS | {"logical_zero_factory", "se_memory"}
 LOCAL_PRIOR_POLICY = "module_local_stim_dem"
 LOCAL_PRIOR_APPROXIMATION = "preparation_and_earlier_stage_residual_errors_excluded_v1"
 LEGACY_PRIOR_POLICY = "circuit_informed_projected"
@@ -147,6 +148,8 @@ class ExperimentPoint:
 
     @property
     def final_readout(self):
+        if self.kind == "knill_ec_memory" and self.noise != "hex_uniform":
+            return "ideal_destructive_Z"
         return ("noiseless_terminal_Z_factory_oracle" if self.kind == "logical_zero_factory"
                 else "noisy_destructive_Z")
 
@@ -333,8 +336,8 @@ def parse_config(raw) -> ExperimentConfig:
     policy = raw.get("create_codecapacity_dem", False)
     if type(policy) is not bool:
         raise ValueError("create_codecapacity_dem must be bool")
-    if kind == "fig4d_reproduction" and policy:
-        raise ValueError("Fig.4(d) reproduction requires create_codecapacity_dem=False")
+    if kind in KNILL_KINDS and policy:
+        raise ValueError("Knill EC / Fig.4(d) reproduction requires create_codecapacity_dem=False")
     skip_validation = raw.get("skip_circuit_validation", False)
     if type(skip_validation) is not bool:
         raise ValueError("skip_circuit_validation must be bool")
@@ -363,7 +366,7 @@ def parse_config(raw) -> ExperimentConfig:
         _choice(raw.get("code", "rotated_surface"), {"rotated_surface"}, "code"),
         noise,
         rounds["r_0"], rounds["r_plus"],
-        _integer(raw.get("T_tel", 8 if kind == "fig4d_reproduction" else 1), "T_tel"),
+        _integer(raw.get("T_tel", 8 if kind in KNILL_KINDS else 1), "T_tel"),
         theta, policy, _choice(raw.get("decoder", "mwpm"), {"mwpm"}, "decoder"),
         _integer(raw.get("shots", 64), "shots"), batch,
         _integer(raw.get("workers", 1), "workers"),

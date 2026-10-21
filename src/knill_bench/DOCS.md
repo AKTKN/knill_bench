@@ -137,3 +137,17 @@ The parent validates effective parameters/hashes/scope on publish/resume;
 saved analysis validates the same noise metadata. Fixed/adaptive output remains
 paired and bounded. Full Knill/Fig.4(d), SE memory and v1 numerical paths are
 unchanged. See [custom noise](../../docs/factory_custom_noise.md).
+
+## General Knill EC memory
+
+experiments.knill_ec_memory is the canonical full-Knill runner, sharing the
+bounded worker/adapter path with legacy fig4d_reproduction. Hex exports the
+physical policy; adapters.hex_full_knill records actual rates/boundaries.
+See [noise revision](../../docs/knill_ec_noise_plan.md) for supported kinds,
+models, arbitrary positive T, compatibility and saved-only plot-knill.
+
+Current Knill-noise dependency pin: Hex HEX-K1 `8fa2200315cc4feaccf341a461f91739233de08a` on
+`auxiliary-system`, descending from HEX-N2/H5. This supersedes the earlier
+HEX-N2 pin. Bootstrap/bundles require that clean exact checkout; runtime
+checks the new native policy and fixed Knill API, with strict source/resource
+hashes for installed wheels.

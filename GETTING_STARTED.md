@@ -269,3 +269,18 @@ factory shell wrapper/CLI runs it in both fixed and auto chunk modes. Custom
 noise is supported only by logical_zero_factory; Fig.4(d) and SE memory raise
 before output. Schema-v1 explicit profiles are unchanged. The guide separates
 physical idle exposure from the local inference window and documents resume.
+
+## General Knill EC memory
+
+Use [knill_ec_memory.yaml](configs/templates/knill_ec_memory.yaml) or its
+noiseless_bellpair/code_capacity_noise companion templates. Run with
+`bash scripts/run_knill_ec_memory.sh CONFIG`, resume the printed directory,
+and use `knill-bench-v2 plot-knill RUN --output knill.png`. T_tel may be any
+positive integer; the existing Fig.4(d) files keep T=8. The new noise models
+use ideal final measurement. See [noise boundaries](docs/knill_ec_noise_plan.md).
+
+Current Knill-noise dependency pin: Hex HEX-K1 `8fa2200315cc4feaccf341a461f91739233de08a` on
+`auxiliary-system`, descending from HEX-N2/H5. This supersedes the earlier
+HEX-N2 pin. Bootstrap/bundles require that clean exact checkout; runtime
+checks the new native policy and fixed Knill API, with strict source/resource
+hashes for installed wheels.

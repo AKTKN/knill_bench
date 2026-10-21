@@ -182,3 +182,19 @@ completed resume; saved analysis checks the same fields. Factory run rejects a
 mismatched external resume document before any incomplete-file cleanup.
 Uniform provenance/cache/identity semantics are preserved. See
 [the guide](../../../docs/factory_custom_noise.md) for exact fields and examples.
+
+## General Knill EC memory revision
+
+knill_ec_memory.run accepts positive T (default 8), no theta and False priors.
+Scalar noise supports hex_uniform/noiseless_bellpair/code_capacity_noise via
+Hex-owned policies. It shares _run_point and fixed/adaptive bounded execution
+with Fig.4(d), and checks an external resume document before cleanup. New
+metadata is validated before completion/resume; legacy kind canonical hashes
+are unchanged. CLI plot-knill has plot-fig4d as an alias. See
+[noise and compatibility](../../../docs/knill_ec_noise_plan.md).
+
+Current Knill-noise dependency pin: Hex HEX-K1 `8fa2200315cc4feaccf341a461f91739233de08a` on
+`auxiliary-system`, descending from HEX-N2/H5. This supersedes the earlier
+HEX-N2 pin. Bootstrap/bundles require that clean exact checkout; runtime
+checks the new native policy and fixed Knill API, with strict source/resource
+hashes for installed wheels.

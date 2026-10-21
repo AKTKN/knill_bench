@@ -54,5 +54,5 @@ def test_installed_hex_still_requires_pinned_hex_n2_provenance(monkeypatch):
     monkeypatch.setattr(provenance, "source_info", lambda module: info.copy())
     assert provenance.validate_hex()["required_revision"] == provenance.HEX_REVISION
     info["commit"] = "a"*40
-    with pytest.raises(RuntimeError, match="must descend from HEX-N2"):
+    with pytest.raises(RuntimeError, match="must descend from HEX-K1"):
         provenance.validate_hex()

@@ -161,3 +161,13 @@ regions, complete custom cache separation, paired physical logical faults,
 no oracle influence, native reuse, zero multipliers, fixed/auto/spawn aligned
 Parquet/counts/metadata, saved analysis, tamper rejection and failed-point
 restart/replay. No production sweep or new large Monte Carlo fixture is added.
+
+## General Knill memory noise tests
+
+test_knill_ec_memory.py covers parsing/domain/protocol restrictions, config
+round trips, physical IDs/seeds, exact native circuit/global-frame replay,
+d3/5 p0 and cached decoding, fixed/auto bounded output, metadata tampering,
+completed resume, saved plotting, fixed serial/spawn equality and failed-point
+restart. New physical fixtures use <=7 shots; production configs parse only.
+Existing legacy tests remain, with two expectations updated for shipped kind
+renaming. See [plan/contract](../docs/knill_ec_noise_plan.md).
