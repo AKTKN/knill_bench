@@ -165,3 +165,18 @@ Current Knill-noise dependency pin: Hex HEX-K1 `8fa2200315cc4feaccf341a461f91739
 HEX-N2 pin. Bootstrap/bundles require that clean exact checkout; runtime
 checks the new native policy and fixed Knill API, with strict source/resource
 hashes for installed wheels.
+
+## Key-specific physical-error plotting coordinate
+
+NotebookPlots.plot_logical_error_rate now accepts rescale_p_keys, applying
+(23/10)*p-(8/5)*p**2 only to those dataset keys' plotted x values and Wilson
+shades. Saved files/filter coordinates and all LER statistics stay unchanged.
+See [notebook usage and analytic scope](../../docs/notebook_plotting.md).
+
+## General Knill simulation with two prior scopes
+
+experiments.knill_sim dispatches the general memory runner. True enables
+module-local Stim or native full-prefix inference through adapters.knill_priors.
+Existing kinds/default hashes remain supported. See
+[Knill simulation](../../docs/knill_sim.md) for syntax, physical independence,
+scopes, metadata, cache lifetime and unsupported models.

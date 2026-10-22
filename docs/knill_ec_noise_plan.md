@@ -105,3 +105,10 @@ Current Knill-noise dependency pin: Hex HEX-K1 `8fa2200315cc4feaccf341a461f91739
 HEX-N2 pin. Bootstrap/bundles require that clean exact checkout; runtime
 checks the new native policy and fixed Knill API, with strict source/resource
 hashes for installed wheels.
+
+## General Knill inference update
+
+The later [knill_sim contract](knill_sim.md) supersedes the general kinds'
+mandatory False flag above: True explicitly selects module_local/default or
+full_prefix. Both preserve all physical noise boundaries in this guide.
+Legacy reproduction settings and earlier saved hashes stay unchanged.

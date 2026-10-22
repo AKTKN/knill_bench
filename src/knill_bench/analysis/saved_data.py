@@ -155,9 +155,9 @@ class RunRegistry:
                         or info.get("seed") != point_seed(config.master_seed, point)
                         or any(info.get(k) != v for k, v in point.sampling_identity.items())):
                     raise ValueError("complete point identity/count/publication metadata mismatch")
-                if config.kind == "logical_zero_factory":
+                if config.kind in {"logical_zero_factory", "knill_sim", "knill_ec_memory"}:
                     validate_noise_execution(point, info.get("execution"),
-                                             create_codecapacity_dem=config.create_codecapacity_dem)
+                                             create_codecapacity_dem=config.create_codecapacity_dem, codecapacity_prior=config.codecapacity_prior)
                 selected.append(SavedPoint(path, point, info, conditions, config.shots))
         if set(filters) - known:
             raise ValueError(f"unknown filter fields: {sorted(set(filters) - known)}")

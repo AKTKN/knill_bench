@@ -20,7 +20,8 @@ from hex_qec.modularisation import (
     generate_logical_measurement_module,
 )
 from knill_bench.codes import Code
-from knill_bench.experiments.config_v2 import ExperimentPoint, KNILL_KINDS
+from knill_bench.experiments.config_v2 import (ExperimentPoint, KNILL_KINDS, GENERAL_KNILL_KINDS,
+    KNILL_PRIOR_POLICIES, LOCAL_PRIOR_APPROXIMATION, KNILL_PREFIX_APPROXIMATION)
 from .hex_native import PackedFrame, _transition
 
 
@@ -35,13 +36,21 @@ class HexFullKnill:
 
     T=1 is supported here for small protocol tests; the Fig.4(d) runner requires
     T=8. knill_ec_memory accepts arbitrary positive T and native noise models.
-    No postselection, terminal factory oracle, or code-capacity reweighting.
+    Optional local/full-prefix inference retains all physical noise.
+    No postselection or terminal factory oracle.
     Native handles and templates belong to this point in this process only.
     """
 
-    def __init__(self, point: ExperimentPoint, *, seed: int):
+    def __init__(self, point: ExperimentPoint, *, seed: int,
+                 create_codecapacity_dem=False, codecapacity_prior="module_local"):
+        if type(create_codecapacity_dem) is not bool:
+            raise ValueError("create_codecapacity_dem must be bool")
+        if not isinstance(codecapacity_prior, str) or codecapacity_prior not in KNILL_PRIOR_POLICIES:
+            raise ValueError("codecapacity_prior must be module_local or full_prefix")
+        if point.kind == "fig4d_reproduction" and create_codecapacity_dem:
+            raise ValueError("legacy Fig.4(d) requires create_codecapacity_dem=False")
         if point.kind not in KNILL_KINDS:
-            raise ValueError("full Knill requires knill_ec_memory / Fig.4(d) points")
+            raise ValueError("full Knill requires knill_sim / knill_ec_memory / Fig.4(d) points")
         noise = KnillNoiseModel(point.noise)
         rates = noise.probabilities(point.p)
         code = Code.rotated(point.d)
@@ -98,8 +107,6 @@ class HexFullKnill:
         self.engine = modularised_circuit(modules)
         self.supports, self.roles = supports, roles
         self.transitions = transitions
-        self.converter = self.engine.circuit.compile_m2d_converter()
-        self.sampler = self.engine.circuit.compile_sampler(seed=seed)
         self.metadata = dict(
             protocol="hex_fixed_full_knill", T_tel=point.T_tel,
             r_0=[point.r_0] * point.T_tel, r_plus=[point.r_plus] * point.T_tel,
@@ -116,9 +123,26 @@ class HexFullKnill:
             sampling="one_point_seeded_stim_sampler_advanced_in_fixed_batches",
         )
 
-        if point.kind == "knill_ec_memory":
+        if point.kind in GENERAL_KNILL_KINDS:
             self.metadata.update(noise_probabilities=rates, terminal_ideal_oracle=False,
                 noise_scope_version="knill_ec_physical_noise_v1")
+
+        if create_codecapacity_dem:
+            from .knill_priors import configure_local_priors, configure_full_prefix_priors, SCOPE
+            local = codecapacity_prior == "module_local"
+            descriptions = (configure_local_priors(self, code) if local
+                            else configure_full_prefix_priors(self, code))
+            self.metadata.update(
+                create_codecapacity_dem=True, codecapacity_prior=codecapacity_prior,
+                prior_policy=KNILL_PRIOR_POLICIES[codecapacity_prior],
+                projected_approximation=LOCAL_PRIOR_APPROXIMATION if local else KNILL_PREFIX_APPROXIMATION,
+                prior_scope=SCOPE if local else "initialization_to_current_bell_readout_prefix",
+                preparation_residual_errors_in_prior=not local,
+                earlier_stage_residual_errors_in_prior=not local,
+                boundary_noise="native_only_no_added_channel", projected_priors=descriptions,
+            )
+        self.converter = self.engine.circuit.compile_m2d_converter()
+        self.sampler = self.engine.circuit.compile_sampler(seed=seed)
 
     def sample(self, shots):
         return self.sampler.sample(shots=shots)

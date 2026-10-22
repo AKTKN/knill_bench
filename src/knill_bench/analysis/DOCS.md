@@ -16,6 +16,16 @@ first-rejection lifetime fractions/means, LER reduction, and postselected LER ve
 Scalar/membership `filter_by` and scalar/list `group_by` accept key and resolved
 experimental conditions. Ambiguous physical groups raise rather than pool.
 `per_rounds=True` normalizes with `1-(1-LER)**(1/r)` using rounds or T.
+`plot_logical_error_rate(rescale_p_keys=["ideal_bell"])` maps only selected
+registered keys' horizontal coordinates to (23/10)*p-(8/5)*p**2, including their
+Wilson shades. A scalar key or list/tuple/set/frozenset is supported; None/empty
+keeps existing coordinates. Key validation uses the registry without IO; unknown
+keys raise, while registered filtered-out paths remain unopened. Filters/groups
+use original saved p; counts, LER/interval bounds and legend text stay unchanged.
+The axis identifies the code-capacity scale when transformed points are present.
+This display option composes with per_rounds and does not auto-detect physical
+models or claim channel equivalence outside the documented logical-Z/T=1 scope.
+See [the example and assumptions](../../../docs/notebook_plotting.md).
 Reduction is `1-selected_LER/raw_LER`; no acceptance or zero baseline gives
 undefined values. Default threshold grids contain all exact unique stage gaps;
 automatic lifetime grids with >10 values raise and request `gap_threshold`.
@@ -172,3 +182,11 @@ arbitrary T and check its noise execution metadata. plot-knill and the
 plot-fig4d alias share this saved-only path, actual T/noise title, existing
 summary keys and Agresti-Coull statistics. See
 [noise contract](../../../docs/knill_ec_noise_plan.md).
+
+## General Knill inference provenance
+
+plot-knill/summarize_saved and RunRegistry now accept knill_sim/knill_ec_memory
+True runs, preserving their local/full-prefix labels and validating inference
+mode, scope, residual inclusion flags and per-stage sector hash structure.
+Saved analysis never compiles a prior or changes logical-error labels. See
+[metadata contract](../../../docs/knill_sim.md).

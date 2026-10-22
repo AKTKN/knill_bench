@@ -788,3 +788,47 @@ dirty-dependency gate failures resolved by committing Hex before bench's final
 gate. No v1 provenance or numerical behavior changed. Incoming unrelated
 notebook/.gitignore work is preserved and excluded from this scoped commit.
 No production sweep or other worktree edit ran.
+
+## 2026-10-22 — Key-specific ideal-Bell/capacity LER coordinates
+
+NotebookPlots.plot_logical_error_rate adds rescale_p_keys (default None).
+Only specified registered dataset keys use x=(23/10)*p-(8/5)*p**2; their Wilson
+shades follow the same coordinates. Original-p filtering/grouping, all LER
+counts/interval endpoints, legend labels, defaults and other figures remain
+unchanged. Nonempty string keys or list/tuple/set/frozenset are accepted,
+unknown/invalid keys fail before IO, and filtered-out registered paths stay
+lazy. Transformed figures identify the code-capacity x scale. The option
+composes with per_rounds without changing its existing y normalization.
+
+Documented the supplied channel correspondence and logical-Z/T=1 assumptions,
+with the requested code_capacity/ideal_bell example. Added 20 synthetic cases;
+focused notebook gate: 57 passed, 12.58 s. Full Conda gate: 552 passed,
+1208 inherited-category warnings, 167.91 s. Real saved-data-only PNG/PDF smoke
+passes for eight curves/52 published points, with all input hashes unchanged
+and sampler/decoder constructors forbidden. Artifacts are ignored under
+results/notebook_p_rescale. User notebook/.gitignore are byte-identical to
+initial contents; no simulation, Hex/dependency, configuration or data edits.
+
+## 2026-10-22 — General knill_sim and two explicit prior scopes
+
+Removed the general-Knill False-only guard and added kind=knill_sim while
+retaining knill_ec_memory. After explaining the difference, the user explicitly
+chose support for both codecapacity_prior=module_local (default) and full_prefix.
+Local builds strict two-sector Stim DEMs from the actual current native
+Bell-resource CX, optional data noise, data coupling and readouts; +1 CSS/
+Pauli analysis boundaries never enter physical sampling. Prep/earlier-stage
+residuals are excluded only from its prior. Full-prefix uses native Hex causal
+projection/global maps and retains unsupported graph/no-active-event errors.
+There is no fallback or physical-noise change. Both scopes retain native prep
+repair, packed runtime frames and bounded fixed/adaptive execution.
+
+Explicit scope/approximation/residual flags and per-stage sector hashes are
+saved and checked by parent publication/resume/CLI/notebook readers. Existing
+valid False hashes and physical IDs/seeds are preserved; mode is inference
+only. Tiny templates and docs/knill_sim.md explain both scopes and limits.
+The supplied 24-point/200000-shot grid was parsed without circuit construction;
+no production sweep ran. Focused: 30 new tests passed, 148 warnings, 18.20 s;
+full gate: 581 passed, 1356 warnings, 182.02 s. Read-only Hex: 41 passed,
+188 warnings, 26.54 s. Two-worker fixed/auto CLI smokes, complete resume and
+saved plots pass for both modes (local d3/5 d-rounds; prefix d3 one-round).
+Hex/pins/v1 and user .gitignore/notebook/previous plotting work are preserved.

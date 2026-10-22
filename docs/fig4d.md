@@ -140,3 +140,10 @@ ideal final readout. These variants are not the Fig.4(d) paper model. The
 legacy fig4d_reproduction kind and plot-fig4d alias retain compatibility.
 See [plan and implemented contract](knill_ec_noise_plan.md). plot-knill uses
 the same saved-only statistics at the actual experiment T.
+
+## General simulation and True inference
+
+The [general knill_sim runner](knill_sim.md) accepts optional local/full-prefix
+True inference. Shipped paper settings remain T8, d-round preparation, uniform
+noise and False priors. Existing knill_ec_memory also supports the general
+options. No change to physical boundaries or paper-agreement evidence follows.

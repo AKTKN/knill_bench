@@ -1501,3 +1501,95 @@ plotting sources/tests and guide are byte-identical to their initial contents;
 shared guide updates are append-only and their incoming portions remain unstaged.
 Other dependencies and the hex-parallel worktree are untouched. No production
 sweep, statistical paper-agreement, performance or threshold claim is made.
+
+## 2026-10-22 — Selected-key ideal-Bell/capacity x conversion
+
+Implemented per-figure rescale_p_keys on plot_logical_error_rate only, using
+the user's supplied x=(23/10)*p-(8/5)*p**2 for the named registry keys. This
+is a coordinate view of saved statistics, with no inferred model selection,
+new sampling, fitting, pooling or LER/interval recomputation. See
+[notebook plotting](docs/notebook_plotting.md) for usage and the supplied
+logical-Z/T=1 channel-equivalence assumptions.
+
+- `bash scripts/python.sh -m pytest -q tests/test_notebook_plotting.py --disable-warnings`
+  — **57 passed**, **12.58 s**. Twenty new synthetic cases check .01/.03/.05/.07
+  map to .02284/.06756/.11100/.15316 for only the requested key, both distance
+  groups and both per_rounds modes. They verify band/line coordinates, unchanged
+  LER/interval y values/legends/files, raw-p filtering, grouping without key,
+  zero/no clipping, no-op defaults/empty inputs, early unknown/type rejection,
+  and no IO for filtered-out paths. Fixtures remain six saved rows, no sampling.
+- `bash scripts/python.sh -m pytest -q --disable-warnings`
+  — **552 passed**, **1208 warnings**, **167.91 s**. No failed checks.
+- `bash scripts/python.sh /tmp/smoke_ler_p_rescale.py`
+  — passes using the actual notebook's saved ideal_bell and code_capacity
+  runs (20261022100223_0522ba07_ideal_bell and
+  20261022095055_e051a690_code_capacity). Both declare logical-Z Knill, T=1,
+  ideal final readout; only ideal_bell's p is transformed. Eight curves from
+  52 published points/52 million saved rows render in the requested log-x flow.
+  Every x coordinate matches the saved p or supplied polynomial; every y
+  matches saved error/shot counts. All config/metadata/Parquet hashes are
+  identical before and after. compile_sampler, compile_detector_sampler and
+  Matching.from_check_matrix were patched to raise throughout figure/export,
+  proving the smoke did not sample or construct a decoder.
+  PNG/PDF exports remain ignored at
+  results/notebook_p_rescale/code_capacity_vs_ideal_bell.{png,pdf}; the PNG was
+  visually inspected. No curve-agreement hypothesis test is asserted.
+- `git diff --check` passes. Initial SHA256 values confirm the user's existing
+  notebooks/saved_figures.ipynb and .gitignore edits remain untouched. Hex is
+  still clean at the existing pin; no simulation schema/config/runner, physical
+  code or other notebook outputs were modified.
+
+## 2026-10-22 — General Knill simulation and selectable True priors
+
+User reported the general-Knill True guard blocking d-round preparation and
+requested kind=knill_sim. Clarified existing Hex full-prefix versus local DEM
+scope; user explicitly selected both as configurable options. Added fixed
+codecapacity_prior=module_local/default or full_prefix for general True Knill.
+False retains Hamming, physical noise/records/seeds and existing valid config
+hashes. New scope metadata and cache keys distinguish inference models; no
+unsupported model silently falls back. See [contract](docs/knill_sim.md).
+
+Commands/results, from bench root in Conda knill_system:
+
+- `bash scripts/python.sh -m pytest -q tests/test_knill_ec_memory.py tests/test_fig4d.py tests/test_v2_config.py --disable-warnings`
+  — 137 passed, 160 warnings, 17.95 s after independent alias/guard plumbing.
+- Tiny direct native-boundary smoke constructed local d3/r3 and d5/r5, and
+  prefix d3/r1, T=1/p=.001, then sampled/decoded three shots each: all pass.
+- `bash scripts/python.sh -m pytest -q tests/test_knill_sim.py --disable-warnings`
+  — **30 passed**, 148 warnings, **18.20 s**. Covers the user's full grid
+  parsing with sampler construction forbidden; both general names/options;
+  strict irrelevant/unknown-field rejection; False hash compatibility;
+  prior-independent case IDs/seeds/raw seven-shot arrays; both new physical
+  models; actual d3/5 d-round preparation; cache reuse and no per-shot model/
+  sampler/graph construction; prep/past exclusion hashes; noisy terminal
+  boundary; exact local ideal-Bell/capacity sector DEM probabilities under
+  p_cap=2.3*p-1.6*p**2; native full-prefix/global-map decode parity for all
+  three physical models; unsupported/p0 rejection before sampler compilation;
+  fixed/auto run/resume/CLI and notebook saved readers; inference-scope
+  tamper rejection; fixed serial/spawn equality.
+  Removed only the obsolete knill_ec_memory True-rejection parameter from
+  the previous test. Legacy False/factory/SE/v1/native expectations remain.
+- `bash scripts/python.sh -m pytest -q external/Hex/tests/test_codecapacity_public.py external/Hex/tests/test_knill_noise.py --disable-warnings`
+  — **41 passed**, 188 warnings, **26.54 s**, read-only. Confirms native
+  prefix causal/context/unsupported-model and existing physical-noise tests.
+- **Full gate:** `bash scripts/python.sh -m pytest -q --disable-warnings`
+  — **581 passed**, **1356 warnings**, **182.02 s**. No failed checks.
+- `bash scripts/python.sh /tmp/smoke_knill_sim.py > results/knill_sim_smoke_output.json`
+  — four actual CLI/wrapper runs with workers=2, three shots per point,
+  p=.001/T=1, each True mode under fixed batch=3 and auto. Local uses d3/5,
+  r_0=r_plus=d; prefix uses d3/r=(1,1). All 18 saved trajectories are
+  published with IDs [0,1,2], the selected prior label/scope and complete
+  metadata. Installed knill-bench-v2 completed resume leaves Parquet bytes
+  unchanged; plot-knill/summarize_saved work for both modes. Every tiny point
+  observed zero errors; no statistical agreement is inferred. Configs, runs,
+  summaries and PNGs stay ignored under results/knill_sim_smoke.
+- `bash scripts/python.sh -m pip check` passes, as do
+  `bash scripts/python.sh -m compileall -q src` and `git diff --check`.
+
+New physical fixtures are d3/5 and <=7 shots. No user production configuration
+or sweep was run. Full-prefix still rejects its known d3 2/3-round unsupported
+X-sector structure; local resolves that scope issue by explicitly changing
+inference assumptions, without erasing physical prep/past residuals. Hex and
+all dependency source/pins are unchanged/clean. Incoming and ongoing user
+notebook/.gitignore edits, earlier plotting source changes and existing saved
+data are preserved. No benchmark, threshold or exact posterior claim.

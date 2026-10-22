@@ -292,3 +292,12 @@ Current Knill-noise dependency pin: Hex HEX-K1 `8fa2200315cc4feaccf341a461f91739
 HEX-N2 pin. Bootstrap/bundles require that clean exact checkout; runtime
 checks the new native policy and fixed Knill API, with strict source/resource
 hashes for installed wheels.
+
+## General Knill True priors
+
+Use `kind: knill_sim`, `create_codecapacity_dem: true`, and explicit
+`codecapacity_prior: module_local` or `full_prefix`. The local template uses
+d3/d-round preparation; the prefix template uses a supported one-round case.
+Run either with run_knill_ec_memory.sh, then resume/plot-knill. The existing
+knill_ec_memory kind also accepts these options. See
+[scope, compatibility and limits](docs/knill_sim.md).

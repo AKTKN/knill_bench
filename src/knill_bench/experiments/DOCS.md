@@ -198,3 +198,14 @@ Current Knill-noise dependency pin: Hex HEX-K1 `8fa2200315cc4feaccf341a461f91739
 HEX-N2 pin. Bootstrap/bundles require that clean exact checkout; runtime
 checks the new native policy and fixed Knill API, with strict source/resource
 hashes for installed wheels.
+
+## knill_sim and explicit inference scope
+
+config_v2 accepts general kind knill_sim and existing knill_ec_memory with
+True priors and codecapacity_prior=module_local/default or full_prefix.
+The option is inference-only, omitted from canonical False/default configs
+and never added to physical points/seeds. The common runner passes it to
+both fixed/adaptive worker setup/cache keys. RunStore uses config's explicit
+prior_policy/projected_approximation and validates per-stage scope/model
+metadata before completion/resume. Legacy Fig.4(d), factory and SE contracts
+are unchanged. See [Knill simulator](../../../docs/knill_sim.md).

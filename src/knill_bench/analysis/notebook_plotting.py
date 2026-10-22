@@ -175,15 +175,32 @@ class NotebookPlots:
                                    zorder=.5, label="_nolegend_")
 
     def plot_logical_error_rate(self, *, filter_by=None, group_by=("key", "d"),
-                                per_rounds=False, ax=None):
+                                per_rounds=False, rescale_p_keys=None, ax=None):
         """LER vs p; optionally 1-(1-LER)**(1/rounds_or_T).
 
-        The transform is a normalization convention, not an independent-round
-        noise estimate. Zero observed errors remain zero (invisible on log y).
+        rescale_p_keys selects registered dataset keys (one string or a
+        list/tuple/set/frozenset) whose plotted p becomes (23/10)*p-(8/5)*p**2,
+        the ideal-Bell to
+        code-capacity coordinate. Both lines and shades move; filters/grouping
+        still use saved p. Counts, LER, interval bounds and saved data do not
+        change. Analytic channel equivalence assumes logical-Z memory, T=1,
+        ideal Bell resources/final readout and independent CSS-sector MWPM.
+
+        per_rounds is a display normalization convention, not an independent-
+        round noise estimate. Zero observed errors stay zero (invisible on log y).
         """
         if type(per_rounds) is not bool:
             raise ValueError("per_rounds must be bool")
+        requested = () if rescale_p_keys is None else choices(rescale_p_keys)
+        if any(not isinstance(key, str) or not key.strip() for key in requested):
+            raise ValueError("rescale_p_keys must be a dataset key or a list/tuple/set of keys")
+        rescaled = frozenset(requested)
+        unknown = rescaled - self.data.paths.keys()
+        if unknown:
+            raise ValueError(f"unknown dataset key in rescale_p_keys: {sorted(unknown)}")
         fields, groups, _ = self._prepare(filter_by, group_by, curves=True)
+        has_rescaled = any(row["conditions"]["key"] in rescaled
+                           for rows in groups.values() for row in rows)
         with self.style.context():
             _, ax = self.style.axes(ax)
             for key, rows in groups.items():
@@ -196,11 +213,14 @@ class NotebookPlots:
                     with np.errstate(divide="ignore"):
                         y = -np.expm1(np.log1p(-y) / rounds)
                     lower, upper = self.interval.per_round(errors, shots, rounds)
-                x = [r["conditions"]["p"] for r in rows]
+                x = np.array([r["conditions"]["p"] for r in rows], float)
+                if rows[0]["conditions"]["key"] in rescaled:
+                    x = (23 / 10) * x - (8 / 5) * x**2
                 line, = ax.plot(x, y, marker="o", label=self._label(fields, key))
                 self._shade(ax, x, lower, upper, line.get_color())
             ylabel = "logical error rate per round" if per_rounds else "logical error rate"
-            return self._finish(ax, "Physical error rate", ylabel, log=True)
+            xlabel = "Physical error rate (code-capacity scale)" if has_rescaled else "Physical error rate"
+            return self._finish(ax, xlabel, ylabel, log=True)
 
     def plot_gap_frequency(self, *, filter_by=None, group_by=("key", "d", "p"),
                            T_idx=1, normalize=False, return_unique=False,

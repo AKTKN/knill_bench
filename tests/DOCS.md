@@ -203,3 +203,24 @@ completed resume, saved plotting, fixed serial/spawn equality and failed-point
 restart. New physical fixtures use <=7 shots; production configs parse only.
 Existing legacy tests remain, with two expectations updated for shipped kind
 renaming. See [plan/contract](../docs/knill_ec_noise_plan.md).
+
+## Key-specific LER x-coordinate conversion
+
+test_notebook_plotting.py checks the supplied ideal-Bell/capacity numerical
+pairs, multiple dataset/distance groups, identical LER/interval y values,
+matched band/line x transforms, per_rounds composition, saved-p filtering,
+key-independent grouping, p=0/no clipping, no-op defaults, early invalid-key
+rejection and lazy filtered-out paths. All fixtures use six saved synthetic
+rows; no physical sampling is added. Read-only real-data PNG/PDF validation
+and the full regression command are recorded in TEST.md.
+
+## General Knill two-prior tests
+
+test_knill_sim.py parses the user's production grid without construction,
+checks new/legacy names, strict option scope, old False hashes, nonphysical
+prior identities/seeds, actual unchanged raw sampling, d3/5 d-round local
+execution, reusable two-sector caches, native full-prefix/global-frame parity,
+exact local ideal-Bell/capacity sector DEM equality, p0/unsupported rejection
+before sampler setup, fixed/auto output, saved readers, tamper rejection and
+fixed serial/spawn equality. New physical batches are <=7 shots. The obsolete
+knill_ec_memory True-rejection expectation is removed; legacy tests remain.

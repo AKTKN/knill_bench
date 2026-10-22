@@ -17,11 +17,15 @@ if TYPE_CHECKING:
     from hex_qec.circuit_generation import FactoryNoiseModel
 
 
-KNILL_KINDS = {"knill_ec_memory", "fig4d_reproduction"}
+GENERAL_KNILL_KINDS = {"knill_sim", "knill_ec_memory"}
+KNILL_KINDS = GENERAL_KNILL_KINDS | {"fig4d_reproduction"}
 KINDS = KNILL_KINDS | {"logical_zero_factory", "se_memory"}
 LOCAL_PRIOR_POLICY = "module_local_stim_dem"
 LOCAL_PRIOR_APPROXIMATION = "preparation_and_earlier_stage_residual_errors_excluded_v1"
 LEGACY_PRIOR_POLICY = "circuit_informed_projected"
+KNILL_PRIOR_POLICIES = {"module_local": "knill_module_local_stim_dem",
+                        "full_prefix": "knill_full_prefix_projected"}
+KNILL_PREFIX_APPROXIMATION = "full_prefix_fixed_reference_independent_superposition_v1"
 
 
 def canonical(value) -> str:
@@ -148,7 +152,7 @@ class ExperimentPoint:
 
     @property
     def final_readout(self):
-        if self.kind == "knill_ec_memory" and self.noise != "hex_uniform":
+        if self.kind in GENERAL_KNILL_KINDS and self.noise != "hex_uniform":
             return "ideal_destructive_Z"
         return ("noiseless_terminal_Z_factory_oracle" if self.kind == "logical_zero_factory"
                 else "noisy_destructive_Z")
@@ -215,8 +219,10 @@ class ExperimentConfig:
     rounds: int | str = "d"
     get_logicalgap: bool = False
     noise_model: "FactoryNoiseModel | None" = None
+    codecapacity_prior: str = "module_local"
 
     def __post_init__(self):
+        _choice(self.codecapacity_prior, KNILL_PRIOR_POLICIES, "codecapacity_prior")
         validate_noise(self.kind, self.noise, self.noise_model)
         if self.noise_model is not None:
             for d in self.distances:
@@ -231,6 +237,8 @@ class ExperimentConfig:
     def as_dict(self):
         result = asdict(self)
         result.pop("noise_model")
+        if self.kind not in GENERAL_KNILL_KINDS or not self.create_codecapacity_dem:
+            result.pop("codecapacity_prior")
         if self.noise_model is not None:
             result["noise"] = noise_as_dict(self.noise_model)
         # Preserve canonical hashes of existing configurations with full validation.
@@ -259,7 +267,17 @@ class ExperimentConfig:
     def prior_policy(self):
         if self.kind == "se_memory":
             return "full_circuit_stim_dem"
+        if self.kind in GENERAL_KNILL_KINDS and self.create_codecapacity_dem:
+            return KNILL_PRIOR_POLICIES[self.codecapacity_prior]
         return LOCAL_PRIOR_POLICY if self.create_codecapacity_dem else "hex_legacy_hamming"
+
+    @property
+    def projected_approximation(self):
+        if not self.create_codecapacity_dem:
+            return None
+        if self.kind in GENERAL_KNILL_KINDS and self.codecapacity_prior == "full_prefix":
+            return KNILL_PREFIX_APPROXIMATION
+        return LOCAL_PRIOR_APPROXIMATION
 
     @property
     def gap_units(self):
@@ -295,7 +313,7 @@ class ConfigDocument:
 def parse_config(raw) -> ExperimentConfig:
     _mapping(raw, "schema_version kind name output_root code noise sweep r_0 r_plus T_tel theta "
              "create_codecapacity_dem decoder shots batch_size workers master_seed skip_circuit_validation "
-             "buffer_shot target_chunk_seconds rounds get_logicalgap".split(), "root")
+             "buffer_shot target_chunk_seconds rounds get_logicalgap codecapacity_prior".split(), "root")
     if type(raw.get("schema_version")) is not int or raw["schema_version"] != 2:
         raise ValueError("schema_version must be 2")
     kind = _choice(raw.get("kind"), KINDS, "kind")
@@ -336,8 +354,11 @@ def parse_config(raw) -> ExperimentConfig:
     policy = raw.get("create_codecapacity_dem", False)
     if type(policy) is not bool:
         raise ValueError("create_codecapacity_dem must be bool")
-    if kind in KNILL_KINDS and policy:
-        raise ValueError("Knill EC / Fig.4(d) reproduction requires create_codecapacity_dem=False")
+    if kind == "fig4d_reproduction" and policy:
+        raise ValueError("Fig.4(d) reproduction requires create_codecapacity_dem=False")
+    prior = _choice(raw.get("codecapacity_prior", "module_local"), KNILL_PRIOR_POLICIES, "codecapacity_prior")
+    if "codecapacity_prior" in raw and (kind not in GENERAL_KNILL_KINDS or not policy):
+        raise ValueError("codecapacity_prior requires general Knill EC with create_codecapacity_dem=True")
     skip_validation = raw.get("skip_circuit_validation", False)
     if type(skip_validation) is not bool:
         raise ValueError("skip_circuit_validation must be bool")
@@ -371,7 +392,7 @@ def parse_config(raw) -> ExperimentConfig:
         _integer(raw.get("shots", 64), "shots"), batch,
         _integer(raw.get("workers", 1), "workers"),
         _integer(raw.get("master_seed", 12345), "master_seed", 0, 2**64 - 1),
-        skip_validation, buffer, target, memory_rounds, get_gap, noise_model,
+        skip_validation, buffer, target, memory_rounds, get_gap, noise_model, prior,
     )
 
 

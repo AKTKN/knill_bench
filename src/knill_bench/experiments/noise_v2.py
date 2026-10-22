@@ -18,8 +18,8 @@ def noise_as_dict(model):
 
 def validate_noise(kind, name, model, *, p=None, r_plus=None):
     if isinstance(name, str) and name in {"noiseless_bellpair", "code_capacity_noise"} and model is None:
-        if kind != "knill_ec_memory":
-            raise ValueError("special Knill noise is supported only for kind=knill_ec_memory")
+        if kind not in {"knill_sim", "knill_ec_memory"}:
+            raise ValueError("special Knill noise is supported only for kind=knill_ec_memory or knill_sim")
         from hex_qec.modularisation import KnillNoiseModel
         policy = KnillNoiseModel(name)
         if p is not None:
@@ -107,25 +107,44 @@ def execution_noise(point):
     )
 
 
-def validate_noise_execution(point, execution, *, create_codecapacity_dem):
+def validate_noise_execution(point, execution, *, create_codecapacity_dem, codecapacity_prior="module_local"):
     """Cross-check native noise provenance before publication/resume/analysis."""
-    if point.kind == "knill_ec_memory":
+    if point.kind in {"knill_sim", "knill_ec_memory"}:
         from hex_qec.modularisation import KnillNoiseModel
+        from .config_v2 import KNILL_PRIOR_POLICIES, LOCAL_PRIOR_APPROXIMATION, KNILL_PREFIX_APPROXIMATION
         expected = KnillNoiseModel(point.noise).probabilities(point.p)
+        policy = KNILL_PRIOR_POLICIES[codecapacity_prior] if create_codecapacity_dem else "hex_legacy_hamming"
         if (not isinstance(execution, dict)
                 or execution.get("noise") != point.noise
                 or execution.get("noise_probabilities") != expected
                 or execution.get("final_readout") != point.final_readout
                 or execution.get("final_readout_error") != expected["final_readout"]
-                or execution.get("prior_policy") != "hex_legacy_hamming"
+                or execution.get("prior_policy") != policy
                 or execution.get("noise_scope_version") != "knill_ec_physical_noise_v1"
                 or execution.get("terminal_ideal_oracle") is not False
-                or execution.get("create_codecapacity_dem") is not False
+                or execution.get("create_codecapacity_dem") is not create_codecapacity_dem
                 or execution.get("physical_error") != point.p
                 or execution.get("T_tel") != point.T_tel
                 or execution.get("r_0") != [point.r_0] * point.T_tel
                 or execution.get("r_plus") != [point.r_plus] * point.T_tel):
             raise ValueError("saved Knill noise execution metadata changed or is missing")
+        if create_codecapacity_dem:
+            import re
+            local = codecapacity_prior == "module_local"
+            priors = execution.get("projected_priors")
+            hashes = ("configuration_sha256", "model_sha256", "physical_module_sha256", "analysis_circuit_sha256") if local else ("configuration_sha256", "model_sha256")
+            if (execution.get("codecapacity_prior") != codecapacity_prior
+                    or execution.get("projected_approximation") != (LOCAL_PRIOR_APPROXIMATION if local else KNILL_PREFIX_APPROXIMATION)
+                    or execution.get("prior_scope") != ("current_bell_resource_cnot_data_coupling_and_readouts" if local else "initialization_to_current_bell_readout_prefix")
+                    or execution.get("preparation_residual_errors_in_prior") is not (not local)
+                    or execution.get("earlier_stage_residual_errors_in_prior") is not (not local)
+                    or execution.get("boundary_noise") != "native_only_no_added_channel"
+                    or not isinstance(priors, list) or len(priors) != point.T_tel
+                    or any(not isinstance(stage, list) or len(stage) != 2 for stage in priors)
+                    or any(not isinstance(prior, dict) or any(not isinstance(prior.get(k), str)
+                           or re.fullmatch(r"[0-9a-f]{64}", prior[k]) is None for k in hashes)
+                           for stage in priors for prior in stage)):
+                raise ValueError("saved Knill inference scope/model metadata changed or is missing")
         return
     if point.noise_model is None:
         return

@@ -173,3 +173,13 @@ Current Knill-noise dependency pin: Hex HEX-K1 `8fa2200315cc4feaccf341a461f91739
 HEX-N2 pin. Bootstrap/bundles require that clean exact checkout; runtime
 checks the new native policy and fixed Knill API, with strict source/resource
 hashes for installed wheels.
+
+## General Knill EC and selectable inference
+
+Use `kind: knill_sim` (or the existing knill_ec_memory) with any positive
+T_tel. `create_codecapacity_dem: true` enables `codecapacity_prior:
+module_local` (default, factory-style scope) or `full_prefix` (native causal
+projection). False retains unit Hamming. Physical noise/readout is independent
+of that choice. Full-prefix retains its structural limits and never falls
+back. See [Knill simulation](docs/knill_sim.md) for exact scopes and tiny
+[local](configs/templates/knill_sim.yaml)/[prefix](configs/templates/knill_sim_full_prefix.yaml) templates.

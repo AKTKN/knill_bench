@@ -179,3 +179,13 @@ Execution metadata includes noise_probabilities and
 noise_scope_version=knill_ec_physical_noise_v1 with actual T/depths. Complete
 publication/resume/saved analysis validate these fields. Legacy kind hashes
 and schemas stay unchanged. See [contract](knill_ec_noise_plan.md).
+
+## General Knill prior selection
+
+knill_sim and knill_ec_memory retain the error-only point schema. True
+configs save codecapacity_prior (module_local/default or full_prefix) and
+distinct prior_policy/approximation plus per-stage two-sector model hashes.
+Local execution declares preparation/past residuals excluded from inference;
+prefix declares their inclusion. Publication/resume/saved readers validate
+the selected scope. Neither prior changes physical point IDs or seeds. See
+[metadata and scopes](knill_sim.md).

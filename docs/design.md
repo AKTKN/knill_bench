@@ -128,3 +128,11 @@ The v2 canonical kind is now knill_ec_memory, with arbitrary positive T_tel.
 and code_capacity_noise with ideal final measurement, superseding the noisy
 final boundary above for these explicit options only. Uniform/v1/factory/SE
 physics are unchanged. Hex owns the shared policy and data noise fragment.
+
+## General Knill inference selection
+
+The new [knill_sim contract](knill_sim.md) supersedes the general-Knill
+False-only restriction. Local Stim priors include the current resource CX,
+data coupling and Bell readouts; full-prefix uses native Hex causal projection.
+Both leave physical preparation/frames/noise/readout unchanged, with explicitly
+different inference scope and strict unsupported-model errors.

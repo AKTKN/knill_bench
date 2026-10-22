@@ -9,7 +9,7 @@ import numpy as np
 import pyarrow.parquet as pq
 
 from knill_bench.data.storage_v2 import validate_point_files
-from knill_bench.experiments.config_v2 import KNILL_KINDS, load_saved_config
+from knill_bench.experiments.config_v2 import KNILL_KINDS, GENERAL_KNILL_KINDS, load_saved_config
 from knill_bench.experiments.noise_v2 import validate_noise_execution
 
 
@@ -37,8 +37,9 @@ def summarize_saved(run_path):
     metadata = json.loads((path / "metadata.json").read_text())
     if (config.kind not in KNILL_KINDS
             or (config.kind == "fig4d_reproduction" and config.T_tel != 8)
-            or config.theta is not None or config.create_codecapacity_dem
-            or (config.kind == "knill_ec_memory"
+            or config.theta is not None
+            or (config.kind == "fig4d_reproduction" and config.create_codecapacity_dem)
+            or (config.kind in GENERAL_KNILL_KINDS
                 and metadata.get("final_readout") != next(config.points()).final_readout)
             or metadata.get("kind") != config.kind
             or metadata.get("schema_version") != 2 or metadata.get("status") != "complete"
@@ -57,7 +58,7 @@ def summarize_saved(run_path):
             raise ValueError("require complete aligned Knill EC / Fig.4(d) points")
         if not (path / point.filename("logical_error")).is_file():
             raise ValueError("missing logical_error file for a complete point")
-        validate_noise_execution(point, info.get("execution"), create_codecapacity_dem=False)
+        validate_noise_execution(point, info.get("execution"), create_codecapacity_dem=config.create_codecapacity_dem, codecapacity_prior=config.codecapacity_prior)
         validate_point_files(path, point, config.shots)
         shots, errors = 0, 0
         for batch in pq.ParquetFile(path / point.filename("logical_error")).iter_batches(batch_size=65536):

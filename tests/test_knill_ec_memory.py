@@ -59,7 +59,7 @@ def test_special_models_rejected_for_other_protocols(tmp_path, noise, kind):
     assert not (tmp_path / "runs").exists()
 
 
-@pytest.mark.parametrize("updates", [dict(create_codecapacity_dem=True), dict(theta=0.),
+@pytest.mark.parametrize("updates", [dict(theta=0.),
                                      dict(T_tel=0), dict(T_tel=True), dict(noise="code_capacity"),
                                      dict(noise=["hex_uniform", "code_capacity_noise"]),
                                      dict(noise={"model": "custom"})])

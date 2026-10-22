@@ -1,0 +1,20 @@
+# Tiny general Knill EC example; no production sweep.
+schema_version: 2
+kind: knill_sim
+name: knill_module_local_smoke
+output_root: results
+noise: hex_uniform
+sweep:
+  d: [3]
+  p: [0.001]
+r_0: d
+r_plus: d
+T_tel: 1
+create_codecapacity_dem: true
+codecapacity_prior: module_local
+decoder: mwpm
+shots: 3
+batch_size: 3  # Integer gives fixed-partition replay; auto adapts to wall time.
+buffer_shot: 3
+workers: 1
+master_seed: 12345

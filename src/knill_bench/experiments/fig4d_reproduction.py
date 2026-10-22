@@ -14,10 +14,13 @@ def validate_experiment(config):
         raise ValueError("Fig.4(d) requires no theta and create_codecapacity_dem=False")
 
 
-def _run_point(path, point, shots, batch_size, seed, *, buffer_shot=None):
+def _run_point(path, point, shots, batch_size, seed, *, buffer_shot=None,
+               create_codecapacity_dem=False, codecapacity_prior="module_local"):
     # Construct native samplers/graphs/maps inside the worker, never pickle them.
     from knill_bench.adapters.hex_full_knill import HexFullKnill
-    model = HexFullKnill(point, seed=seed)
+    options = (dict(create_codecapacity_dem=True, codecapacity_prior=codecapacity_prior)
+               if create_codecapacity_dem else {})
+    model = HexFullKnill(point, seed=seed, **options)
     with PointWriter(path, point, expected_shots=shots) as writer:
         output = writer if buffer_shot is None else PointBuffer(writer, buffer_shot)
         for start in range(0, shots, batch_size):

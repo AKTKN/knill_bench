@@ -493,3 +493,20 @@ Latest scoped gate: 532 bench tests passed (1208 warnings, 151.11 s);
 Hex is pinned to HEX-K1 8fa2200315cc4feaccf341a461f91739233de08a; native
 sources are clean after their authorized commit. See TEST.md for the initial
 dirty-fork integration failure, corrected tests and tiny fixed/auto smokes.
+
+## User-authorized general Knill simulator and selectable priors
+
+The user removed the general Knill False-only restriction and explicitly
+selected support for both module-local Stim DEM and full-prefix projected
+priors via codecapacity_prior. kind=knill_sim is general; knill_ec_memory
+remains compatible. Local is default and includes current Bell assembly/
+teleportation/readout, excluding prep/past residuals only from inference.
+Full-prefix retains native Hex H5 causal replay and unsupported-graph errors.
+Do not silently fall back between policies or erase physical residuals.
+See [Knill simulator](docs/knill_sim.md). Hex/pins/v1 stay read-only; no
+production sweep or edits to user notebooks/.gitignore are authorized.
+
+Latest general-Knill gate: 581 passed, 1356 warnings, 182.02 s; targeted
+read-only Hex gate: 41 passed, 188 warnings, 26.54 s. Tiny two-worker fixed/
+auto runs and completed resume/saved plots pass for both prior modes. See
+TEST.md; the supplied 200000-shot/d5..11 grid is parse-only validation.

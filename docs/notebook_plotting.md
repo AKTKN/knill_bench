@@ -195,6 +195,47 @@ Knill/factoryでは `r=T`。これは独立round仮定を証明するもので�
 計算はlog1p/expm1で行う。デフォルトFalse。
 ゼロ観測エラーを擬似カウントで置き換えないので、0は対数軸では表示されない。
 
+### 特定keyのpをcode-capacity座標へ換算する
+
+```python
+fig, ax = plots.plot_logical_error_rate(
+    filter_by={"key": ["code_capacity", "ideal_bell"]},
+    group_by=["key", "d"], per_rounds=False,
+    rescale_p_keys=["ideal_bell"],
+)
+ax.set_xscale("log")
+ax.legend(loc="upper left", fontsize=7)
+fig
+```
+
+`rescale_p_keys` に指定した登録済みdataset keyだけ、表示する横座標を
+
+\[
+p_{\mathrm{cap}}=\frac{23}{10}p_{\mathrm{ideal}}
+                  -\frac85p_{\mathrm{ideal}}^2
+\]
+
+へ換算する。上の例では `ideal_bell` を換算し、`code_capacity` は保存されたpを使う。
+文字列1つ、またはlist/tuple/set/frozensetで複数keyを指定できる。
+省略/None/空の候補列なら従来どおり。未知のkeyや文字列以外の候補は読み込み前に
+ValueErrorになる。登録済みでもfilterから外れたkeyのファイルは開かない。
+判定にはdataset keyを使うので、`group_by="d"` のようにkeyをgroup名から省いても動く。
+
+線とWilson shadeのx座標に同じ換算を適用する。LER、shots/errors、区間の上下限、
+凡例名は変更しない。`per_rounds=True` とも併用でき、既存のy方向の換算は独立に
+適用される。`filter_by={"p": ...}`、grouping、並び順は**保存された元のp**で判定し、
+保存config/metadata/Parquetを変更しない。換算結果をsimulationのp範囲へclipしない。
+選択された点が実際に換算された図の横軸名は
+`Physical error rate (code-capacity scale)`。必要ならこの文字列をFigureStyle.labelsで
+上書きできる。換算対象がすべてfilterから外れた場合は従来の横軸名を保つ。
+
+この式は、logical-Z memory・T=1・理想Bell resourceと最終readout・独立CSS-sector
+MWPMでのチャネル対応を比較するためのもの。
+`noiseless_bellpair` の実効bit-flip確率
+`q_ideal=(23/15)*p-(16/15)*p**2` と、capacity側の `q_cap=2*p_cap/3` を合わせる。
+APIは指定keyに表示上の換算を適用し、モデルやTから換算対象を自動推定しない。
+科学的な前提は比較するrunの保存設定で確認する。
+
 ## 2. Logical gapのfrequency
 
 ```python

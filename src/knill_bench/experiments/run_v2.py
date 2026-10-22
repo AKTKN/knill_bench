@@ -73,8 +73,7 @@ class RunStore:
                 prior_policy=config.prior_policy,
                 final_readout=next(config.points()).final_readout,
                 gap_units=config.gap_units,
-                projected_approximation=(LOCAL_PRIOR_APPROXIMATION
-                                         if config.create_codecapacity_dem else None),
+                projected_approximation=config.projected_approximation,
                 points={p.case_id: dict(p.sampling_identity, status="pending", seed=point_seed(config.master_seed, p),
                                        shots=0, logical_errors=0, wall_seconds=0., started_at=None,
                                        ended_at=None, files=[p.filename(t) for t in p.tables])
@@ -109,12 +108,12 @@ class RunStore:
             if (value.get("schema_version") != 2 or value.get("config_hash") != config.config_hash
                     or value.get("input_sha256") != document.input_hash or value.get("config") != config.as_dict()):
                 raise ValueError("saved v2 config changed; resume rejected")
-            if (config.kind == "knill_ec_memory"
+            if (config.kind in {"knill_sim", "knill_ec_memory"}
                     and value.get("final_readout") != next(config.points()).final_readout):
                 raise ValueError("saved Knill final readout changed")
             if (value.get("prior_policy") != config.prior_policy
                     or (config.create_codecapacity_dem
-                        and value.get("projected_approximation") != LOCAL_PRIOR_APPROXIMATION)):
+                        and value.get("projected_approximation") != config.projected_approximation)):
                 raise ValueError("saved prior policy changed; create a new run")
             env = collect_environment()
             if _compatibility(value["environment"]) != _compatibility(env):
@@ -132,7 +131,7 @@ class RunStore:
                     raise ValueError("saved point filenames changed")
                 if info["status"] == "complete":
                     validate_noise_execution(point, info.get("execution"),
-                                             create_codecapacity_dem=config.create_codecapacity_dem)
+                                             create_codecapacity_dem=config.create_codecapacity_dem, codecapacity_prior=config.codecapacity_prior)
                     validate_point_files(path, point, config.shots)
                     if (type(info["shots"]) is not int or info["shots"] != config.shots
                             or type(info["logical_errors"]) is not int
@@ -197,7 +196,7 @@ class RunStore:
                 or result.files != tuple(point.filename(t) for t in point.tables)):
             raise ValueError("invalid point result identity/counts")
         validate_point_files(self.path, point, config.shots)
-        validate_noise_execution(point, execution, create_codecapacity_dem=config.create_codecapacity_dem)
+        validate_noise_execution(point, execution, create_codecapacity_dem=config.create_codecapacity_dem, codecapacity_prior=config.codecapacity_prior)
         if execution is not None:
             if not isinstance(execution, dict):
                 raise ValueError("execution metadata must be a JSON mapping")

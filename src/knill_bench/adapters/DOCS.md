@@ -123,3 +123,18 @@ Current Knill-noise dependency pin: Hex HEX-K1 `8fa2200315cc4feaccf341a461f91739
 HEX-N2 pin. Bootstrap/bundles require that clean exact checkout; runtime
 checks the new native policy and fixed Knill API, with strict source/resource
 hashes for installed wheels.
+
+## General Knill priors
+
+HexFullKnill(point, seed=..., create_codecapacity_dem=False,
+codecapacity_prior="module_local") now supports both True policies through
+knill_priors.py. Local extracts current native auxiliary CX, optional data
+noise and Bell coupling/readouts into canonical three-block bodies. Two
+strict Stim DEMs use +1 CSS inputs and Pauli logical boundaries; complete
+signatures feed native Hex log-weight class matching. Residual prep/past
+errors are excluded only from that prior. 16-entry model/graph and 8-entry
+encoder LRUs cache no samplers. Full-prefix invokes native global maps and
+configure_knill_projected_priors once, preserving causal recovery conventions
+and graph/domain errors. Physical sampler/circuit and cached packed frame
+processing are shared with False. See
+[algorithms/scopes/limitations](../../../docs/knill_sim.md).

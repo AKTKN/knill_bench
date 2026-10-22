@@ -419,3 +419,69 @@ def test_undefined_reduction_has_no_shade_and_shared_interval_configuration(make
     assert len(_bands(ax)) == 1  # zero observed errors still have a nonzero upper bound
     with pytest.raises(ValueError, match="interval"):
         NotebookPlots({"missing": "/nonexistent"}, interval="wilson")
+
+
+@pytest.mark.parametrize("per_rounds", [False, True])
+def test_ler_key_specific_p_rescaling_moves_lines_and_bands_only(make_saved, per_rounds):
+    # Published p_ideal -> p_capacity values from the supplied channel formula.
+    probabilities = (.01, .03, .05, .07)
+    expected = [.02284, .06756, .11100, .15316]
+    path = make_saved("fig4d_reproduction", probabilities=probabilities, distances=(3, 5))
+    original = {file: file.read_bytes() for file in path.iterdir()}
+    plots = NotebookPlots({"code_capacity": path, "ideal_bell": path}, batch_size=2)
+    options = dict(filter_by={"key": ["code_capacity", "ideal_bell"]},
+                   group_by=["key", "d"], per_rounds=per_rounds)
+    _, raw = plots.plot_logical_error_rate(**options)
+    fig, ax = plots.plot_logical_error_rate(**options, rescale_p_keys=["ideal_bell"])
+    assert len(ax.lines) == len(_bands(ax)) == 4
+    for before, after, old_band, band in zip(raw.lines, ax.lines, _bands(raw), _bands(ax)):
+        transformed = "key=ideal_bell" in after.get_label()
+        np.testing.assert_allclose(after.get_xdata(), expected if transformed else probabilities)
+        np.testing.assert_array_equal(after.get_ydata(), before.get_ydata())
+        assert after.get_label() == before.get_label()
+        vertices = band.get_paths()[0].vertices
+        old_vertices = old_band.get_paths()[0].vertices
+        expected_x = (23/10)*old_vertices[:, 0] - (8/5)*old_vertices[:, 0]**2 if transformed else old_vertices[:, 0]
+        np.testing.assert_allclose(vertices[:, 0], expected_x)
+        np.testing.assert_array_equal(vertices[:, 1], old_vertices[:, 1])
+    assert ax.get_xlabel() == "Physical error rate (code-capacity scale)"
+    assert {file: file.read_bytes() for file in path.iterdir()} == original
+    ax.set_xscale("log")
+    ax.legend(loc="upper left", fontsize=7)
+    fig.canvas.draw()  # Exercise the user's log-x notebook flow.
+
+
+@pytest.mark.parametrize("keys", ["ideal_bell", ("ideal_bell",), {"ideal_bell"}, frozenset({"ideal_bell"})])
+def test_ler_rescaling_uses_dataset_key_without_key_grouping(make_saved, keys):
+    path = make_saved("fig4d_reproduction", probabilities=(0., .01, .07, .5))
+    plots = NotebookPlots({"ideal_bell": path})
+    # Filter on the saved p before converting its plotted value.
+    _, ax = plots.plot_logical_error_rate(filter_by={"p": [.01, .5]}, group_by="d", rescale_p_keys=keys)
+    np.testing.assert_allclose(ax.lines[0].get_xdata(), [.02284, .75])
+    assert ax.lines[0].get_label() == "d=3"  # No implicit legend rewriting.
+    # The mapping neither drops zero nor clips mapped coordinates to .5.
+    _, ax = plots.plot_logical_error_rate(filter_by={"p": 0.}, rescale_p_keys=keys)
+    np.testing.assert_array_equal(ax.lines[0].get_xdata(), [0.])
+
+
+@pytest.mark.parametrize("keys", [None, [], (), set()])
+def test_ler_default_and_empty_p_rescaling_preserve_existing_axes(make_saved, keys):
+    plots = NotebookPlots({"f": make_saved(probabilities=(.01, .03))})
+    _, ax = plots.plot_logical_error_rate(rescale_p_keys=keys)
+    np.testing.assert_allclose(ax.lines[0].get_xdata(), [.01, .03])
+    assert ax.get_xlabel() == "Physical error rate"
+
+
+def test_ler_p_rescaling_does_not_open_filtered_out_datasets(make_saved, tmp_path):
+    plots = NotebookPlots({"code_capacity": make_saved(), "ideal_bell": tmp_path / "absent"})
+    _, ax = plots.plot_logical_error_rate(filter_by={"key": "code_capacity"}, rescale_p_keys=["ideal_bell"])
+    np.testing.assert_allclose(ax.lines[0].get_xdata(), [.001])
+    assert ax.get_xlabel() == "Physical error rate"
+
+
+@pytest.mark.parametrize("keys", [True, 3, "", " ", [None], ["ideal_bell", 5], {"ideal_bell": "formula"},
+                                 "typo", ["ideal_bell", "typo"]])
+def test_ler_invalid_p_rescaling_rejected_before_io(keys):
+    plots = NotebookPlots({"ideal_bell": "/nonexistent"})
+    with pytest.raises(ValueError, match="rescale_p_keys"):
+        plots.plot_logical_error_rate(rescale_p_keys=keys)

@@ -83,9 +83,9 @@ def _compile_model(point, seed, options):
         from knill_bench.adapters.hex_memory import HexMemory
         model = HexMemory(point, seed=seed)
         return model, model.circuit, model.metadata
-    if point.kind in {"knill_ec_memory", "fig4d_reproduction"}:
+    if point.kind in {"knill_sim", "knill_ec_memory", "fig4d_reproduction"}:
         from knill_bench.adapters.hex_full_knill import HexFullKnill
-        model = HexFullKnill(point, seed=seed)
+        model = HexFullKnill(point, seed=seed, **options)
         return model, model.engine.circuit, model.metadata
     from .logical_zero_factory import _prepare_point
     _, model, execution = _prepare_point(point, seed, **options)
@@ -113,7 +113,7 @@ def run_chunk(task, **options):
     # independent of which worker receives it; no dependency globals are patched.
     sampler = circuit.compile_sampler(seed=task.seed)
     raw = sampler.sample(shots=task.shots)
-    if task.point.kind in {"knill_ec_memory", "fig4d_reproduction", "se_memory"}:
+    if task.point.kind in {"knill_sim", "knill_ec_memory", "fig4d_reproduction", "se_memory"}:
         decoded = model.decode_batch(raw)
         labels = decoded.logical_error
         gaps = getattr(decoded, "gaps", None)
