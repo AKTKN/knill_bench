@@ -13,4 +13,5 @@ cluster
 scripts/cluster.sh
 scripts/extract.sh
 scripts/fetch_cluster.sh
+notebooks/saved_figures.ipynb
 scripts/compress.sh
