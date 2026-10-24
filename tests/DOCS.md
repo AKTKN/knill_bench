@@ -40,6 +40,20 @@ stripped evaluation labels and coordinate inference negative controls fail
 as intended. New native decodes contain three synthetic zero syndromes;
 the injection tests use exact DEMs, without physical sampling.
 
+`test_temporal_gap.py` and `test_preparation_metrics.py` add prompt 03 gates:
+cached batch/single/explicit packed decoding, full original-column constraints/
+costs/features, frozen zeros/ones and baseline P/F diagnostics; no graph build,
+DEM parsing or quantization during decode; fixed output-mode hashes and a
+controlled valid alternate tied optimum with honest disagreement flag.
+Six-row hand-derived masks/counts verify independent X/Z/code/logical
+denominators, per-check/error-count/joint histograms, code-correct conditional
+readout error, inclusive cuts and null empty/zero-acceptance cases. Invalid
+costs/gaps/status/frames, initial anchor and terminal-record inputs fail.
+Tiny native d3/5 R1/2/3 fixtures use <=7 shots for noiseless/noisy-model and
+noisy full-witness comparisons, middle X/Z readout and terminal X/Z/Y fault
+responses, sector separation, oracle independence and software-frame
+double-application controls. All supplied exhaustive core tests remain.
+
 `test_notebook_plotting.py` uses only six-row synthetic v2 tables (no physical
 sampling). It checks lazy keyed registration, scalar/membership/alias filters,
 unambiguous grouping, all six editable figure APIs, APS/300-dpi context/export,

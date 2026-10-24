@@ -43,6 +43,9 @@ class TemporalMatchingResult:
     debug_matches_compact says whether tracked baseline/alternative labels and
     costs agree with compact mode; a false entry identifies a separate tie
     resolution, never a witness attached to the compact correction.
+    baseline_frozen/past/future are the same selected baseline's diagnostic
+    labels, including in compact mode; invalid baselines have masked zero
+    placeholders. Frozen columns use this core's solver-input column order.
     """
 
     baseline_features: np.ndarray
@@ -54,6 +57,9 @@ class TemporalMatchingResult:
     baseline_errors: np.ndarray | None = None
     complementary_errors: np.ndarray | None = None
     debug_matches_compact: np.ndarray | None = None
+    baseline_frozen: np.ndarray | None = None
+    baseline_past: np.ndarray | None = None
+    baseline_future: np.ndarray | None = None
 
 
 def _binary_matrix(value, name: str) -> csc_matrix:
@@ -197,6 +203,13 @@ class _StaticMatcher:
         padded[:, :self.num_rows] = syndromes
         return padded
 
+    def prepare_full_witness(self) -> None:
+        """Cache the optional same-solve original-column graph during setup."""
+        if self.matcher is not None and self._debug_matcher is None:
+            self._debug_matcher = pymatching.Matching.from_check_matrix(
+                self._graph, weights=self._graph_weights, faults_matrix=self._source_labels,
+                merge_strategy="disallow", use_virtual_boundary_node=True)
+
     def decode_batch(self, syndromes: np.ndarray, *, return_errors: bool = False
                      ) -> tuple[np.ndarray, np.ndarray, np.ndarray | None, np.ndarray | None]:
         if self.matcher is None or not len(syndromes):
@@ -209,10 +222,7 @@ class _StaticMatcher:
             return predictions, weights, None, None
         # Obtain every label from ONE solve.  A separate decode_to_edges_array
         # call need not choose the same shortest path on zero-weight/tied cycles.
-        if self._debug_matcher is None:
-            self._debug_matcher = pymatching.Matching.from_check_matrix(
-                self._graph, weights=self._graph_weights, faults_matrix=self._source_labels,
-                merge_strategy="disallow", use_virtual_boundary_node=True)
+        self.prepare_full_witness()
         errors, weights = self._debug_matcher.decode_batch(self._pad(syndromes), return_weights=True)
         if (not np.array_equal(_parities(errors, self.incidence), syndromes)
                 or not np.array_equal(errors @ self.weights, weights)):
@@ -328,6 +338,11 @@ class TemporalMatching:
             self._comparison.components[self.num_detectors]
             == self._comparison.components[self.num_detectors + 1])
 
+    def prepare_full_witness(self) -> None:
+        """Prewarm both debug graphs; ordinary compact topology is unchanged."""
+        self._baseline.prepare_full_witness()
+        self._comparison.prepare_full_witness()
+
     def decode_batch(self, syndromes, *, return_errors: bool = False) -> TemporalMatchingResult:
         """Decode an unpacked binary batch without observing any evaluation truth.
 
@@ -355,6 +370,9 @@ class TemporalMatching:
         errors0 = np.zeros((count, self.num_mechanisms), dtype=np.uint8) if return_errors else None
         errors1 = np.zeros_like(errors0) if return_errors else None
         debug_matches = np.zeros(count, dtype=bool) if return_errors else None
+        frozen = np.zeros((count, len(self.frozen_columns)), dtype=np.uint8)
+        past = np.zeros(count, dtype=np.uint8)
+        future = np.zeros(count, dtype=np.uint8)
 
         valid_ids = np.flatnonzero(self._baseline.feasible(shots))
         valid_shots = shots[valid_ids]
@@ -362,6 +380,9 @@ class TemporalMatching:
             valid_shots, return_errors=return_errors)
         fixed_count = len(self.frozen_columns)
         fixed = predictions0[:, :fixed_count]
+        frozen[valid_ids] = fixed
+        past[valid_ids] = predictions0[:, fixed_count]
+        future[valid_ids] = predictions0[:, fixed_count + 1]
         base_features[valid_ids] = predictions0[:, fixed_count + 2:]
         w0[valid_ids] = weights0
         status[valid_ids] = TemporalStatus.NO_COMPLEMENTARY_SOLUTION.value
@@ -392,4 +413,4 @@ class TemporalMatching:
             debug_matches[comp_ids] &= matches1
 
         return TemporalMatchingResult(base_features, comp_features, w0, w1, gaps,
-                                      status, errors0, errors1, debug_matches)
+                                      status, errors0, errors1, debug_matches, frozen, past, future)

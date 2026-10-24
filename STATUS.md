@@ -918,3 +918,36 @@ Hex edit or dependency-pin change is part of this phase.
 Final source-frozen full gate: 828 passed, 1628 existing-category warnings,
 191.44 s. All 762 previous tests are retained; 66 model/artifact cases were
 added. Documentation links, new-file whitespace and git diff checks pass.
+
+## 2026-10-24 — Batch temporal decoder and preparation metrics (prompt 03)
+
+Committed/pushed prompt 02 as 451e1f0 (`02: certify completed DEM boundary
+models and artifacts`) on surface-prep-fixed. Prompt 03 is a local diff.
+The new static-model-only TemporalGapDecoder caches the supplied two-solve
+X core plus a known-initial-zero Z-prefix model using its static multigraph
+kernel. No matching optimizer, Hex physics, config/seed identity or legacy
+numerical path was replaced. Core additions only expose the selected
+baseline's frozen/P/F diagnostics and prewarm optional full-witness graphs.
+
+Strict predictions retain independent X baseline/complement/Z masks, common
+integer costs and score units, same-solve full witnesses and mode/tie/frame/
+source/model hashes. Batch/single and explicit packed APIs construct no
+graphs or DEMs during decode. Evaluator-only metrics apply one software
+prefix frame and report masked per-check/any-check X/Z sign errors, code-space
+OR, logical-Z readout errors, joint/error-count histograms, inclusive gap cuts
+and null undefined rates. Valid baselines survive missing complements.
+No physical correction, terminal recovery, all-syndrome LUT or new simulation
+table is added; ordered runner/storage work remains prompt 04.
+
+Focused gate: 312 passed, 432 existing-category warnings, 28.65 s. Tiny native
+readout/X/Z/Y fixtures, noisy full witnesses, oracle isolation, cached
+batch/single behavior, strict padding and controlled equal-cost tie flags
+pass. Six-row hand-derived metric masks/denominators/joint counts and frame
+negative controls pass. pip check and compileall pass. The guide records one
+seven-shot timing call at d3/5 R2, with exact boundaries and no scaling claim.
+Full-gate results and exact commands are recorded in TEST.md. No production
+sweep, dependency edit or user config/notebook/.gitignore change was made.
+Final source-frozen full gate: 883 passed, 1716 existing-category warnings,
+268.78 s. All 828 previous tests remain; 55 adapter/metric cases were added.
+New/changed documentation links, whitespace and dependency/legacy/user-file
+scope checks pass. No unit-test failure or dependency patch was needed.

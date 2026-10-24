@@ -3,8 +3,10 @@
 The fixed-R preparation setup now certifies and serializes its X-sector
 boundary model using the supplied `TemporalDemModel` and matching core.
 `BoundaryConstraintModel` remains an alias of that same type. This step
-adds no high-level X/Z decoder, metric, worker or simulation table; those
-remain prompts 03/04. The CLI build/run guard is unchanged.
+adds no simulation table or runner. The subsequent
+[prompt-03 X/Z decoder and metrics](preparation_decoder.md) now consume these
+static models; worker/persistence integration remains prompt 04. The CLI
+build/run guard is unchanged.
 
 See [circuit/record contracts](surface_preparation.md) and
 [theory and assumptions](temporal_preparation_theory.md). Hex remains
@@ -38,8 +40,9 @@ Matching graphs are constructed once by the adapter, outside decode calls.
 It checks complete detector/evaluation namespaces, ordered online identities
 and evaluation metric/check identities, then compares the nominal
 production-shaped and completed models. It retains all tau_X, tau_Z and
-logical_Z features, in the builder's order. The future adapter may select its
-X prediction rows; this model does not implement Z-prefix inference.
+logical_Z features, in the builder's order. The adapter selects its X prediction
+rows. This X boundary model does not implement Z-prefix inference; prompt 03's
+separate `PrefixDemModel` does so without a P/F completion.
 
 When physical p and decoding_p differ, both sides of certification use
 decoding_p. Physical sampling remains on the original production circuit.
@@ -119,7 +122,7 @@ it is not authentication or a replacement for the builder's scientific proof.
 Setup owns model arrays and must not mutate them after construction.
 
 The artifact identifies the boundary model and its cost policy. Prompt 03
-will additionally identify the selected compact/full-witness and tie policy
+additionally identifies the selected compact/full-witness and tie policy
 in its adapter definition; a static model hash alone does not select that mode.
 
 ## Equivalence and independent checks

@@ -10,7 +10,9 @@ evaluation labels are now available through the Python API; see the
 [circuit guide and tiny template](docs/surface_preparation.md). The
 [completed boundary model](docs/temporal_boundary_model.md) now has strict
 provenance, production-model equivalence checks and portable hashed artifacts.
-High-level decoder and CLI simulation-runner integration remain later steps.
+The [batch X/Z decoder and evaluator](docs/preparation_decoder.md) now provide
+separate sign/code/logical metrics and validity-aware gap cuts. CLI simulation-
+runner integration remains prompt 04.
 
 Saved v2 datasets can also be compared from notebooks with lazy keyed path
 registration, six editable figure types and `plotting_lib` APS styling at

@@ -617,3 +617,48 @@ Prompt 02 final source-frozen gate:
 previous tests remain, plus 66 model/artifact cases. Three-shot artifact/core
 smoke, pip check, compileall and documentation/whitespace/scope checks pass.
 TEST.md records the corrected empty-target negative-control fixture.
+
+## Fixed-R surface preparation: prompt 03 (2026-10-24)
+
+The user authorized committing/pushing prompt 02 before implementing
+surface_timegap/prompts/03_batch_decoder_and_metrics.md. Checkpoint 451e1f0
+is pushed on surface-prep-fixed. Prompt 03 remains a local implementation
+diff; stop before prompt 04 worker/storage integration unless requested.
+Hex, other dependencies, pins, user configs/notebooks/.gitignore and existing
+v1/v2 numerical paths remain unchanged. Use Conda knill_system and <=7-shot
+d3/5 physical fixtures; no production sweep is authorized.
+
+Read docs/preparation_decoder.md. TemporalGapDecoder accepts only static X
+completed/Z-prefix models and two online bool detector arrays. Setup caches
+the supplied TemporalMatching plus the same static multigraph kernel for Z,
+whose known initial-zero anchor remains in the physical prefix. No terminal
+probe/readout is decoder evidence. Full-witness mode prewarms optional
+label graphs; no decode reparses DEMs, quantizes or constructs graphs.
+Compact/full mode, tie/frame/source/model/backend identities are hashed.
+The core has additive frozen-bit/P/F result fields and graph prewarming;
+its objectives, topology, offsets and solver algorithm are not rewritten.
+
+Prefix_frame_only means one software parity comparison, no physical
+correction, pure-error LUT or terminal recovery. Unsupported terminal mode
+raises. The evaluator alone joins truth with prediction, keeping per-sector,
+code-space and logical-Z readout meanings separate. Independent validity
+denominators preserve baselines with no complement. High-level acceptance
+requires X baseline AND X complement AND Z validity AND gap>=g. NaN gaps are
+unavailable; negative/inconsistent available costs/gaps raise. All error
+placeholders require masks; code/joint counts require both baselines.
+Source/debug witnesses belong to their selected same-solve baseline; never
+attach a disagreeing full witness to compact output. Frozen diagnostics
+include zeros and ones with original completed-DEM column IDs.
+
+New synthetic tests cover hand-derived costs/masks/joint counts, controlled
+alternate valid ties, static caching and explicit little-endian padding.
+Native d3/5 R1/2/3 fixtures and single readout/Pauli faults use <=7 shots.
+Measured illustrative setup/decode calls are documented, without throughput,
+calibration, FT or posterior claims. Append all gate results to STATUS/TEST.
+
+Prompt 03 final source-frozen gate:
+`bash scripts/python.sh -m pytest -q --disable-warnings` — 883 passed,
+1716 existing-category warnings, 268.78 s. All 828 earlier tests remain,
+with 55 new adapter/metric cases. Focused: 312 passed. pip check, compileall,
+documentation links/whitespace and unchanged dependency/user/legacy scope
+checks pass. No failed unit gate or dependency patch was needed in this phase.

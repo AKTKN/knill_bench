@@ -10,6 +10,17 @@ artifact I/O in decoding; the step-04 delegation will save its hash and load
 that validated model rather than parsing a DEM during decode. No worker or
 runner source changes are part of prompt 02.
 
+Prompt 03 adds evaluator-only `preparation_metrics.evaluate_preparation`:
+join strict predictions with truth once to obtain per-check/any-check X/Z
+sign errors, their code-space OR, and logical-Z readout error. Independent
+baseline validity masks retain valid statistics when gaps are unavailable.
+`preparation_acceptance` takes predictions only and requires all three
+validities plus inclusive gap>=threshold. `summarize_preparation` produces
+compact per-check/error-count/joint counters, denominators, selected/baseline
+rates and invalid reasons, using null for undefined rates. No physical
+correction, terminal recovery, sampler, writer or runner is constructed.
+See [API and numerical semantics](../../../docs/preparation_decoder.md).
+
 `runner.py` retains v1 prepare/execute/resume, bounded spawn scheduling,
 parent commits and count/stopping behavior. `worker.py` caches compiled
 physical models, samplers and numerical backends per process and streams

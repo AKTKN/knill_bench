@@ -3,8 +3,9 @@
 `surface_prep_fixed` now has a strict schema-v1 config branch, a Python circuit
 builder and production sample splitting. It uses native Hex primitives on
 one rotated-surface patch: noisy transversal physical-zero initialization,
-exactly R full X-then-Z rounds, then ideal evaluation. Decoder/metric/worker
-and saved-report integration are later prompts. `knill-bench build/run`
+exactly R full X-then-Z rounds, then ideal evaluation. The
+[X/Z batch decoder and metrics](preparation_decoder.md) are now implemented;
+worker and saved-report integration remain later prompts. `knill-bench build/run`
 currently rejects this protocol before creating output; it does not fall
 through to the ordinary memory runner.
 
@@ -13,7 +14,8 @@ scientific contract. Hex remains unchanged at HEX-K1
 `8fa2200315cc4feaccf341a461f91739233de08a`. The prompt 00 bench checkpoint
 `e3de069` and prompt 01 checkpoint `3cdc594` are pushed on
 `surface-prep-fixed`. Prompt 02's [boundary certification/artifact API](temporal_boundary_model.md)
-is implemented locally; decoder/runner integration remains later work.
+is committed as `451e1f0`. Prompt 03 supplies the local decoder/metric APIs;
+runner integration remains later work.
 
 ## Small example
 
@@ -73,7 +75,8 @@ profiles and Knill options fail. Physical p may be in [0,.5], but its default
 nominal decoder p must be below .5; supply a distinct nominal value if needed.
 The temporal descriptor accepts positive finite `weight_scale` (1000) and
 `output_mode: compact|full_witness`; this step validates the descriptor without
-constructing its future adapter. Only `sampling.stop_rule: fixed_shots` is
+constructing an adapter during config validation. The Python setup API now
+accepts these same scale/mode parameters. Only `sampling.stop_rule: fixed_shots` is
 accepted. Worker counts and fixed chunk sizes keep their existing meanings.
 
 Unknown/duplicate preparation YAML keys, unsafe tags, nonfinite/overflowed
@@ -145,7 +148,7 @@ actual imported Hex Python/matrix resources and ordered code-matrix rows.
 Model hashes cover prefix/three circuit roles/DEMs, both record/detector/
 observable maps and probability/settings semantics. Actual Hex ref/dirty state
 is recorded through the existing verified-checkout/wheel provenance path.
-The later adapter adds its own quantized-weight/output-mode identity; these
+The adapter now adds its own quantized-weight/output-mode identity; these
 builder hashes describe circuits, DEMs and maps, not a compiled decoder.
 
 Physical tests use d3/5, R=2/3/4/5 and at most seven shots per batch. They
@@ -159,5 +162,6 @@ including all evaluation labels, using exact independent XOR aggregation.
 
 These are structural tests, not logical-error calibration or a confidence/FT
 claim. Prompt 02 now supplies comparative-model certification/serialization;
-full Z inference, metrics, worker/restart/output and reports remain later prompts. Exact
+prompt 03 implements separate known-zero Z inference and metrics.
+Worker/restart/output and reports remain later prompts. Exact
 commands/results and corrections are recorded in [TEST.md](../TEST.md).

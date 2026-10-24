@@ -13,6 +13,15 @@ It changes no persisted shot table. Future preparation results require a separat
 sign/code/logical schema; existing `logical_failure`/`errors` columns and v2
 point files must retain their meanings.
 
+Prompt 03 adds in-memory `PreparationDiagnostics`, strict prediction masks/
+cost checks and evaluator-only batch labels/counters; it introduces no table.
+X/Z sign and logical errors use independent validity denominators; code/joint
+errors require both baselines. Missing gaps retain valid baseline statistics.
+Summaries include separate per-check/error-count totals, eight-bin X/Z/logical
+joint counts, code-correct conditional readout error and inclusive valid-gap
+selection. Zero denominators yield null rates. See
+[interfaces, masks and tie identities](preparation_decoder.md).
+
 B1 retains this v1 layout and the B0 v2 table types below. Its independent
 [Fig.4(d) runner](fig4d.md) writes only one logical_error table per point,
 actual shot/error counts and a nested execution descriptor in the existing

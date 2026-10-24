@@ -1797,3 +1797,70 @@ high-level adapter/metrics, runner-owned artifact publication and saved-data
 analysis are still their later prompts; the existing pre-output guard remains.
 Prompt 02 is left as the requested local implementation diff; only the
 explicitly requested prompt-01 checkpoint was committed/pushed this turn.
+
+## 2026-10-24 — Prompt 03 batch decoder and preparation metrics
+
+At the user's request, checked `git diff --check`, staged the 19 prompt-02
+source/test/docs files and ran
+`git commit -m '02: certify completed DEM boundary models and artifacts'`
+and `git push origin surface-prep-fixed`. Commit **451e1f0** is pushed.
+This phase preserves Hex/source pins, all existing configs/notebooks/data
+and .gitignore. Prompt 03 is kept as a local implementation diff.
+
+TemporalGapDecoder reuses the supplied two-solve core, with additive result
+diagnostics and full-witness prewarming, and its static multigraph engine
+for independent known-zero Z-prefix inference. New model/evaluator modules
+stay separate from legacy builders/decoders/simulation tables. No optimizer
+or circuit physics is duplicated. New physical fixtures use d3/5 and <=7 shots.
+
+- `bash scripts/python.sh -m pytest -q tests/test_temporal_matching.py tests/test_temporal_dem.py tests/test_preparation_contract.py --disable-warnings > /tmp/knill_prep_03_seed.log 2>&1`
+  — **85 passed**, **1.17 s**, after the additive core result/prewarm changes.
+- Initial direct Python d3/R2 physical-p0/nominal-.003 smoke, three shots,
+  seed 9: both sign/logical predictions and errors zero, finite gaps 9.372,
+  three ok/accepted rows; no runner/output construction.
+- `bash scripts/python.sh -m pytest -q tests/test_temporal_gap.py --disable-warnings > /tmp/knill_prep_03_adapter.log 2>&1`
+  — initial **22 passed**, **72 existing-category warnings**, **8.60 s**.
+- `bash scripts/python.sh -m pytest -q tests/test_temporal_gap.py tests/test_preparation_metrics.py tests/test_temporal_matching.py tests/test_preparation_contract.py --disable-warnings > /tmp/knill_prep_03_focused.log 2>&1`
+  — **90 passed**, 72 warnings, 7.77 s; after the additional native readout/
+  noisy-witness/scope/padding cases, **95 passed**, 88 warnings, 8.89 s.
+  There were no failed unit checks in these gates.
+- `bash scripts/python.sh -m pytest -q tests/test_temporal_gap.py tests/test_preparation_metrics.py tests/test_temporal_matching.py tests/test_temporal_dem.py tests/test_temporal_model_artifact.py tests/test_preparation_boundary_model.py tests/test_preparation_contract.py tests/test_preparation_circuits.py tests/test_preparation_config.py tests/test_decoding.py --disable-warnings > /tmp/knill_prep_03_focused_final.log 2>&1`
+  — **312 passed**, **432 existing-category warnings**, **28.65 s**.
+  New gates independently verify fixed zeros/ones, P/F/cost offsets, original-
+  column restoration and features, same-solve witnesses, controlled alternate
+  equal-cost ties, fixed mode hashes, cached batch/single/packed APIs and
+  no DEM parsing/quantization/graph building during decode. Six-row metric
+  fixtures verify X/Z/code/logical denominators, error counts/joint bins,
+  code-correct conditional readout error, inclusive truth-independent cuts,
+  invalid/empty cases and software-frame double-application controls.
+  Native d3/5 R1/2/3 tests use <=7 shots: actual nominal/noiseless and noisy
+  full-column models, known middle X/Z readout faults, invisible endpoint
+  X/Z/Y faults, oracle changes, invalid initial/terminal Z scopes and empty
+  R1 X input. Existing legacy decoder and all earlier preparation tests stay.
+- `bash scripts/python.sh -m compileall -q src tests` — passes;
+  `bash scripts/python.sh -m pip check` — no broken requirements.
+- Standalone direct Python timing/smoke wrote only
+  `/tmp/knill_prep_03_timings.json`: d3/5, R2, p=.003, seven shots, seed 617,
+  compact mode. One call per setting: build 301.592/338.468 ms; decoder setup
+  49.031/289.407 ms (model compilation 26.491/159.619 ms); X graphs
+  6.955/8.768 ms and Z graph 3.819/12.284 ms. X comparative batch decode
+  1.708/2.266 ms, Z prefix .677/1.679 ms, decode total 2.816/4.346 ms;
+  evaluator/summary 1.291/.758 ms. Both illustrative batches have seven ok
+  statuses, gap 9.372 and X/Z original-column counts 92/199 and 289/743.
+  The guide records timer boundaries; these are single-call descriptions,
+  not production throughput, calibration, speed/scaling or rare-error claims.
+- `bash scripts/python.sh -m pytest -q --disable-warnings > /tmp/knill_prep_03_full_gate.log 2>&1`
+  — **883 passed**, **1716 existing-category warnings**, **268.78 s**.
+  All 828 previous tests remain, with 55 new adapter/metric cases. This is
+  the first successful full gate with source/tests held fixed throughout.
+  No failed unit check or dependency source patch was needed for prompt 03.
+- Changed/new Markdown links, untracked-source whitespace and
+  `git diff --check` pass. Hex, lomatching, surface-sim and external plotting_lib
+  checkouts are clean. Hex remains at HEX-K1
+  8fa2200315cc4feaccf341a461f91739233de08a. Diff scope confirms existing user
+  configs/notebooks/.gitignore, pins/environment files, legacy decoder
+  dispatch, config/circuit builders and simulation runner are unchanged.
+
+All Python source and tests were frozen before the full gate; documentation
+only was edited while that validation ran. This phase adds no ordered worker,
+result storage or CLI simulation integration; the prompt-04 guard remains.

@@ -5,15 +5,22 @@ output-state X/Z sign inference, deterministic logical-Z evaluation and a
 boundary-completed comparative decoder. Prompt 01 now supplies the native
 physical prefix, ideal evaluation, offline completion and strict config branch;
 see [actual APIs and limits](surface_preparation.md). Existing memory/Knill
-numerical paths remain unchanged. Preparation decoder/runner integration is
-deferred, with an explicit pre-output guard.
+numerical paths remain unchanged. Preparation's Python decoder/evaluator are
+available; runner integration retains its explicit pre-output guard.
 
 Prompt 02 supplies [certified boundary models](temporal_boundary_model.md):
 unmerged completed-term H/P/F/S/feature maps, original float/common integer
 costs and versioned full-column artifacts. Setup compares nominal production
 and completed same-X-sector online/evaluation parity models, preserving the
 separate known-Z anchor. Artifact loading needs no DEM parsing. The supplied
-matching core is unchanged; X/Z adapter and runner remain prompts 03/04.
+matching objectives are unchanged. Prompt 03's
+[batch adapter/evaluator](preparation_decoder.md) caches this two-solve X core
+and an independent known-initial-zero Z-prefix model using the same static
+multigraph kernel. It reports masked baseline/complement/Z validity, selected
+frozen-bit/P/F diagnostics and mode-specific same-solve witnesses. Only the
+evaluator sees truth, applying one prefix software frame for X/Z sign,
+code-space and logical-Z readout counts. Artifact/worker/result integration
+remains prompt 04.
 
 The original schema-v1 design below remains unchanged. B1 adds an independent
 [eight-cycle Fig.4(d) experiment](fig4d.md) using actual Hex full Knill modules,

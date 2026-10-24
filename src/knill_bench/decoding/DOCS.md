@@ -37,9 +37,22 @@ disagreement; solver-input and original DEM column orders remain distinct.
 
 These kernels have synthetic exhaustive-optimum tests. Current-pin native
 model certification, R2 readout/data/two-qubit Pauli responses and strict
-artifact round-trips are now tested; the high-level X/Z adapter and worker
-remain later steps. See
+artifact round-trips are now tested. Prompt 03 adds a high-level X/Z adapter;
+the worker remains prompt 04. See
 [proofs, units, assumptions and scientific gates](../../../docs/temporal_preparation_theory.md).
+
+`preparation_model.compile_preparation_prefix_model` selects the production
+Z rows, verifies their known initial-zero/SE record expressions, and produces
+`preparation_prefix.PrefixDemModel` with tau_Z/logical_Z response maps. It
+retains original production DEM columns, preserves parallel/invisible terms,
+rejects separators and selected-sector hyperedges, quantizes once and removes
+p0 only from solver inputs. It is one ordinary prefix model, with no inferred
+temporal boundaries or competing H/P/F/S type. The shared `_StaticMatcher`
+provides exact unmerged graph handling; no new matching optimizer is written.
+`TemporalMatchingResult` now also exposes the selected baseline's frozen bits
+and P/F labels, masked by baseline validity. `prepare_full_witness` prewarms
+the existing optional debug graphs. Objectives/RHS/costs/tie handling are
+unchanged. See [adapter and metrics](../../../docs/preparation_decoder.md).
 
 ## Existing conversion and audits
 

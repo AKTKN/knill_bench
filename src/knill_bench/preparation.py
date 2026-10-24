@@ -292,6 +292,24 @@ class PreparationStatus(str, Enum):
 
 
 @dataclass(frozen=True)
+class PreparationDiagnostics:
+    """Selected X baseline fiber, masked by baseline_valid, and Z cost.
+
+    Frozen IDs index the full completed DEM; assignments include zeros and
+    ones in that order. Full-mode Z witnesses use its active-column order,
+    with a separate same-mode agreement flag. No sampled hidden values appear.
+    """
+
+    frozen_original_columns: tuple[int, ...]
+    baseline_frozen: BoolArray
+    baseline_past: BoolArray
+    baseline_future: BoolArray
+    z_weight: FloatArray
+    z_errors: NDArray[np.uint8] | None = None
+    z_debug_matches_compact: BoolArray | None = None
+
+
+@dataclass(frozen=True)
 class PreparationPrediction:
     """Adapter output; masks define availability of zero placeholder features.
 
@@ -319,6 +337,64 @@ class PreparationPrediction:
     status: NDArray[np.str_]
     weight_scale: float
     debug: TemporalMatchingResult | None = None
+    diagnostics: PreparationDiagnostics | None = None
+
+    @property
+    def x_baseline_valid(self) -> BoolArray:
+        """Explicit sector name for the existing baseline_valid contract."""
+        return self.baseline_valid
+
+    def __post_init__(self) -> None:
+        for name in ("tau_x_prediction", "tau_z_prediction", "logical_z_prediction"):
+            _boolean_batch(getattr(self, name), name)
+        count = len(self.tau_x_prediction)
+        if (len(self.tau_z_prediction) != count or self.logical_z_prediction.shape != (count, 1)):
+            raise ValueError("preparation predictions must align shots and one logical Z")
+        for name in ("baseline_valid", "complementary_valid", "z_decoder_valid"):
+            value = getattr(self, name)
+            if not isinstance(value, np.ndarray) or value.dtype != np.bool_ or value.shape != (count,):
+                raise ValueError(f"{name} must be bool[shots]")
+        if (self.complementary_valid & ~self.baseline_valid).any():
+            raise ValueError("complementary validity requires baseline validity")
+        for name, valid in (("baseline_weight", self.baseline_valid),
+                            ("complementary_weight", self.complementary_valid)):
+            value = getattr(self, name)
+            if (not isinstance(value, np.ndarray) or value.dtype != np.float64 or value.shape != (count,)
+                    or not np.isfinite(value[valid]).all() or (value[valid] < 0).any()
+                    or (value[valid] > 2**53 - 1).any() or not np.equal(value[valid], np.rint(value[valid])).all()
+                    or not np.isposinf(value[~valid]).all()):
+                raise ValueError(f"{name} must contain valid integer costs or unavailable +infinity")
+        try:
+            scale = float(self.weight_scale)
+        except (TypeError, ValueError, OverflowError) as error:
+            raise ValueError("weight_scale must be finite and positive") from error
+        if (isinstance(self.weight_scale, (bool, np.bool_)) or not isinstance(self.weight_scale, (int, float))
+                or not np.isfinite(scale) or scale <= 0):
+            raise ValueError("weight_scale must be finite and positive")
+        if (not isinstance(self.gap, np.ndarray) or self.gap.dtype != np.float64 or self.gap.shape != (count,)
+                or not np.isnan(self.gap[~self.complementary_valid]).all()
+                or not np.isfinite(self.gap[self.complementary_valid]).all()
+                or (self.gap[self.complementary_valid] < 0).any()):
+            raise ValueError("gap must be finite nonnegative when available, NaN otherwise")
+        mask = self.complementary_valid
+        if not np.array_equal(self.gap[mask], (self.complementary_weight[mask] - self.baseline_weight[mask]) / self.weight_scale):
+            raise ValueError("gap disagrees with the common integer objective/scale")
+        expected = np.full(count, PreparationStatus.INVALID_SYNDROME.value, dtype="<U26")
+        expected[self.baseline_valid] = PreparationStatus.NO_COMPLEMENTARY_SOLUTION.value
+        expected[mask] = PreparationStatus.Z_DECODER_INVALID.value
+        expected[mask & self.z_decoder_valid] = PreparationStatus.OK.value
+        if not isinstance(self.status, np.ndarray) or self.status.shape != (count,) or not np.array_equal(self.status, expected):
+            raise ValueError("preparation status disagrees with independent validity masks")
+        if self.diagnostics is not None:
+            diag = self.diagnostics
+            if (diag.baseline_frozen.dtype != np.bool_ or diag.baseline_frozen.shape != (count, len(diag.frozen_original_columns))
+                    or diag.baseline_past.dtype != np.bool_ or diag.baseline_past.shape != (count,)
+                    or diag.baseline_future.dtype != np.bool_ or diag.baseline_future.shape != (count,)
+                    or diag.z_weight.dtype != np.float64 or diag.z_weight.shape != (count,)
+                    or not np.isfinite(diag.z_weight[self.z_decoder_valid]).all()
+                    or (diag.z_weight[self.z_decoder_valid] < 0).any()
+                    or not np.isposinf(diag.z_weight[~self.z_decoder_valid]).all()):
+                raise ValueError("preparation diagnostic dimensions/costs disagree with validity")
 
 
 class PreparationDecoder(Protocol):

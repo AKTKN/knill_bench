@@ -13,7 +13,13 @@ Python usage. CLI simulation build/run remains guarded pending step 04.
 Prompt 02's [boundary model API](../../docs/temporal_boundary_model.md) compiles
 and certifies static X models, preserves float/integer costs and original
 columns/features in hashed JSON artifacts, and loads without DEM parsing.
-The native builder and matching core remain unchanged in that step.
+The native builder and matching objectives remain unchanged in that step.
+Prompt 03 adds strict prediction/diagnostic contracts,
+`adapters.temporal_gap.TemporalGapDecoder`, the independent known-zero
+`decoding.preparation_prefix` model and evaluator-only
+`simulation.preparation_metrics`. Their [API guide](../../docs/preparation_decoder.md)
+documents cached batch/single/packed decoding, same-mode witnesses, validity
+denominators and inclusive gap cuts. No simulation table or runner is added.
 
 `analysis.RunRegistry`, `NotebookPlots` and `FigureStyle` provide saved-only
 v2 notebook comparisons with deferred keyed loading, six editable Matplotlib

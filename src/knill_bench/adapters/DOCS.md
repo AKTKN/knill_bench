@@ -1,5 +1,28 @@
 # Decoder and reference adapters (schema v1)
 
+## Fixed-R preparation batch adapter (prompt 03)
+
+`temporal_gap.prepare_preparation_decoder(compiled, weight_scale=1000,
+output_mode="compact")` compiles static X boundary/Z-prefix models and returns
+`TemporalGapDecoder(x_model, z_model, ...)`. The adapter holds no compiled
+evaluator or sampler. `decode_batch(online_x_bool, online_z_bool)` and
+`decode_one` return the strict `PreparationPrediction`, optional same-solve
+full witnesses and frozen-bit/P/F diagnostics. Explicit `decode_packed_batch`
+unpacks little-endian uint8 sectors once and rejects nonzero padding.
+
+Two cached X solves use the supplied TemporalMatching core; one ordinary
+Z-prefix solve reuses its static multigraph kernel with the known initial-zero
+anchor. Both keep duplicate mechanisms, p0 exclusion and common integer costs.
+Full-mode graphs are prewarmed during setup. Output mode/frame/tie policy,
+backend/source/model hashes and feature/column maps define decoder identity.
+Unavailable gaps stay NaN; validity flags separate X baseline, X complement
+and Z. Only the evaluator joins predictions with truth. See
+[interfaces and measured setup/decode boundaries](../../../docs/preparation_decoder.md).
+This Python adapter is not yet connected to CLI workers; legacy
+`decoders.describe/construct` numerical paths are unchanged.
+
+## Existing adapters
+
 `decoders.py` supplies global BP-LSD, PyMatching and LOM construction/
 description, supported named fallback and result conversion. `hex_native.py`
 uses the actual Hex CSS/Bell/final callbacks with cached local correction
