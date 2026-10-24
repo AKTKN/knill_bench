@@ -229,4 +229,7 @@ class Builder:
 
 
 def build(case):
+    if case.get('protocol') == 'surface_prep_fixed':
+        from .preparation import build_preparation
+        return build_preparation(case)
     return Builder(case).build()

@@ -1,14 +1,16 @@
 # Fixed-R surface preparation: theory and implementation contract
 
-Contract date: 2026-10-24, `surface_prep_fixed_v1`. This is prompt 00: theory,
-shared types and the reviewed decoder seed. Circuit/config integration,
-the X/Z adapter, metrics, workers and reports are subsequent steps, not
-implemented capabilities of this change. No production experiment is run.
+Contract date: 2026-10-24, `surface_prep_fixed_v1`. Prompt 00 established theory,
+shared types and the reviewed decoder seed. Prompt 01 now implements the
+native circuit/config and evaluator-buffer contracts described in
+[the preparation guide](surface_preparation.md). The X/Z adapter, metrics,
+workers and reports remain later steps. No production experiment is run.
 
 ## Checkout and scope
 
 The user-requested checkpoint is bench `2e618b9`, pushed on `auxiliary-system`.
-Implementation starts from it on child branch `surface-prep-fixed`; this work
+Implementation starts from it on child branch `surface-prep-fixed`; prompt 00
+was subsequently committed/pushed as `e3de069` at the user's request. Prompt 01
 remains a local diff. Hex is clean at the existing HEX-K1 pin
 `8fa2200315cc4feaccf341a461f91739233de08a`, LOM at `b55a7a6`, surface-sim at
 `493f800`. No dependency source or pin is changed. The handoff's Hex `5de58f2`
@@ -264,8 +266,10 @@ not schema-v2 auto scheduling. Preserve all old protocols/CLI calls/hashes:
 | 04 commit/resume | Reuse `runner.execute_run`'s bounded spawn, ordered staged commits, seed derivation and manifest verification. Add a protocol-specific table-set/schema selection in `data/storage.py`/runner, not reinterpretation of existing `logical_failure`/`errors` or v2 point files. Preparation tables carry their own version tag. Workers stage bounded outputs; parent alone commits small manifests/counts. |
 | 05 saved analysis | `analysis/preparation.py` reads versioned preparation counts/optional compact rows, validates identities and reports gap calibration, acceptance/unconditional-miss/conditional-risk curves, intervals and measured timing. It never simulates or automatically resumes. |
 
-No new config, command or result schema is executable in step 00. The later
-CLI uses the existing `knill-bench validate-config/build/run/resume/analyze`
+Step 00 introduced no config/command/result schema. Step 01 now supports
+config validation, direct Python circuit construction and production sample
+splitting; it guards CLI build/run before output pending step 04. The later
+runner uses the existing `knill-bench validate-config/build/run/resume/analyze`
 dispatch, thin shell wrapper and existing config loader. It must reject
 irrelevant legacy fields instead of silently borrowing their meaning. R is
 not an extra simulation sweep axis. No new standalone scheduler/seed system
@@ -283,10 +287,10 @@ These do not certify a physical builder or the future high-level adapter.
 
 Remaining gates, to complete in their owning steps:
 
-- [ ] 01: d3/5, R=2/3/4/5 has exactly R full rounds; small <=7-shot p0
+- [x] 01: d3/5, R=2/3/4/5 has exactly R full rounds; small <=7-shot p0
   fixtures have zero tau/logical-Z flips while first X signs remain random.
   Deterministic flows and negative reference-comparison controls are checked.
-- [ ] 01/02: actual output-cut faults after last X are visible to truth;
+- [x] 01: actual output-cut faults after last X are visible to truth;
   independently injected first/final readout, intermediate and corner faults
   match online/past/future/tau/logical responses without gate-name inference.
 - [ ] 02: production/completed **same-sector** marginalized models agree at

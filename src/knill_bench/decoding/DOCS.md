@@ -20,8 +20,10 @@ nodes preserve parallel mechanisms. Unavailable gaps are NaN, not confidence.
 Optional debug uses same-solve full witnesses and reports compact tie
 disagreement; solver-input and original DEM column orders remain distinct.
 
-These kernels have synthetic exhaustive-optimum tests; there is no fixed-R
-physical circuit/adapter/worker yet. See
+These kernels have synthetic exhaustive-optimum tests. Prompt 01's physical
+builder now supplies explicit completed DEM/row maps, with selected current-pin
+marginal and actual sampler/core isolation checks; the high-level adapter and
+worker remain later steps. See
 [proofs, units, assumptions and scientific gates](../../../docs/temporal_preparation_theory.md).
 
 ## Existing conversion and audits

@@ -9,8 +9,23 @@ roles/degree/separator/probability/weight validation and infeasibility.
 online/evaluator shot/dtype isolation (including disjoint shared-buffer
 views), truth-independent core outputs and the single boundary-model type's
 source/strictness metadata. It constructs no physical circuit or runner.
-Actual physical integration and Monte Carlo calibration are pending; see
+Physical circuit integration is covered in prompt 01 below; Monte Carlo
+calibration and the high-level decoder/worker remain pending. See
 [the contract checklist](../docs/temporal_preparation_theory.md).
+
+`test_preparation_circuits.py` uses d3/5, explicit R=2/3/4/5 and <=7-shot
+fixtures. It checks exact native physical prefixes, signed instrument and
+label flows, known-Z/unknown-X boundaries, evaluator/offline resource
+exclusion, explicit ledgers/maps/hashes, readout/data/corner/late-output
+injections, single/double software-frame controls, detached real sampler
+labels and seed-core truth independence. Selected current-pin models match
+same-sector completed/production marginalized DEMs exactly up to binary64
+probability accumulation. Unsupported native noise/instrument/DEM options
+raise; compilation is forbidden from sampling/constructing a matcher.
+`test_preparation_config.py` checks the new strict literal-R protocol branch,
+fixed defaults/axes, duplicate/unsafe/invalid fields, physical versus nominal
+noise identities/seeds, pre-output runner guard and exact legacy resolved
+config/grid goldens. Existing legacy circuit goldens and all tests remain.
 
 `test_notebook_plotting.py` uses only six-row synthetic v2 tables (no physical
 sampling). It checks lazy keyed registration, scalar/membership/alias filters,

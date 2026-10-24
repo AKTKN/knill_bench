@@ -857,3 +857,32 @@ Focused gate: 85 passed, 1.32 s. Full-gate commands, an initial validation
 source-edit/resume rejection and its correction are recorded in TEST.md.
 Final source-frozen full gate: 666 passed, 1356 inherited-category warnings,
 276.16 s. pip check, compileall, documentation links and whitespace pass.
+
+## 2026-10-24 — Fixed-R native circuits and truth (prompt 01)
+
+At the user's request, committed/pushed prompt 00 as e3de069 on
+surface-prep-fixed. Hex's auxiliary-system was clean and already pushed at
+8fa2200; no dependency source/pin change or artificial empty commit was needed.
+Prompt 01 adds native one-patch physical-zero preparation with exactly R full
+X/Z SE rounds, ideal evaluation after the final Z extraction and a separate
+offline completed X model. Compiled ledgers/detector roles/observable expressions,
+cut/resource accounting, actual imported provenance and hashes are explicit.
+Signed instrument/logical/label flows, strict DEM extraction and the audited
+unconditional uniform-noise domain are checked without sampling or decoding.
+
+The existing config/grid accept a strict protocol-only branch and the tiny
+schema-v1 template. Explicit nominal decoding_p changes only inference models,
+not physical circuit/point seeds. Detached production sample splitting keeps
+all truth/readout buffers out of online observations. Native injected-fault
+and current-pin marginal tests cover the output tail, both sign sectors,
+deterministic logical Z, single software-frame semantics and oracle isolation.
+Legacy config/grid/memory-circuit goldens stay exact. The runner has an explicit
+pre-output guard pending step 04; adapters/metrics remain steps 02/03.
+
+Focused final gate: 216 passed, 288 existing-category warnings, 16.62 s.
+Installed CLI validation, pip check, compileall and guide/whitespace audits
+pass. The full gate and exact commands/corrections are recorded in TEST.md.
+No production sampling, existing data/config/notebook edits or dependency
+changes are part of this phase. Prompt 01 remains an uncommitted local diff.
+Final source-frozen full gate: 762 passed, 1496 existing-category warnings,
+187.01 s. The R1 empty-online-X boundary also passes a three-shot p0 smoke.

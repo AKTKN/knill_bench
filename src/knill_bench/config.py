@@ -7,7 +7,7 @@ from pathlib import Path
 import math
 import yaml
 
-PROTOCOLS = {'se_memory', 'knill_hex_dminus2', 'knill_aft_postgate', 'knill_aft_prep_only'}
+PROTOCOLS = {'se_memory', 'knill_hex_dminus2', 'knill_aft_postgate', 'knill_aft_prep_only', 'surface_prep_fixed'}
 
 
 def canonical(value):
@@ -36,8 +36,54 @@ def choice(v, options, where):
         raise ValueError(f'{where} must be one of {options}; got {v!r}')
 
 
+def _finite_number(value):
+    if isinstance(value, bool) or not isinstance(value, (int, float)):
+        return False
+    try:
+        return math.isfinite(value)
+    except OverflowError:
+        return False
+
+
+class _PreparationLoader(yaml.SafeLoader):
+    def construct_mapping(self, node, deep=False):
+        self.flatten_mapping(node)
+        result = {}
+        for key_node, value_node in node.value:
+            key = self.construct_object(key_node, deep=deep)
+            if key in result:
+                raise ValueError(f'duplicate preparation YAML key: {key!r}')
+            result[key] = self.construct_object(value_node, deep=deep)
+        return result
+
+
+def _is_preparation(cfg):
+    return (isinstance(cfg, dict) and isinstance(cfg.get('protocols'), list)
+            and any(isinstance(p, dict) and p.get('id') == 'surface_prep_fixed' for p in cfg['protocols']))
+
+
 def load(path):
-    return resolve(yaml.safe_load(Path(path).read_text()))
+    text = Path(path).read_text()
+    raw = yaml.safe_load(text)
+    if _is_preparation(raw):
+        raw = yaml.load(text, Loader=_PreparationLoader)
+    return resolve(raw)
+
+
+def _preparation_protocol(proto):
+    fields(proto, 'id decoders rounds prep_basis sign_sector readout_basis logical_evaluation adaptive decoding_p', 'preparation protocol')
+    rounds = proto.get('rounds')
+    if type(rounds) is not int or not 1 <= rounds <= 2**63 - 1:
+        raise ValueError('preparation rounds must be an explicit positive signed-int64 integer')
+    for name, expected in dict(prep_basis='z', sign_sector='x', readout_basis='z',
+                               logical_evaluation='prefix_frame_only').items():
+        choice(proto.setdefault(name, expected), [expected], name)
+    if proto.setdefault('adaptive', False) is not False:
+        raise ValueError('surface_prep_fixed requires adaptive=false')
+    if 'decoding_p' in proto:
+        p = proto['decoding_p']
+        if not _finite_number(p) or not 0 <= p < .5:
+            raise ValueError('decoding_p must be finite in [0, 0.5)')
 
 
 def resolve(raw):
@@ -45,34 +91,53 @@ def resolve(raw):
     fields(cfg, 'schema_version experiment noise decoders protocols sampling timing storage diagnostics', 'root')
     if cfg.get('schema_version') != 1:
         raise ValueError('schema_version must be 1')
+    preparation = _is_preparation(cfg)
+    if preparation and len(cfg['protocols']) != 1:
+        raise ValueError('surface_prep_fixed cannot be mixed with other protocols')
     e = cfg['experiment']
     fields(e, 'name master_seed output_root code distances bases physical_error_rates cycles cycles_per_distance replicates initial_boundary final_readout comparison', 'experiment')
     e.setdefault('name','knill_bench'); e.setdefault('output_root','results')
     e.setdefault('master_seed',12345); e.setdefault('replicates',1)
     integer(e['master_seed'],'master_seed',0); integer(e['replicates'],'replicates')
+    if preparation:
+        forbidden = {'cycles', 'cycles_per_distance', 'initial_boundary', 'final_readout', 'comparison'} & e.keys()
+        if forbidden:
+            raise ValueError(f'surface_prep_fixed forbids legacy experiment fields {sorted(forbidden)}; use explicit rounds')
+        e.setdefault('bases', ['z'])
+        if e['bases'] != ['z']:
+            raise ValueError('surface_prep_fixed requires bases: [z]')
+        if e['master_seed'] > 2**64 - 1:
+            raise ValueError('preparation master_seed must fit uint64')
     choice(e.setdefault('code','rotated_surface'), ['rotated_surface'], 'code')
     for d in e['distances']:
         integer(d,'distance',3)
         if d % 2 == 0: raise ValueError('distances must be odd')
     for b in e['bases']: choice(b,['x','z'],'basis')
     for p in e['physical_error_rates']:
-        if isinstance(p,bool) or not isinstance(p,(int,float)) or not math.isfinite(p) or not 0 <= p <= .5:
+        if not _finite_number(p) or not 0 <= p <= .5:
             raise ValueError('physical_error_rates must be finite in [0, 0.5]')
-    if ('cycles' in e) == ('cycles_per_distance' in e):
-        raise ValueError('specify exactly one of cycles or cycles_per_distance')
-    for n in e.get('cycles',e.get('cycles_per_distance')): integer(n,'cycles')
-    for key in ('distances','bases','physical_error_rates','cycles' if 'cycles' in e else 'cycles_per_distance'):
+    if not preparation:
+        if ('cycles' in e) == ('cycles_per_distance' in e):
+            raise ValueError('specify exactly one of cycles or cycles_per_distance')
+        for n in e.get('cycles',e.get('cycles_per_distance')): integer(n,'cycles')
+    grid_keys = ['distances', 'bases', 'physical_error_rates']
+    if not preparation:
+        grid_keys.append('cycles' if 'cycles' in e else 'cycles_per_distance')
+    for key in grid_keys:
         if not e[key] or len(set(e[key]))!=len(e[key]): raise ValueError(f'{key} must be nonempty and unique')
-    boundary=e.setdefault('initial_boundary',{'kind':'ideal_encoded'})
-    fields(boundary,'kind','initial_boundary'); choice(boundary['kind'],['ideal_encoded','noisy_preparation'],'boundary')
-    choice(e.setdefault('final_readout','noisy_destructive'),['noisy_destructive'],'final_readout')
-    comparison=e.setdefault('comparison',{'kind':'equal_cycles'})
+    if not preparation:
+        boundary=e.setdefault('initial_boundary',{'kind':'ideal_encoded'})
+        fields(boundary,'kind','initial_boundary'); choice(boundary['kind'],['ideal_encoded','noisy_preparation'],'boundary')
+        choice(e.setdefault('final_readout','noisy_destructive'),['noisy_destructive'],'final_readout')
+    comparison={'kind':'equal_cycles'} if preparation else e.setdefault('comparison',{'kind':'equal_cycles'})
     fields(comparison,'kind target_time','comparison')
     choice(comparison['kind'],['equal_cycles','equal_time'],'comparison')
     if comparison['kind']=='equal_time':
         if not isinstance(comparison.get('target_time'),(int,float)) or comparison['target_time']<=0:
             raise ValueError('equal_time requires positive target_time in noise.time_unit')
     n=cfg.setdefault('noise',{'profile':'hex_legacy'})
+    if preparation and n != {'profile': 'hex_legacy'}:
+        raise ValueError('surface_prep_fixed currently supports only noise: {profile: hex_legacy}')
     fields(n,'profile multipliers durations time_unit preparation_schedule','noise')
     choice(n['profile'],['hex_legacy','explicit'],'noise.profile')
     if n['profile']=='hex_legacy':
@@ -92,7 +157,13 @@ def resolve(raw):
             if any(p*v>.5 for v in n['multipliers'].values()): raise ValueError('resolved noise probabilities must be <= 0.5')
     for name, dec in cfg['decoders'].items():
         kind=dec.get('kind')
-        if kind=='bplsd_global':
+        if kind=='temporal_gap' and preparation:
+            fields(dec, 'kind weight_scale output_mode', f'decoders.{name}')
+            scale = dec.setdefault('weight_scale', 1000)
+            if not _finite_number(scale) or scale <= 0:
+                raise ValueError('weight_scale must be finite and positive')
+            choice(dec.setdefault('output_mode', 'compact'), ['compact', 'full_witness'], 'output_mode')
+        elif kind=='bplsd_global':
             fields(dec,'kind bp_method max_iter ms_scaling_factor schedule lsd_method lsd_order',f'decoders.{name}')
             defaults=dict(bp_method='minimum_sum',max_iter=100,ms_scaling_factor=.75,schedule='parallel',lsd_method='LSD_0',lsd_order=0)
             for k,v in defaults.items(): dec.setdefault(k,v)
@@ -117,6 +188,17 @@ def resolve(raw):
         else: raise ValueError(f'unsupported decoder kind {kind!r}')
     ids=[]
     for proto in cfg['protocols']:
+        if preparation:
+            _preparation_protocol(proto)
+            if 'decoding_p' not in proto and any(p >= .5 for p in e['physical_error_rates']):
+                raise ValueError('default decoding_p must be < 0.5; supply an explicit nominal decoding_p')
+            if not isinstance(proto.get('decoders'), list) or not proto['decoders'] or len(set(proto['decoders'])) != len(proto['decoders']):
+                raise ValueError('preparation decoders must be a nonempty unique list')
+            for dn in proto['decoders']:
+                if cfg['decoders'].get(dn, {}).get('kind') != 'temporal_gap':
+                    raise ValueError('surface_prep_fixed requires a temporal_gap decoder')
+            ids.append(proto['id'])
+            continue
         fields(proto,'id decoders prep_rounds post_gate_rounds post_gate_scope','protocol')
         pid=proto['id']; choice(pid,PROTOCOLS,'protocol.id'); ids.append(pid)
         defaults=(0,0) if pid=='se_memory' else ({'rule':'d_minus_2'},0) if pid=='knill_hex_dminus2' else (1,int(pid=='knill_aft_postgate'))
@@ -135,6 +217,8 @@ def resolve(raw):
     for k,v in dict(workers=1,shots_per_case=64,chunk_size=32,max_pending_chunks_per_worker=1,model_cache_size=1,native_threads_per_worker=1).items():
         integer(s.setdefault(k,v),k)
     choice(s.setdefault('stop_rule','fixed_shots'),['fixed_shots','target_errors','time_budget'],'stop_rule')
+    if preparation and s['stop_rule'] != 'fixed_shots':
+        raise ValueError('surface_prep_fixed requires fixed_shots')
     if s['stop_rule']!='fixed_shots':
         integer(s.setdefault('max_shots',s['shots_per_case']),'max_shots')
         if s['stop_rule']=='target_errors':
@@ -166,6 +250,20 @@ def resolve(raw):
 
 def grid(cfg):
     e=cfg['experiment']
+    if _is_preparation(cfg):
+        proto = cfg['protocols'][0]
+        for d, p in itertools.product(e['distances'], e['physical_error_rates']):
+            case = dict(protocol='surface_prep_fixed', code=e['code'], distance=d, basis='z', p=float(p),
+                        rounds=proto['rounds'], noise=cfg['noise'],
+                        **{k: proto[k] for k in ('prep_basis', 'sign_sector', 'readout_basis', 'logical_evaluation', 'adaptive')},
+                        schedule_id='hex_surface_x_then_z_v1', oracle_cut='after_final_z_extraction',
+                        probe_spec='ideal_X_MPP_then_ideal_destructive_Z', sampler_semantics='surface_prep_fixed_v1')
+            case['sampling_case_id'] = digest(case)
+            case['decoding_p'] = float(proto.get('decoding_p', p))
+            case['decoders'] = proto['decoders']
+            case['decoder_specs'] = cfg['decoders']
+            yield case
+        return
     for d,b,p,n,proto in itertools.product(e['distances'],e['bases'],e['physical_error_rates'],e.get('cycles',e.get('cycles_per_distance')),cfg['protocols']):
         cycles=n if 'cycles' in e else n*d
         case=dict(protocol=proto['id'],distance=d,basis=b,p=float(p),cycles=cycles,

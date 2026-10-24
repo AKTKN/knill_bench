@@ -33,6 +33,9 @@ def ensure_threads(count):
 
 def prepare(config_path):
     cfg=load(config_path)
+    if any(p['id']=='surface_prep_fixed' for p in cfg['protocols']):
+        from knill_bench.preparation import PreparationCapabilityError
+        raise PreparationCapabilityError('surface_prep_fixed circuit/config are available; runner integration is deferred to prompt 04')
     ensure_threads(cfg['sampling']['native_threads_per_worker'])
     stamp=datetime.now(timezone.utc).strftime('%Y%m%dT%H%M%S.%fZ')
     run=Path(cfg['experiment']['output_root']).resolve()/f'{stamp}_{uuid.uuid4().hex[:10]}'

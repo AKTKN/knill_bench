@@ -1,8 +1,9 @@
 # Output and schema version 1
 
 The [fixed-R preparation contract](temporal_preparation_theory.md) defines
-in-memory online/truth/prediction types only at prompt 00. It changes no
-persisted table. Future preparation results require a separate versioned
+in-memory online/truth/prediction types at prompt 00; prompt 01 adds explicit
+circuit record/observable maps and detached production batch splitting.
+It changes no persisted table. Future preparation results require a separate versioned
 sign/code/logical schema; existing `logical_failure`/`errors` columns and v2
 point files must retain their meanings.
 

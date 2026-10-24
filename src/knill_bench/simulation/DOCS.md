@@ -1,5 +1,11 @@
 # Simulation and replay (schema v1)
 
+For prompt 01, runner.prepare explicitly rejects surface_prep_fixed after
+config parsing and before directory creation. Its circuit and truth APIs
+are available through Python, but the existing memory/Knill accounting must
+not be used as a preparation worker. Ordered chunk integration is step 04;
+see [current preparation capabilities](../../../docs/surface_preparation.md).
+
 `runner.py` retains v1 prepare/execute/resume, bounded spawn scheduling,
 parent commits and count/stopping behavior. `worker.py` caches compiled
 physical models, samplers and numerical backends per process and streams

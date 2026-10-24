@@ -5,8 +5,10 @@ Reproducible physical Stim memory experiments comparing repeated surface-code sy
 Fixed-R surface preparation is beginning on `surface-prep-fixed`. The
 [theory and typed contract](docs/temporal_preparation_theory.md) fixes the
 output-state labels, offline temporal boundaries and two-solve gap definition.
-Only contracts and synthetic-tested decoder kernels are available at this
-stage; `surface_prep_fixed` circuit/config/CLI execution is not yet integrated.
+The native fixed-R circuit builder, strict config validation and isolated
+evaluation labels are now available through the Python API; see the
+[prompt 01 guide and tiny template](docs/surface_preparation.md). Decoder and
+CLI simulation-runner integration remain later steps.
 
 Saved v2 datasets can also be compared from notebooks with lazy keyed path
 registration, six editable figure types and `plotting_lib` APS styling at

@@ -1,0 +1,28 @@
+# Prompt 01: validate config and build through the Python API.
+# The CLI simulation runner is added in prompt 04; this is a tiny fixture.
+schema_version: 1
+experiment:
+  name: surface_prep_fixed_example
+  code: rotated_surface
+  distances: [3]
+  bases: [z]
+  physical_error_rates: [0.001]
+  master_seed: 617
+  output_root: results
+noise: {profile: hex_legacy}
+decoders:
+  temporal: {kind: temporal_gap, weight_scale: 1000, output_mode: compact}
+protocols:
+  - id: surface_prep_fixed
+    decoders: [temporal]
+    rounds: 3
+    prep_basis: z
+    sign_sector: x
+    readout_basis: z
+    logical_evaluation: prefix_frame_only
+    adaptive: false
+    # Optional fixed inference noise, independent of physical_error_rates:
+    # decoding_p: 0.001
+sampling: {workers: 1, shots_per_case: 3, chunk_size: 3, stop_rule: fixed_shots}
+timing: {warmup_shots: 0, latency_sample_count_per_case: 0}
+storage: {save_shot_results: true, retained_uniform_samples_per_case: 0, retained_failure_samples_per_case: 0}

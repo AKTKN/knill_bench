@@ -1655,3 +1655,75 @@ resolves README/theory/package/decoder/test guide targets. Documentation patch
 context errors were corrected using the actual file headings/endings, without
 partial file edits. `git diff --check` passes. The checkpoint notebook and
 .gitignore have no subsequent diff; dependency repositories remain clean.
+
+## 2026-10-24 — Fixed-R preparation prompt 01
+
+The user explicitly requested the prompt-00 commit/push first, then prompt 01.
+`git commit -m "00: define fixed-R preparation theory and contracts"` created
+e3de069 (16 files), and `git push -u origin surface-prep-fixed` succeeded.
+Hex status was clean at 8fa2200315cc4feaccf341a461f91739233de08a;
+`git -C external/Hex push origin auxiliary-system` returned Everything up-to-date.
+No Hex commit/source/pin or other dependency/worktree change was made.
+
+Read prompt 01, its shared implementation plan/00 contract, actual Code,
+native primitives, config/grid/CLI and legacy builder/runner interfaces.
+Implemented only native circuits/config/truth splitting and a pre-output
+runner guard; no high-level decoder, metric, Monte Carlo worker or report is
+claimed here. All new sampling fixtures are d3/5 and <=7 shots; no supplied
+older-pin large validation script or production sweep was executed.
+
+Commands/results from Conda knill_system:
+
+- Three-shot direct builds at d3/R2/p0 and d3/R3/p=.001 pass. Strict completed
+  DEMs connect to the unchanged seed core, with no dependency patches. The
+  p0 circuit has 16 physical measurements and 13 ideal evaluation measurements;
+  tau_X/tau_Z/logical_Z all zero. These are fixtures, not statistical estimates.
+- `bash scripts/python.sh -m pytest -q tests/test_preparation_circuits.py --disable-warnings > /tmp/knill_prep_01_circuits.log 2>&1`
+  — initial **1 failed, 34 passed**, 120 warnings, 4.46 s. The only failure
+  was an unfilled expected legacy circuit SHA placeholder in the test. The
+  measured SHA was already available; replaced the placeholder with
+  1c5706d386c7089b0fbe71a9949e32a77244cce99c77772f9df801eeb6c74a9d.
+  No physics, assertion convention or decoder rule changed to address it.
+- `bash scripts/python.sh -m pytest -q tests/test_preparation_config.py tests/test_preparation_contract.py --disable-warnings > /tmp/knill_prep_01_config.log 2>&1`
+  — **68 passed**, 3.92 s, before extra numeric/domain edge cases were added.
+- `bash scripts/python.sh -m pytest -q tests/test_preparation_config.py tests/test_preparation_circuits.py tests/test_preparation_contract.py tests/test_temporal_dem.py tests/test_temporal_matching.py tests/test_circuits.py --disable-warnings > /tmp/knill_prep_01_focused_gate.log 2>&1`
+  — final **216 passed**, **288 existing-category warnings**, **16.62 s**.
+  Earlier focused refinements passed 213/214 cases. Current coverage includes
+  exact native physical prefixes at d3/5 R2/3/4/5; noisy-first/last readout,
+  intermediate/late/corner data injections; unknown first-X negative controls;
+  ideal tau/logical-Z and known-Z anchor; output/evaluation/offline counts;
+  instrument/signed flows, strict DEM options/failure, changed noise/probability
+  domain capability errors, no sampler/matcher in compilation, exact marginal
+  DEM parity probabilities at four current-pin d/R settings; physical versus
+  nominal noise hashes/samples/seeds; real sampler/core truth isolation;
+  fixed defaults/axes, duplicate/unsafe/unknown/overflowed inputs and pre-output
+  runner rejection. Existing circuit tests and all prompt-00 tests are retained.
+- `bash scripts/python.sh -m pytest -q tests/test_preparation_circuits.py tests/test_preparation_config.py --disable-warnings > /tmp/knill_prep_01_science_final.log 2>&1`
+  — 95 passed, 136 warnings, 5.97 s, before the final native-rate audit case.
+- Reconstructed config.py from `git show e3de069:src/knill_bench/config.py`
+  in an isolated module and checked exact canonical config/grid hashes:
+  b18095133ef63d3c315c612e0748bfda8caa607e3bdc38d8a3db31a6943cd072 and
+  8815093f14af3939de1a25718e3c6dfdb159eaf80cfb63444d6a8918179d75a9.
+  The new regression tests retain these pre-extension goldens.
+- Reconstructed the legacy builder directly from
+  `git show e3de069:src/knill_bench/circuits/builders.py` in an isolated module:
+  its d3/Z/noisy-preparation/R-independent two-cycle circuit **and DEM** match
+  the current legacy branch exactly. No sampling is needed for this comparison.
+- `conda run --no-capture-output -n knill_system knill-bench validate-config configs/templates/surface_prep_fixed.yaml > /tmp/knill_prep_01_cli.json`
+  — installed CLI passes, one d3/R3 point, no physics/sampling/output creation.
+- `bash scripts/python.sh -m pip check` — no broken requirements;
+  `bash scripts/python.sh -m compileall -q src` passes. README/theory/preparation/
+  package/circuit/simulation/decoder/test guide links resolve, new-file
+  whitespace checks and `git diff --check` pass.
+- `bash scripts/python.sh -m pytest -q --disable-warnings > /tmp/knill_prep_01_full_gate.log 2>&1`
+  — **762 passed**, **1496 existing-category warnings**, **187.01 s**.
+  All 666 previous tests remain; 96 circuit/config cases were added. Python
+  source/tests were held fixed throughout this successful first full gate.
+- Three-shot d3/R1/p0 direct builder/sampler/split smoke (seed=9) also passes:
+  online X shape (3,0), online Z shape (3,4), all noiseless evaluator labels
+  zero. This checks the advertised positive-R/empty-sector boundary without
+  constructing a runner, output directory or terminal decoder.
+
+Full gate was started after all Python source/tests were finalized; subsequent
+edits are documentation only. Prompt 01 remains a local diff, preserving the
+user's notebooks/configs/.gitignore, all saved data and clean dependency sources.

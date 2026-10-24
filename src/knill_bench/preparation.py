@@ -1,4 +1,4 @@
-"""Contracts for fixed-R preparation; no circuit construction or execution.
+"""Contracts and production sample splitting for fixed-R preparation.
 
 These types are separate from the schema-v1 ``models`` classes. Indices are
 absolute, zero-based indices in the named circuit's flattened measurement or
@@ -8,7 +8,7 @@ observable maps describe hypothetical faults, never sampled truth.
 
 from __future__ import annotations
 
-from dataclasses import dataclass
+from dataclasses import asdict, dataclass
 from enum import Enum
 from typing import Literal, Protocol, TypeAlias
 
@@ -101,6 +101,16 @@ class PreparationLabels:
 
 
 @dataclass(frozen=True)
+class PreparationObservable:
+    """A deterministic evaluation parity in its owning circuit's records."""
+
+    observable_id: int
+    metric: Literal["tau_x", "tau_z", "logical_z"]
+    check_index: int | None
+    record_ids: tuple[int, ...]
+
+
+@dataclass(frozen=True)
 class PreparationOutputCut:
     """Exclusive prefix limits, after R full rounds and before all evaluation.
 
@@ -131,18 +141,30 @@ class CompiledPreparationExperiment:
     """
 
     settings: PreparationSettings
+    distance: int
+    physical_probability: float
+    decoding_probability: float
+    data_qubits: tuple[int, ...]
     physical_prefix: stim.Circuit
     circuit: stim.Circuit
+    model_circuit: stim.Circuit
     completed_circuit: stim.Circuit
+    dem: stim.DetectorErrorModel
+    model_dem: stim.DetectorErrorModel
+    completed_dem: stim.DetectorErrorModel
     ledger: tuple[PreparationRecord, ...]
     completed_ledger: tuple[PreparationRecord, ...]
     detectors: tuple[PreparationDetector, ...]
     completed_detectors: tuple[PreparationDetector, ...]
     labels: PreparationLabels
     completed_labels: PreparationLabels
+    observables: tuple[PreparationObservable, ...]
+    completed_observables: tuple[PreparationObservable, ...]
     output_cut: PreparationOutputCut
     source_hashes: tuple[tuple[str, str], ...]
     model_hashes: tuple[tuple[str, str], ...]
+    hex_revision: str
+    hex_dirty: bool
 
     @property
     def online_x_detector_ids(self) -> tuple[int, ...]:
@@ -151,6 +173,32 @@ class CompiledPreparationExperiment:
     @property
     def online_z_detector_ids(self) -> tuple[int, ...]:
         return tuple(d.detector_id for d in self.detectors if d.sector == "z")
+
+    @property
+    def metadata(self) -> dict:
+        """JSON-compatible setup descriptor; no sampled values or timing claims."""
+        return dict(
+            protocol="surface_prep_fixed", semantics_version=PREPARATION_SEMANTICS,
+            distance=self.distance, settings=asdict(self.settings), noise_profile="hex_legacy",
+            physical_probability=self.physical_probability, decoding_probability=self.decoding_probability,
+            native_noise_scope="native_reset_readout_flips_and_two_qubit_depolarization_no_idle_or_one_qubit_noise",
+            z_prefix_anchor="known_initial_zero", sign_target="output_state_after_final_Z_extraction",
+            output_cut=asdict(self.output_cut), physical_se_rounds=self.settings.rounds,
+            physical_blocks=1, teleportations=0, physical_measurements=self.physical_prefix.num_measurements,
+            physical_qubits=self.physical_prefix.num_qubits,
+            elapsed_time=None, spacetime_volume=None,
+            evaluation_measurements=self.circuit.num_measurements-self.output_cut.measurement_count,
+            offline_past_probes=len(self.labels.tau_x),
+            online_x_detector_ids=self.online_x_detector_ids, online_z_detector_ids=self.online_z_detector_ids,
+            evaluation_labels=asdict(self.labels), completed_evaluation_labels=asdict(self.completed_labels),
+            completed_detector_roles=tuple(d.role.value for d in self.completed_detectors),
+            logical_evaluation="prefix_frame_only", physical_correction_applied=False,
+            software_correction="evaluation_parity_xor_once", terminal_recovery=False,
+            output_probe="ideal_X_stabilizer_MPP", final_readout="ideal_destructive_Z_evaluation_only",
+            offline_completion_sampled=False, instrument_validation="signed_CSS_and_logical_flows",
+            source_hashes=dict(self.source_hashes), model_hashes=dict(self.model_hashes),
+            hex_revision=self.hex_revision, hex_dirty=self.hex_dirty,
+        )
 
 
 def _boolean_batch(value: BoolArray, name: str) -> None:
@@ -278,3 +326,26 @@ class PreparationDecoder(Protocol):
 
     def decode_batch(self, online_x_detectors: BoolArray,
                      online_z_detectors: BoolArray) -> PreparationPrediction: ...
+
+
+def split_preparation_samples(compiled: CompiledPreparationExperiment,
+                              detectors: BoolArray, observables: BoolArray) -> PreparationBatch:
+    """Split a production detector-sampler batch using explicit compiled maps.
+
+    This does not simulate, decode, repair or score. Copies detach online input
+    buffers from both raw sampler buffers and all evaluator labels. Never pass
+    completed-circuit samples here; its row namespace includes hidden probes.
+    """
+    _boolean_batch(detectors, "detectors")
+    _boolean_batch(observables, "observables")
+    if detectors.shape != (len(observables), compiled.circuit.num_detectors):
+        raise ValueError("production detector count/shot count does not match compiled maps")
+    if observables.shape[1] != compiled.circuit.num_observables:
+        raise ValueError("production observable count does not match compiled labels")
+    return PreparationBatch(
+        PreparationObservations(detectors[:, compiled.online_x_detector_ids].copy(),
+                                detectors[:, compiled.online_z_detector_ids].copy()),
+        PreparationTruth(observables[:, compiled.labels.tau_x].copy(),
+                         observables[:, compiled.labels.tau_z].copy(),
+                         observables[:, compiled.labels.logical_z].copy()),
+    )

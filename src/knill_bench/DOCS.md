@@ -4,9 +4,12 @@
 compiled physical/evaluation/offline circuits, explicit ledgers/cut/maps,
 separate online observations and evaluator truth, predictions and a decoder
 Protocol. `BoundaryConstraintModel` aliases the reviewed temporal DEM type;
-legacy `models.py` remains unchanged. This is prompt 00, without a physical
-builder or new config/runner/CLI. See
+legacy `models.py` remains unchanged. Prompt 01 adds a circuit/config builder,
+explicit observable expressions and production batch splitting. See
 [theory, exact integration sites and remaining gates](../../docs/temporal_preparation_theory.md).
+The [preparation guide](../../docs/surface_preparation.md) documents actual
+native round/flow/noise checks, physical/nominal model roles and the tiny
+Python usage. CLI simulation build/run remains guarded pending step 04.
 
 `analysis.RunRegistry`, `NotebookPlots` and `FigureStyle` provide saved-only
 v2 notebook comparisons with deferred keyed loading, six editable Matplotlib

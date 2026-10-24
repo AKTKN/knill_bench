@@ -543,3 +543,36 @@ Prompt 00 final gate: `bash scripts/python.sh -m pytest -q --disable-warnings`
 — 666 passed, 1356 inherited-category warnings, 276.16 s. Focused kernels/
 contracts: 85 passed. TEST.md records the initial source-edit-during-test
 resume rejection and the clean-source rerun; no resume guard was weakened.
+
+## Fixed-R surface preparation: prompt 01 (2026-10-24)
+
+The user authorized committing/pushing prompt 00 before implementing prompt 01.
+Bench e3de069 is pushed on surface-prep-fixed. Hex had no pending changes;
+its auxiliary-system push was already up-to-date at HEX-K1. No artificial Hex
+commit, pin change or other-worktree edit was made. Prompt 01 work remains a
+local diff; further commit/push requires a later request.
+
+Read docs/surface_preparation.md for the implemented circuit/config/truth API.
+surface_prep_fixed is a protocol-only schema-v1 extension: fixed literal R,
+z/x/z, prefix_frame_only, hex_legacy and fixed_shots. Legacy valid resolved
+config/grid/circuit identities stay exact. Both Code/native instrument flows
+and the unconditional native gate/noise/probability domain are checked;
+undecomposed non-gauge DEM failures raise capability errors. Physical p and
+optional nominal decoding_p stay separate; only the latter changes offline
+inference circuits. Source/ref/map/model hashes are explicit.
+
+The physical prefix contains exactly R full X/Z rounds and no evaluation.
+Production adds ideal output X-MPP/destructive Z and evaluator-only labels;
+offline completion adds hidden past X probes after noisy initialization.
+Record/detector/observable namespaces are explicit. Only production sampler
+arrays may enter split_preparation_samples; its detached observations expose
+no raw readout or truth. The current runner rejects this protocol before
+output creation; do not route it through legacy memory accounting. Decoder/
+metric integration remains prompts 02/03; ordered workers/output remain 04.
+Use Conda and <=7-shot d3/5 physical fixtures. No production sweep is authorized.
+
+Prompt 01 full gate: `bash scripts/python.sh -m pytest -q --disable-warnings`
+— 762 passed, 1496 existing-category warnings, 187.01 s. Focused circuit/
+config/kernel/legacy gate: 216 passed. Installed config CLI, pip check,
+compileall and a three-shot R1/zero-online-X boundary smoke pass. See TEST.md
+for exact commands, the corrected placeholder assertion and unchanged scope.
