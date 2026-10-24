@@ -7,11 +7,10 @@ Prompt 02 adds an explicitly requested setup artifact through
 `temporal_artifact.write_temporal_model`: version-1 JSON, canonical payload
 SHA256, original ordered term supports/probabilities, typed detector rows,
 feature order, float/integer costs/policies and model provenance. Loading
-strictly reconstructs sparse arrays without a DEM parser; the future runner
-will persist/verify the owning hash. See [artifact details](temporal_boundary_model.md).
-It changes no persisted shot table. Future preparation results require a separate versioned
-sign/code/logical schema; existing `logical_failure`/`errors` columns and v2
-point files must retain their meanings.
+strictly reconstructs sparse arrays without a DEM parser; the prompt-04 runner
+now persists/verifies the owning hash. See [artifact details](temporal_boundary_model.md).
+Preparation uses its separate versioned sign/code/logical schema; existing
+`logical_failure`/`errors` columns and v2 point files retain their meanings.
 
 Prompt 03 adds in-memory `PreparationDiagnostics`, strict prediction masks/
 cost checks and evaluator-only batch labels/counters; it introduces no table.
@@ -21,6 +20,17 @@ Summaries include separate per-check/error-count totals, eight-bin X/Z/logical
 joint counts, code-correct conditional readout error and inclusive valid-gap
 selection. Zero denominators yield null rates. See
 [interfaces, masks and tie identities](preparation_decoder.md).
+
+Prompt 04 adds preparation_result_version=1 schemas to storage.py through
+data/preparation.py: preparation_cases, preparation_chunks, optional compact
+preparation_shots, bounded preparation_retained, preparation_calls and
+preparation_stopping. Existing batches is reused only for protocol-neutral
+physical chunk identity/count/time/sample hashes. Nullable sign/code/logical
+flags and costs/gaps are never encoded as legacy logical_failure/errors.
+Chunk JSON counters retain independent validity/per-check/joint/gap-bin
+denominators. Fixed bins and exact compact semantics, sampling hash format,
+retention limits and publication/recovery are specified in
+[the execution/schema guide](preparation_execution.md).
 
 B1 retains this v1 layout and the B0 v2 table types below. Its independent
 [Fig.4(d) runner](fig4d.md) writes only one logical_error table per point,

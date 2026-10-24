@@ -1,5 +1,11 @@
 # Scripts and entry points
 
+The existing run_simulation.sh/.py wrapper now accepts the bounded
+surface_prep_fixed template via normal CLI dispatch. No new execution
+framework or scheduler wrapper is added. Run/resume/analyze commands, a
+three-shot smoke and a parse-only larger template are documented in
+[the preparation execution guide](../docs/preparation_execution.md).
+
 ## Factory wall-time diagnosis
 
 `profile_factory.py CONFIG --distance D --p P --output NEW.json` measures one

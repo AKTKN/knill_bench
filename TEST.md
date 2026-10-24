@@ -1864,3 +1864,94 @@ or circuit physics is duplicated. New physical fixtures use d3/5 and <=7 shots.
 All Python source and tests were frozen before the full gate; documentation
 only was edited while that validation ran. This phase adds no ordered worker,
 result storage or CLI simulation integration; the prompt-04 guard remains.
+
+## 2026-10-24 — Prompt 04 ordered preparation Monte Carlo
+
+The user authorized checkpointing prompt 03 before implementation. Ran
+`git diff --check`, staged its 23 source/test/docs files, then
+`git commit -m '03: add batch preparation decoding and isolated metrics'`
+and `git push origin surface-prep-fixed`. Commit **6fa15c5** is pushed.
+Prompt 04 remains a local diff, without a remote push/PR or production sweep.
+Hex and all dependency source/pins remain unchanged. New physical fixtures
+use d3 with <=7 shots per case; inherited memory/Knill fixtures are retained.
+
+- `bash scripts/python.sh -m compileall -q src && bash scripts/python.sh -m pytest -q tests/test_temporal_gap.py tests/test_preparation_metrics.py --disable-warnings > /tmp/knill_prep_04_adapter.log 2>&1`
+  — **55 passed**, 88 existing-category warnings, **10.02 s**, after shared
+  descriptor/timer/sample-map integration; no adapter objective change.
+- Direct temporary d3/R3 template build and worker artifact load passed:
+  static setup made no live graphs; loaded compact worker reported three
+  native graphs. The worker did not parse a Stim DEM.
+- `bash scripts/python.sh -m pytest -q tests/test_preparation_execution.py -x --disable-warnings > /tmp/knill_prep_04_execution.log 2>&1`
+  — initial **13 passed**, **52 warnings**, **53.36 s**. One/two workers,
+  interrupted/completed resume, aggregate/compact/bin equality, schemas,
+  saved-only analysis, artifact/map/partition/committed-data tamper rejection
+  before cleanup, assigned/unobserved worker failure/retry and same-mode
+  retained chunk/hash replay all passed.
+- `bash scripts/python.sh -m pytest -q tests/test_preparation_execution.py tests/test_preparation_config.py tests/test_execution.py --disable-warnings > /tmp/knill_prep_04_focused.log 2>&1`
+  — **1 failed, 88 passed**, **276 warnings**, **147.07 s**. The new prefix
+  artifact negative-control fixture attempted to mutate an immutable tuple
+  before serialization. Changed the fixture to round-trip through JSON
+  first, matching the actual persisted list representation. No production
+  validation, expected response, probability rule or optimizer was relaxed.
+  All inherited execution tests passed in this gate.
+- `bash scripts/python.sh -m pytest -q tests/test_preparation_execution.py tests/test_temporal_gap.py tests/test_preparation_metrics.py tests/test_preparation_config.py --disable-warnings > /tmp/knill_prep_04_focused_final.log 2>&1`
+  — **125 passed**, **152 warnings**, **48.25 s**, after that fixture fix and
+  pre-publication counter/identity checks. Added controlled truth-only changes,
+  cache eviction/rebuild equality, prefix artifact round-trip and parse-only
+  larger-template coverage.
+- `bash scripts/python.sh -m pytest -q tests/test_preparation_execution.py --disable-warnings > /tmp/knill_prep_04_execution_final.log 2>&1`
+  — final **19 passed**, **72 warnings**, **48.41 s**. Also covers two compact/
+  full-mode decoders sharing one physical chunk, p0/R1 null gaps/retention,
+  and controlled second-table parent promotion failure followed by exact-
+  seed/sample-hash recovery without any premature checkpoint.
+- `bash scripts/python.sh -m compileall -q src tests` passes;
+  `bash scripts/python.sh -m pip check` reports no broken requirements.
+- `bash scripts/python.sh -m pytest -q --disable-warnings > /tmp/knill_prep_04_full_gate.log 2>&1`
+  — initial **1 failed, 901 passed**, **1788 existing-category warnings**,
+  **226.91 s**. An existing legacy decoder fallback test uses a minimal case
+  without a protocol key; the new dispatch guard had indexed it directly.
+  Changed describe/construct guards to `case.get('protocol')`, preserving the
+  prior minimal-case API. Other new guards also preserve empty legacy
+  protocol lists. No legacy assertion or numerical behavior changed.
+- `bash scripts/python.sh -m pytest -q tests/test_decoding.py tests/test_temporal_gap.py tests/test_preparation_metrics.py --disable-warnings > /tmp/knill_prep_04_compatibility.log 2>&1`
+  — post-fix **65 passed**, **160 warnings**, **9.79 s**.
+- Direct `/tmp/knill_prep_04_cli_smoke.py` invokes the actual
+  `bash scripts/run_simulation.sh CONFIG`, then installed module CLI
+  `resume RUN --workers 1` and `analyze RUN`. Bounded config: d3/R2/p=.003,
+  seven shots, seed617, chunks 3/3/1, workers2, native threads1, compact mode,
+  warmup1/chunk, latency samples3, retained uniform2/failure1. Both the initial
+  smoke and post-guard-fix rerun pass. Artifacts were isolated in a temporary
+  directory and removed; no user data was touched. The final script was run
+  as `bash scripts/python.sh /tmp/knill_prep_04_cli_smoke.py > /tmp/knill_prep_04_cli_final.log 2>&1`.
+  Raw metrics: `/tmp/knill_prep_04_smoke_metrics.json`.
+  Observed final shell invocation **6.510 s**, execution wall **2.740 s**
+  (**2.555 physical shots/s** including pool/import/I/O/warmup/replay).
+  Primary batch X baseline **73,508 ns/shot**, complement **186,298 ns/shot**;
+  X+complement+Z sum **2.064 ms**, **3,392 decode-only shots/s**. Three single
+  call p50/p95/p99: **1.140/1.637/1.682 ms**. Cold artifact/decoder setup sum
+  **61.098 ms**; sampler compile/sample sums **.123/.687 ms**. Worker process
+  peak RSS **358,871,040 bytes**, selected Python model sparse buffers
+  **5,264 bytes**, max detector+observable sample arrays **63 bytes**;
+  published table ratio **14,681 bytes/physical shot**, dominated by tiny
+  per-part headers. All seven statuses are ok with zero observed errors;
+  no rare-error, performance/scaling, threshold or posterior claim follows.
+  The guide states excluded native/matrix/temporary memory and timer scopes.
+- `bash scripts/python.sh -m pytest -q --disable-warnings > /tmp/knill_prep_04_full_gate_final.log 2>&1`
+  — final **902 passed**, **1788 existing-category warnings**, **234.42 s**.
+  All 883 previous tests remain; 19 execution/artifact/recovery cases were
+  added. Python source/tests stayed unchanged throughout this successful
+  post-compatibility-fix gate; subsequent edits are documentation only.
+- Changed/new guide links, untracked-file whitespace and `git diff --check`
+  pass. Hex/lomatching/surface-sim/external plotting_lib checkouts are clean.
+  Scope audit confirms unchanged .gitignore, user notebooks, environment/pins,
+  circuit builders, seed derivation, completed-DEM classifier and evaluator
+  mathematics. The existing tiny template's comment was refreshed; a new
+  larger template was only parsed. No user experiment data was overwritten.
+
+All Python source/tests were frozen before the final full-gate rerun.
+Documentation-only updates do not weaken source/dependency compatibility.
+The old preparation pre-output guard test now tests invalid config rejection
+before output; valid CLI execution is intentionally implemented. Saved-count
+analysis remains separate from prompt 05 calibration/interval/figure work.
+Only the explicitly requested prompt-03 checkpoint was committed/pushed.
+The prompt-04 implementation is left uncommitted and prompt 05 was not started.

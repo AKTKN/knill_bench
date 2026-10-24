@@ -5,8 +5,8 @@ boundary model using the supplied `TemporalDemModel` and matching core.
 `BoundaryConstraintModel` remains an alias of that same type. This step
 adds no simulation table or runner. The subsequent
 [prompt-03 X/Z decoder and metrics](preparation_decoder.md) now consume these
-static models; worker/persistence integration remains prompt 04. The CLI
-build/run guard is unchanged.
+static models; prompt 04 now supplies
+[ordered workers and persistence](preparation_execution.md).
 
 See [circuit/record contracts](surface_preparation.md) and
 [theory and assumptions](temporal_preparation_theory.md). Hex remains
@@ -31,7 +31,7 @@ core = TemporalMatching(**restored.matching_kwargs())
 
 This explicitly writes one setup artifact in the chosen working directory;
 it never starts a run or samples any circuit. The file is exclusively
-created and fsynced. Prompt 04's runner will own its destination, saved hash
+created and fsynced. Prompt 04's runner owns its destination, saved hash
 and publication/resume checks. Loading rebuilds sparse arrays directly from
 validated columns/roles; it does not parse a DEM or compile a circuit.
 Matching graphs are constructed once by the adapter, outside decode calls.

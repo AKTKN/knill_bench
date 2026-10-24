@@ -26,6 +26,8 @@ SCHEMAS={
  'stopping':[('sampling_case_id',S),('replicate',I),('stop_rule',S),('actual_shots',I),('actual_reference_errors',I),('shot_overshoot',I),('error_overshoot',I),('status',S),('elapsed_seconds',F),('time_overshoot_seconds',F)],
 }
 SCHEMAS={k:pa.schema(v,metadata={b'knill_bench_schema_version':b'1',b'table':k.encode()}) for k,v in SCHEMAS.items()}
+from .preparation import SCHEMAS as PREPARATION_SCHEMAS
+SCHEMAS.update(PREPARATION_SCHEMAS)
 
 
 def atomic_json(path,value):
@@ -54,13 +56,13 @@ def file_sha256(path):
     return digest.hexdigest()
 
 
-def filter_retained_samples(path,available_failures,compression='zstd',batch_size=1024):
+def filter_retained_samples(path,available_failures,compression='zstd',batch_size=1024,table_name='retained_samples'):
     """Apply the global failure quota without loading an all-syndrome part."""
     path=Path(path)
     tmp=path.with_name(path.name+'.filtered.tmp')
     kept=failures=0
     try:
-        with pq.ParquetWriter(tmp,SCHEMAS['retained_samples'],
+        with pq.ParquetWriter(tmp,SCHEMAS[table_name],
                               compression=None if compression=='none' else compression) as writer:
             for batch in pq.ParquetFile(path).iter_batches(batch_size=batch_size):
                 rows=[]
@@ -73,7 +75,7 @@ def filter_retained_samples(path,available_failures,compression='zstd',batch_siz
                         row['reason']='+'.join(reasons)
                         rows.append(row)
                 if rows:
-                    writer.write_table(pa.Table.from_pylist(rows,schema=SCHEMAS['retained_samples']))
+                    writer.write_table(pa.Table.from_pylist(rows,schema=SCHEMAS[table_name]))
                     kept+=len(rows)
         with tmp.open('rb') as f:os.fsync(f.fileno())
         os.replace(tmp,path)

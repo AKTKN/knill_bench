@@ -34,8 +34,8 @@ def ensure_threads(count):
 def prepare(config_path):
     cfg=load(config_path)
     if any(p['id']=='surface_prep_fixed' for p in cfg['protocols']):
-        from knill_bench.preparation import PreparationCapabilityError
-        raise PreparationCapabilityError('surface_prep_fixed circuit/config are available; runner integration is deferred to prompt 04')
+        from .preparation import prepare as prepare_preparation
+        return prepare_preparation(config_path,cfg)
     ensure_threads(cfg['sampling']['native_threads_per_worker'])
     stamp=datetime.now(timezone.utc).strftime('%Y%m%dT%H%M%S.%fZ')
     run=Path(cfg['experiment']['output_root']).resolve()/f'{stamp}_{uuid.uuid4().hex[:10]}'
@@ -106,6 +106,12 @@ def execute_run(run,workers=None,max_new_chunks=None):
     run=Path(run).resolve()
     parameters=json.loads((run/'parameters.json').read_text());cfg=parameters['config']
     original_manifest=json.loads((run/'manifest.json').read_text())
+    preparation=any(p.get('id')=='surface_prep_fixed' for p in cfg['protocols'])
+    tables=TABLES
+    retained_table='retained_samples'
+    if preparation:
+        from knill_bench.data.preparation import TABLES as preparation_tables
+        tables=preparation_tables;retained_table='preparation_retained'
     if digest(cfg)!=original_manifest['config_hash'] or digest(parameters['grid'])!=original_manifest['grid_hash']:
         raise ValueError('resolved config/grid changed; resume rejected')
     if workers is not None:
@@ -116,9 +122,12 @@ def execute_run(run,workers=None,max_new_chunks=None):
     current=environment()
     if compatibility(current)!=manifest['compatibility_hash']:
         raise ValueError('resume code/dependency/environment mismatch: create a new run; snapshots are in provenance/')
+    if preparation:
+        from .preparation import validate_run
+        validate_run(run,json.loads((run/'parameters.json').read_text()),manifest)
     # A checkpoint is the transaction commit marker. Remove orphaned parts.
     done={p.stem for p in (run/'checkpoints').glob('*.json')}
-    for table in TABLES:
+    for table in tables:
         for part in (run/'data'/table).glob('part-*.parquet'):
             key=part.stem[5:]
             if key not in done and key not in {'empty','models'} and not key.startswith('replay-'):
@@ -132,14 +141,16 @@ def execute_run(run,workers=None,max_new_chunks=None):
         ck=json.loads((run/'checkpoints'/f'{key}.json').read_text());committed[key]=ck
         retained[ck['sampling_case_id']]+=ck.get('retained_failures',0)
     # Compatibility also includes saved artifact hashes, not only source revisions.
-    case_rows=read_rows(run,'cases')
+    case_rows=read_rows(run,'preparation_cases' if preparation else 'cases')
     for row in case_rows:
+        if preparation: continue  # Complete artifact and data hashes checked before cleanup above.
         sid=row['sampling_case_id']
         if sha((run/'circuits'/f'{sid}.stim').read_text())!=row['circuit_hash'] or sha((run/'models'/f'{sid}.dem').read_text())!=row['model_hash']:
             raise ValueError('saved circuit/model was changed; resume rejected')
     rows_by_sid={}
     for row in case_rows:rows_by_sid.setdefault(row['sampling_case_id'],[]).append(row)
     for case in cases:
+        if preparation: continue
         sid=case['sampling_case_id']
         metadata=json.loads((run/'models'/f'{sid}.metadata.json').read_text())
         for row in rows_by_sid[sid]:
@@ -153,6 +164,7 @@ def execute_run(run,workers=None,max_new_chunks=None):
                 if graph_path.parent!=(run/'models').resolve() or sha(graph_path.read_text())!=descriptor['graph_hash']:
                     raise ValueError('saved matching graph was changed; resume rejected')
     manifest['status']='running';manifest['last_resumed']=utc();manifest['workers']=cfg['sampling']['workers']
+    if preparation:manifest['completed_chunks']=sorted(done)
     atomic_json(run/'manifest.json',manifest)
     count_new=0;stopping=[];started=time.monotonic()
     previous_wall=manifest.get('active_wall_seconds',0.)
@@ -195,35 +207,51 @@ def execute_run(run,workers=None,max_new_chunks=None):
                 manifest['failed_chunks'].append(failure);manifest['status']='failed'
                 common=dict(sampling_case_id=group[0],replicate=rep,chunk_id=chunk)
                 write_table(run/'data/batches'/f'part-{key}.parquet','batches',[dict(common,seed=failure['seed'],shot_start=start,shots=0,requested_shots=count,workers=cfg['sampling']['workers'],status='worker_failed',error=failure['error'])],cfg['storage']['compression'])
-                effective_ids={json.loads(r['metadata_json'])['effective_case_id']:r['effective_decoder'] for r in read_rows(run,'cases') if r['sampling_case_id']==group[0]}
-                failed_rows=[dict(common,case_id=cid,effective_decoder=name,shots=count,errors=0,valid=0,failed=count,status='worker_failed_unobserved_assigned_shots',scope='terminal_full_history') for cid,name in effective_ids.items()]
-                write_table(run/'data/decoder_batches'/f'part-{key}.parquet','decoder_batches',failed_rows,cfg['storage']['compression'])
+                if preparation:
+                    failed_rows=[dict(common,case_id=case_id(case,name),decoder=name,shots=0,assigned_shots=count,
+                        baseline_valid=0,complementary_valid=0,z_decoder_valid=0,status='worker_failed_unobserved_assigned_shots')
+                        for name in case['decoders']]
+                    write_table(run/'data/preparation_chunks'/f'part-{key}.parquet','preparation_chunks',failed_rows,cfg['storage']['compression'])
+                else:
+                    effective_ids={json.loads(r['metadata_json'])['effective_case_id']:r['effective_decoder'] for r in read_rows(run,'cases') if r['sampling_case_id']==group[0]}
+                    failed_rows=[dict(common,case_id=cid,effective_decoder=name,shots=count,errors=0,valid=0,failed=count,status='worker_failed_unobserved_assigned_shots',scope='terminal_full_history') for cid,name in effective_ids.items()]
+                    write_table(run/'data/decoder_batches'/f'part-{key}.parquet','decoder_batches',failed_rows,cfg['storage']['compression'])
                 atomic_json(run/'manifest.json',manifest)
                 raise RuntimeError(f'worker failed for {key}; chunk remains pending for exact-identity retry; see logs') from exc
             # Global bounded failure retention; uniform samples use fixed preselected indices.
             if result['status']!='complete' or result['key']!=key or result['sampling_case_id']!=group[0] or result['replicate']!=rep or result['chunk_id']!=chunk or result['seed']!=seed(cfg['experiment']['master_seed'],group[0],rep,chunk):
                 raise ValueError(f'worker returned incorrect chunk identity for {key}')
             commit_start=time.perf_counter_ns()
-            if set(result['files'])!=set(TABLES):raise ValueError(f'incomplete staged tables for {key}')
+            if set(result['files'])!=set(tables):raise ValueError(f'incomplete staged tables for {key}')
             for table,entry in result['files'].items():
                 path=Path(entry['path']).resolve()
                 if path.parent!=staging/key or path.name!=f'{table}.parquet':raise ValueError(f'unsafe staged path for {key}')
                 info=pq.ParquetFile(path)
                 if info.metadata.num_rows!=entry['rows'] or not info.schema_arrow.equals(SCHEMAS[table],check_metadata=True) or file_sha256(path)!=entry['sha256']:
                     raise ValueError(f'corrupt staged {table} for {key}')
-            retained_path=Path(result['files']['retained_samples']['path'])
+            retained_path=Path(result['files'][retained_table]['path'])
+            if preparation:
+                from .preparation import validate_staged
+                validate_staged(result,case,cfg,count,start)
             kept,new_failures=filter_retained_samples(retained_path,
                 max(0,cfg['storage']['retained_failure_samples_per_case']-retained[group[0]]),
-                cfg['storage']['compression'])
+                cfg['storage']['compression'],table_name=retained_table)
             if new_failures>result['retained_failure_candidates']:
                 raise ValueError(f'worker retained-failure count mismatch for {key}')
-            result['files']['retained_samples']['rows']=kept
+            result['files'][retained_table]['rows']=kept
+            if preparation:
+                entry=result['files'][retained_table]
+                entry.update(sha256=file_sha256(retained_path),bytes=retained_path.stat().st_size)
             for table,entry in result['files'].items():
                 os.replace(entry['path'],run/'data'/table/f'part-{key}.parquet')
+                if preparation:
+                    directory=os.open(run/'data'/table,os.O_RDONLY|os.O_DIRECTORY)
+                    try:os.fsync(directory)
+                    finally:os.close(directory)
             (staging/key).rmdir()
             ref=cfg['sampling'].get('reference_decoder')
             ref_effective=ref
-            if ref is not None:
+            if ref is not None and not preparation:
                 ref_effective=next(r['effective_decoder'] for r in read_rows(run,'cases') if r['sampling_case_id']==group[0] and r['requested_decoder']==ref)
             reference_errors=next((r['errors']+r['failed'] for r in result['decoder_batches'] if r['effective_decoder']==ref_effective),0)
             ck=dict(sampling_case_id=group[0],replicate=rep,chunk_id=chunk,shots=count,reference_errors=reference_errors,
@@ -234,7 +262,15 @@ def execute_run(run,workers=None,max_new_chunks=None):
                     active_chunk_rss_delta_bytes=result['active_chunk_rss_delta_bytes'],
                     worker_rss_bytes=result['worker_rss_bytes'],worker_peak_rss_bytes=result['worker_peak_rss_bytes'],
                     ipc_payload_bytes=result['ipc_payload_bytes'],parent_commit_ns=time.perf_counter_ns()-commit_start)
+            if preparation:
+                ck.update(sample_hash=result['sample_hash'],sampler_compile_ns=result['sampler_compile_ns'],
+                    sampling_ns=result['sampling_ns'],split_ns=result['split_ns'],
+                    table_files={n:{k:e[k] for k in ('rows','sha256','bytes')} for n,e in result['files'].items()})
             atomic_json(run/'checkpoints'/f'{key}.json',ck)
+            if preparation:
+                directory=os.open(run/'checkpoints',os.O_RDONLY|os.O_DIRECTORY)
+                try:os.fsync(directory)
+                finally:os.close(directory)
             retained[group[0]]+=new_failures;done.add(key);counts[group]+=count;errors[group]+=reference_errors
             manifest['completed_chunks']=sorted(done);atomic_json(run/'manifest.json',manifest)
             count_new+=1
@@ -260,5 +296,6 @@ def execute_run(run,workers=None,max_new_chunks=None):
             stopping.append(dict(sampling_case_id=group[0],replicate=rep,stop_rule=cfg['sampling']['stop_rule'],actual_shots=counts[group],
                 actual_reference_errors=errors[group],shot_overshoot=max(0,counts[group]-limit),error_overshoot=max(0,errors[group]-cfg['sampling'].get('target_errors',errors[group])),
                 status=manifest['status'],elapsed_seconds=manifest['active_wall_seconds'],time_overshoot_seconds=max(0.,manifest['active_wall_seconds']-cfg['sampling'].get('time_budget_seconds',manifest['active_wall_seconds']))))
-    write_table(run/'data/stopping.parquet','stopping',stopping,cfg['storage']['compression'])
+    stopping_table='preparation_stopping' if preparation else 'stopping'
+    write_table(run/'data'/f'{stopping_table}.parquet',stopping_table,stopping,cfg['storage']['compression'])
     return run

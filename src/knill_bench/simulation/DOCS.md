@@ -1,12 +1,11 @@
 # Simulation and replay (schema v1)
 
-For prompt 01, runner.prepare explicitly rejects surface_prep_fixed after
-config parsing and before directory creation. Its circuit and truth APIs
-are available through Python, but the existing memory/Knill accounting must
-not be used as a preparation worker. Ordered chunk integration is step 04;
-see [current preparation capabilities](../../../docs/surface_preparation.md).
+Prompt 04 integrates surface_prep_fixed through runner/worker preparation
+delegations. It reuses the existing bounded spawn, cache and ordered chunk
+commit loop, with separate preparation accounting/tables. See
+[execution, schemas and recovery](../../../docs/preparation_execution.md).
 Prompt 02 provides setup-time boundary certification and exclusive/fsynced
-artifact I/O in decoding; the step-04 delegation will save its hash and load
+artifact I/O in decoding; the step-04 delegation saves its hash and loads
 that validated model rather than parsing a DEM during decode. No worker or
 runner source changes are part of prompt 02.
 
@@ -20,6 +19,17 @@ compact per-check/error-count/joint counters, denominators, selected/baseline
 rates and invalid reasons, using null for undefined rates. No physical
 correction, terminal recovery, sampler, writer or runner is constructed.
 See [API and numerical semantics](../../../docs/preparation_decoder.md).
+
+`preparation.py` supplies static artifact setup, sample-map/model loading,
+canonical bool/shape/little-endian sample hashes, one production sampler
+call per seeded fixed chunk, isolated evaluation and staged counters/compact
+rows/bounded retained examples. Native graphs cache per bounded worker
+entry; samplers compile per chunk seed/call shape. Warmup/single replay
+are separate from primary phase timers. The parent validates immutable
+setup and published parts before cleanup, then validates/promotes all staged
+tables before fsynced checkpoint publication. Failed/unmarked chunks retry
+from their original seed; completed parts remain intact. No second scheduler,
+adaptive partitioning, physical stopping or terminal recovery is introduced.
 
 `runner.py` retains v1 prepare/execute/resume, bounded spawn scheduling,
 parent commits and count/stopping behavior. `worker.py` caches compiled

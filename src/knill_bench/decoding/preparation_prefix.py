@@ -99,6 +99,57 @@ class PrefixDemModel:
         result[:, self.active_columns] = value
         return result
 
+    def to_artifact(self):
+        """Full original columns and explicit projected rows; no Stim needed."""
+        payload = dict(version=1, metadata=self.metadata, probabilities=self.probabilities.tolist(),
+            weights=self.weights.tolist(), full_detector_support=self.full_detector_support,
+            full_observable_support=self.full_observable_support, instruction_indices=self.instruction_indices,
+            num_detectors=max((*self.detector_ids, *(i for s in self.full_detector_support for i in s)), default=-1)+1,
+            num_observables=max((*self.feature_observable_ids, *(i for s in self.full_observable_support for i in s)), default=-1)+1)
+        return dict(payload=payload, sha256=hashlib.sha256(_canonical_json(payload).encode()).hexdigest())
+
+    @classmethod
+    def from_artifact(cls, artifact):
+        """Validate schema/ranges/policies and reconstruct sparse columns directly."""
+        try:
+            if set(artifact) != {"payload", "sha256"}:
+                raise ValueError("invalid envelope")
+            p = artifact['payload']; m = p['metadata']
+            if artifact['sha256'] != hashlib.sha256(_canonical_json(p).encode()).hexdigest():
+                raise ValueError("SHA256 mismatch")
+            if (set(p) != {'version','metadata','probabilities','weights','full_detector_support',
+                           'full_observable_support','instruction_indices','num_detectors','num_observables'}
+                    or type(p['version']) is not int or p['version'] != 1
+                    or any(type(p[k]) is not int or p[k] < 0 for k in ('num_detectors','num_observables'))):
+                raise ValueError("invalid schema/version/dimensions")
+            ds = _ordered_ids(m['detector_ids'], p['num_detectors'], 'detector_ids')
+            fs = _ordered_ids(m['feature_observable_ids'], p['num_observables'], 'observable_ids')
+            dmap, fmap = ({j:i for i,j in enumerate(ids)} for ids in (ds,fs))
+            n=len(p['probabilities']); dr=[]; dc=[]; fr=[]; fc=[]
+            if any(len(p[k]) != n for k in ('full_detector_support','full_observable_support','instruction_indices')):
+                raise ValueError("column count mismatch")
+            supports=[]; labels=[]; previous=-1
+            for j,(raw_d,raw_f,index) in enumerate(zip(p['full_detector_support'],p['full_observable_support'],p['instruction_indices'])):
+                d=_ordered_ids(raw_d,p['num_detectors'],'full detector support')
+                f=_ordered_ids(raw_f,p['num_observables'],'full observable support')
+                if d != tuple(sorted(d)) or f != tuple(sorted(f)) or type(index) is not int or index <= previous:
+                    raise ValueError("invalid original column order/support")
+                previous=index; supports.append(d); labels.append(f)
+                rows=[dmap[k] for k in d if k in dmap]; features=[fmap[k] for k in f if k in fmap]
+                dr.extend(rows);dc.extend([j]*len(rows));fr.extend(features);fc.extend([j]*len(features))
+            probabilities=np.asarray(p['probabilities'],dtype=np.float64)
+            weights=bernoulli_integer_weights(probabilities,weight_scale=m['weight_scale'])
+            model=cls(csc_matrix((np.ones(len(dr),dtype=np.uint8),(dr,dc)),shape=(len(ds),n)),
+                csc_matrix((np.ones(len(fr),dtype=np.uint8),(fr,fc)),shape=(len(fs),n)),
+                probabilities,weights,np.flatnonzero(probabilities>0),ds,fs,tuple(m['feature_ids']),
+                tuple(supports),tuple(labels),tuple(p['instruction_indices']),float(m['weight_scale']),
+                m['source_dem_sha256'],_canonical_json(m['provenance']),m['scope'],m['logical_evaluation'])
+            if _canonical_json(model.to_artifact()) != _canonical_json(artifact):
+                raise ValueError("derived metadata/weights disagree")
+            return model
+        except (ValueError,TypeError,KeyError,OverflowError) as error:
+            raise ValueError(f"Invalid prefix model artifact: {error}") from error
+
 
 def prefix_dem_to_model(dem: stim.DetectorErrorModel, *, detector_ids, observable_ids,
                         feature_ids, weight_scale=1000, model_provenance=None) -> PrefixDemModel:

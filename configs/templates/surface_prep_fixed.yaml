@@ -1,5 +1,4 @@
-# Prompt 01: validate config and build through the Python API.
-# The CLI simulation runner is added in prompt 04; this is a tiny fixture.
+# Three-shot prompt-04 CLI/Python smoke. Larger budgets require an explicit run.
 schema_version: 1
 experiment:
   name: surface_prep_fixed_example

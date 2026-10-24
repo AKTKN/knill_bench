@@ -55,6 +55,9 @@ def decoder_sparse_bytes(decoders):
 
 
 def model(case,cfg,run=None):
+    if case['protocol']=='surface_prep_fixed':
+        from .preparation import model as preparation_model
+        return preparation_model(case,cfg,run,CACHE)
     key=digest([case,cfg['decoders']])
     if key not in CACHE:
         build_start=perf_counter_ns();rss_before=rss_bytes()
@@ -93,6 +96,9 @@ def case_id(case,name): return digest([case['sampling_case_id'],name,case.get('d
 
 
 def execute(task):
+    if task[0]['protocol']=='surface_prep_fixed':
+        from .preparation import execute as execute_preparation
+        return execute_preparation(task)
     case,cfg,rep,chunk,start,count,*rest=task
     run=Path(rest[0]) if rest else None
     cache_hit=digest([case,cfg['decoders']]) in CACHE

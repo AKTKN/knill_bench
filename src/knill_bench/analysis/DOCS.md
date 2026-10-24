@@ -1,5 +1,14 @@
 # Saved-data analysis (schema v1)
 
+`report.analyze` delegates surface_prep_fixed to `preparation.analyze`, which
+validates saved artifacts/checkpoints/parts before streaming published chunk
+counters. It writes a JSON/count/timing report with independent sign/code/
+logical denominators, joint counts, bounded replay latency percentiles and
+explicit memory/I/O timer scopes. It never simulates or resumes. Missing/
+modified published parts reject; uncommitted failure attempts remain separate
+from scientific denominators. Gap calibration/interval curves remain prompt
+05. See [current saved-count API](../../../docs/preparation_execution.md).
+
 ## Notebook figures (schema v2)
 
 `RunRegistry` (`saved_data.py`) registers keyed run paths without filesystem

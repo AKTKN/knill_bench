@@ -15,6 +15,9 @@ class NonmatchableModel(ValueError):
 
 def describe(compiled,case,cfg):
     """Resolve decoder identity without constructing a numerical backend."""
+    if case.get('protocol')=='surface_prep_fixed':
+        from .preparation import describe as describe_preparation
+        return describe_preparation(compiled,case,cfg)
     aliases={};details={};models={};graphs={};lom_subgraph_ns=0
     for name in case['decoders']:
         params=cfg['decoders'][name];kind=params['kind'];effective=name;reason=None
@@ -182,6 +185,9 @@ class GlobalBPLSD:
 
 
 def construct(compiled,case,cfg):
+    if case.get('protocol')=='surface_prep_fixed':
+        from .preparation import construct as construct_preparation
+        return construct_preparation(compiled,case,cfg)
     result={};aliases={};details={}
     artifact_root=compiled.metadata.get('model_artifact_root')
     prepared_details=compiled.metadata.get('decoder_details',{}) if artifact_root else {}

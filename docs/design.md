@@ -6,7 +6,8 @@ boundary-completed comparative decoder. Prompt 01 now supplies the native
 physical prefix, ideal evaluation, offline completion and strict config branch;
 see [actual APIs and limits](surface_preparation.md). Existing memory/Knill
 numerical paths remain unchanged. Preparation's Python decoder/evaluator are
-available; runner integration retains its explicit pre-output guard.
+available, with [ordered chunk execution](preparation_execution.md) now
+integrated through small preparation-specific delegations.
 
 Prompt 02 supplies [certified boundary models](temporal_boundary_model.md):
 unmerged completed-term H/P/F/S/feature maps, original float/common integer
@@ -19,8 +20,10 @@ and an independent known-initial-zero Z-prefix model using the same static
 multigraph kernel. It reports masked baseline/complement/Z validity, selected
 frozen-bit/P/F diagnostics and mode-specific same-solve witnesses. Only the
 evaluator sees truth, applying one prefix software frame for X/Z sign,
-code-space and logical-Z readout counts. Artifact/worker/result integration
-remains prompt 04.
+code-space and logical-Z readout counts. Prompt 04 reuses the existing bounded
+spawn/cache/ordered-commit path, with immutable model/map artifacts, canonical
+sample hashes, pre-cleanup resume checks and separate versioned preparation
+tables. Saved analysis is count/timing-only here; calibration remains prompt 05.
 
 The original schema-v1 design below remains unchanged. B1 adds an independent
 [eight-cycle Fig.4(d) experiment](fig4d.md) using actual Hex full Knill modules,

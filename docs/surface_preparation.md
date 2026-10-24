@@ -5,17 +5,18 @@ builder and production sample splitting. It uses native Hex primitives on
 one rotated-surface patch: noisy transversal physical-zero initialization,
 exactly R full X-then-Z rounds, then ideal evaluation. The
 [X/Z batch decoder and metrics](preparation_decoder.md) are now implemented;
-worker and saved-report integration remain later prompts. `knill-bench build/run`
-currently rejects this protocol before creating output; it does not fall
-through to the ordinary memory runner.
+the [ordered runner and saved-count summary](preparation_execution.md) are
+now integrated. `knill-bench build/run/resume/analyze` dispatch to preparation
+artifacts/results without ordinary memory error accounting. Calibration and
+figure reports remain prompt 05.
 
 See [theory, proofs and interfaces](temporal_preparation_theory.md) for the
 scientific contract. Hex remains unchanged at HEX-K1
 `8fa2200315cc4feaccf341a461f91739233de08a`. The prompt 00 bench checkpoint
 `e3de069` and prompt 01 checkpoint `3cdc594` are pushed on
 `surface-prep-fixed`. Prompt 02's [boundary certification/artifact API](temporal_boundary_model.md)
-is committed as `451e1f0`. Prompt 03 supplies the local decoder/metric APIs;
-runner integration remains later work.
+is committed as `451e1f0`. Prompt 03 is pushed as `6fa15c5`; prompt 04's
+runner/schema integration is a local implementation diff.
 
 ## Small example
 
@@ -26,7 +27,7 @@ Only distance/physical-p are sweep axes; R is a fixed literal integer.
 bash scripts/python.sh -m knill_bench.cli validate-config configs/templates/surface_prep_fixed.yaml
 ```
 
-The Python API builds without writing output or constructing a sampler/decoder:
+The Python builder API still writes no output and constructs no sampler/decoder:
 
 ```python
 from knill_bench.config import load, grid
@@ -45,9 +46,9 @@ online_z = batch.observations.online_z_detectors
 print(compiled.metadata["output_cut"])
 ```
 
-Later workers cache compiled models and advance assigned fixed chunk streams;
-this small example is not a new execution framework. No production sweep was
-used to validate this step.
+The CLI workers now cache compiled models and sample assigned fixed chunk
+streams. See the execution guide for three-shot CLI commands and the parse-
+only larger template. No production sweep was used for validation.
 
 ## Configuration
 
@@ -163,5 +164,6 @@ including all evaluation labels, using exact independent XOR aggregation.
 These are structural tests, not logical-error calibration or a confidence/FT
 claim. Prompt 02 now supplies comparative-model certification/serialization;
 prompt 03 implements separate known-zero Z inference and metrics.
-Worker/restart/output and reports remain later prompts. Exact
+Worker/restart/output integration is covered by prompt 04; calibration/figures
+remain prompt 05. Exact
 commands/results and corrections are recorded in [TEST.md](../TEST.md).

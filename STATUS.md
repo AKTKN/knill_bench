@@ -951,3 +951,39 @@ Final source-frozen full gate: 883 passed, 1716 existing-category warnings,
 268.78 s. All 828 previous tests remain; 55 adapter/metric cases were added.
 New/changed documentation links, whitespace and dependency/legacy/user-file
 scope checks pass. No unit-test failure or dependency patch was needed.
+
+## 2026-10-24 — Ordered preparation Monte Carlo (prompt 04)
+
+Committed/pushed prompt 03 as 6fa15c5 (`03: add batch preparation decoding and
+isolated metrics`) on surface-prep-fixed. Prompt 04 is a local diff. It reuses
+the original bounded spawn/ordered commit path and worker cache/seeds, with
+preparation-specific setup, artifact loading, sampling/evaluation, versioned
+Parquet counters/optional compact rows/bounded retention, staged publication
+and saved-count/timing analysis. Production samples each fixed chunk once;
+both X solves and Z see only the same online detector batch. No decoder-core,
+Hex physics, seed algorithm or legacy error semantics were replaced.
+
+Static describe creates no live Matching objects. Worker artifacts reconstruct
+without DEM parsing; graph cache bounds, cold setup counts and separate
+sampler compile/native phase/evaluation/warmup/replay/I/O scopes are recorded.
+Canonical bool/shape/little-endian sample hashes, model/map/source hashes and
+committed part checksums guard resume before cleanup. Checkpoints mark
+publication after fsynced data promotion; worker/partial-parent failures
+remain pending for original-seed retry. Null gaps/infeasible statuses retain
+their independent baseline denominators. New schemas never reuse legacy
+logical_failure/errors for sign inference.
+
+New execution gate: 19 passed, 72 existing-category warnings, 48.41 s.
+Corrected broader prep/config gate: 125 passed, 152 warnings, 48.25 s.
+One initial artifact-negative-control fixture mutated a tuple; fixed it to
+use its JSON-loaded list form. The first full suite found a legacy minimal-
+case decoder guard regression (1 failed/901 passed); guarded protocol lookups
+restore compatibility. Exact commands and corrections are in TEST.md.
+Post-fix legacy decoder/adapter/metric gate: 65 passed, 160 warnings, 9.79 s.
+The real seven-shot d3/R2/two-worker shell run, completed one-worker resume,
+saved analysis, pip check and compileall pass. The larger template is parse-
+only; no production sweep, dependency source/pin or user-data change occurred.
+Final source-frozen full gate: 902 passed, 1788 existing-category warnings,
+234.42 s. All 883 earlier tests remain, with 19 new execution/recovery cases.
+Guide links, whitespace and dependency/user/physics scope audits pass.
+Prompt 04 remains an uncommitted local diff; prompt 05 has not been started.

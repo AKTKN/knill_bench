@@ -18,8 +18,12 @@ backend/source/model hashes and feature/column maps define decoder identity.
 Unavailable gaps stay NaN; validity flags separate X baseline, X complement
 and Z. Only the evaluator joins predictions with truth. See
 [interfaces and measured setup/decode boundaries](../../../docs/preparation_decoder.md).
-This Python adapter is not yet connected to CLI workers; legacy
-`decoders.describe/construct` numerical paths are unchanged.
+Prompt 04 connects this adapter to CLI workers via a new-protocol delegation
+in `decoders.describe/construct`. `preparation.describe` certifies and records
+static X/Z artifacts without live graphs; construct loads them without DEM
+parsing, verifies hashes/scale/mode and caches native graphs per worker entry.
+Legacy numerical branches are unchanged. See
+[ordered execution](../../../docs/preparation_execution.md).
 
 ## Existing adapters
 

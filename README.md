@@ -11,8 +11,11 @@ evaluation labels are now available through the Python API; see the
 [completed boundary model](docs/temporal_boundary_model.md) now has strict
 provenance, production-model equivalence checks and portable hashed artifacts.
 The [batch X/Z decoder and evaluator](docs/preparation_decoder.md) now provide
-separate sign/code/logical metrics and validity-aware gap cuts. CLI simulation-
-runner integration remains prompt 04.
+separate sign/code/logical metrics and validity-aware gap cuts. The
+[ordered Monte Carlo runner](docs/preparation_execution.md) now supports
+build/run/resume, aggregate or compact outputs, bounded retention and a
+saved-count summary. The larger example is parse-only; no production sweep
+has been run.
 
 Saved v2 datasets can also be compared from notebooks with lazy keyed path
 registration, six editable figure types and `plotting_lib` APS styling at

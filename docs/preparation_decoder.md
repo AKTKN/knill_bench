@@ -2,14 +2,15 @@
 
 The Python API now combines the supplied two-solve X temporal matching core
 with one cached Z-prefix MWPM model. The evaluator separately joins their
-predictions with sampled truth. The CLI build/run guard stays in place until
-prompt 04's ordered worker/storage integration. No production run is included.
+predictions with sampled truth. Prompt 04 now provides
+[ordered worker/storage integration](preparation_execution.md). No production
+run is included.
 
 Start with the [circuit/config guide](surface_preparation.md),
 [completed model/artifact guide](temporal_boundary_model.md) and
 [theory/frame contract](temporal_preparation_theory.md). Hex and all pins stay
 unchanged. Prompt 02 is committed/pushed as `451e1f0` on `surface-prep-fixed`;
-prompt 03 is a local implementation diff.
+prompt 03 is pushed as `6fa15c5`; prompt 04 is a local implementation diff.
 
 ## Python API and truth boundary
 

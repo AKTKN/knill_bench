@@ -5,15 +5,17 @@ shared types and the reviewed decoder seed. Prompt 01 now implements the
 native circuit/config and evaluator-buffer contracts described in
 [the preparation guide](surface_preparation.md). Prompt 02 adds completed
 model certification/artifacts; prompt 03 now supplies the
-[X/Z adapter and evaluator](preparation_decoder.md). Workers and reports
-remain later steps. No production experiment is run.
+[X/Z adapter and evaluator](preparation_decoder.md). Prompt 04 now integrates
+[ordered workers, persistence and saved counts](preparation_execution.md).
+Calibration/figure reports remain prompt 05. No production experiment is run.
 
 ## Checkout and scope
 
 The user-requested checkpoint is bench `2e618b9`, pushed on `auxiliary-system`.
 Implementation starts from it on child branch `surface-prep-fixed`; prompt 00
 was subsequently committed/pushed as `e3de069` at the user's request. Prompt 01
-is pushed as `3cdc594`, prompt 02 as `451e1f0`; prompt 03 remains a local diff.
+is pushed as `3cdc594`, prompt 02 as `451e1f0`, prompt 03 as `6fa15c5`;
+prompt 04 remains a local diff.
 Hex is clean at the existing HEX-K1 pin
 `8fa2200315cc4feaccf341a461f91739233de08a`, LOM at `b55a7a6`, surface-sim at
 `493f800`. No dependency source or pin is changed. The handoff's Hex `5de58f2`
@@ -264,15 +266,15 @@ not schema-v2 auto scheduling. Preserve all old protocols/CLI calls/hashes:
 | 01 circuit/config | Extend `config.resolve/grid` for a separate `protocols[].id=surface_prep_fixed` case, then `circuits/preparation.py` builds the compiled contract from `Code.rotated` and native initialization/X/Z primitives. Never call `Builder.initialize(...noisy_preparation)` or reinterpret cycles. A preparation-only config omits cycles and legacy initial/final boundary settings; mixed legacy/preparation configs are initially rejected. Old config paths remain exact. |
 | 02 model | `compile_preparation_boundary_model(compiled, weight_scale=...)` checks nominal production/completed marginals and delegates to `completed_dem_to_temporal_model`, returning `BoundaryConstraintModel`. `write_temporal_model`/`read_temporal_model` preserve its full-column artifact/hash without DEM parsing. Actual-pin injected faults certify output maps. Z inference retains the production initial anchor in step 03; it has its own feature/row maps. |
 | 03 adapter/evaluator | Implemented: `adapters/temporal_gap.py` constructs `TemporalMatching(**model.matching_kwargs())` with selected tau_X rows plus a cached Z-prefix matcher reusing the static multigraph kernel. `decode_batch` returns `PreparationPrediction` and frozen/P/F diagnostics. Only `simulation/preparation_metrics.py` joins it with truth, forming masked per-sector/code/logical/joint counts. No alternate decoder core or terminal recovery. |
-| 04 setup | Add a preparation delegation in `simulation.runner.prepare` before its legacy `build/describe/convert_dem` path. Store circuits, completed DEM, row/feature maps, column order/probabilities and hashes. `adapters.decoders.describe/construct` delegate the new protocol to its descriptor/adapter, leaving old branches unchanged. |
-| 04 execution | `simulation.worker.model` retains its bounded cache and delegates preparation compilation/loading to `simulation/preparation.py`; `execute` delegates this task before legacy logical-flip accounting. Cache both X graphs, Z graph and maps under physical+decoder identity. Sampler compiles per fixed chunk seed/call shape; only production circuit is sampled. |
-| 04 commit/resume | Reuse `runner.execute_run`'s bounded spawn, ordered staged commits, seed derivation and manifest verification. Add a protocol-specific table-set/schema selection in `data/storage.py`/runner, not reinterpretation of existing `logical_failure`/`errors` or v2 point files. Preparation tables carry their own version tag. Workers stage bounded outputs; parent alone commits small manifests/counts. |
+| 04 setup | Implemented preparation delegation in `simulation.runner.prepare`, saving circuits/DEMs, full X/Z artifacts, maps/probabilities and hashes. `adapters.decoders.describe/construct` delegate the protocol to static description and cached native construction, preserving old branches. |
+| 04 execution | Implemented `simulation.worker.model/execute` delegation to `simulation/preparation.py`, using the shared bounded cache and both X graphs/Z graph/maps. Sampler compiles per fixed chunk seed/call shape; only production is sampled. |
+| 04 commit/resume | Implemented protocol-specific table selection within the existing bounded spawn/ordered commit loop. Versioned preparation tables preserve old logical_failure/errors/v2 meanings. Pre-cleanup artifact/data validation and fsynced checkpoint publication protect retry; workers stage bounded outputs and parent alone commits. |
 | 05 saved analysis | `analysis/preparation.py` reads versioned preparation counts/optional compact rows, validates identities and reports gap calibration, acceptance/unconditional-miss/conditional-risk curves, intervals and measured timing. It never simulates or automatically resumes. |
 
 Step 00 introduced no config/command/result schema. Step 01 now supports
 config validation, direct Python circuit construction and production sample
-splitting; it guards CLI build/run before output pending step 04. The later
-runner uses the existing `knill-bench validate-config/build/run/resume/analyze`
+splitting. Prompt 04's runner uses the existing
+`knill-bench validate-config/build/run/resume/analyze`
 dispatch, thin shell wrapper and existing config loader. It must reject
 irrelevant legacy fields instead of silently borrowing their meaning. R is
 not an extra simulation sweep axis. No new standalone scheduler/seed system
@@ -305,10 +307,10 @@ Remaining gates, to complete in their owning steps:
   sign/logical correction convention and no double correction are tested.
 - [x] 03: batch/single validity, costs/features and tie/output-mode semantics
   agree; debug witnesses satisfy original-column constraints and paths.
-- [ ] 04: one/two spawned workers, failed-chunk restart and uninterrupted run
+- [x] 04: one/two spawned workers, failed-chunk restart and uninterrupted run
   have the same fixed-chunk sample hashes/counts; changed chunk shape, graph,
   label/source/environment hashes reject resume before output mutation.
-- [ ] 04: aggregate-only and compact-shot results agree; all invalid reasons
+- [x] 04: aggregate-only and compact-shot results agree; all invalid reasons
   and assigned/unobserved shots are counted; bounded retention/staging/cache
   construction is independent of shot count. Packed/unpacked/padding and
   retained replay use a versioned canonical sample hash.

@@ -154,7 +154,7 @@ def test_default_model_probability_domain_is_checked_before_building():
         resolve(cfg)
 
 
-def test_config_validation_never_constructs_physics_and_runner_fails_before_output(tmp_path, monkeypatch, capsys):
+def test_config_validation_never_constructs_physics_and_invalid_runner_config_fails_before_output(tmp_path, monkeypatch, capsys):
     from knill_bench.cli import main
     from knill_bench.codes import Code
     from knill_bench.simulation.runner import prepare
@@ -165,7 +165,9 @@ def test_config_validation_never_constructs_physics_and_runner_fails_before_outp
     path.write_text(yaml.safe_dump(cfg))
     assert main(["validate-config", str(path)]) == 0
     assert json.loads(capsys.readouterr().out)["resolved_grid"][0]["rounds"] == 3
-    with pytest.raises(PreparationCapabilityError, match="prompt 04"):
+    cfg['protocols'][0]['adaptive']=True
+    path.write_text(yaml.safe_dump(cfg))
+    with pytest.raises(ValueError, match="adaptive"):
         prepare(path)
     assert not (tmp_path / "must_not_exist").exists()
 

@@ -241,6 +241,8 @@ def resolve(raw):
     for obj, keys in ((t,['collect_batch_times']),(st,['save_shot_results','save_decoder_calls','save_all_syndromes'])):
         for k in keys:
             if type(obj[k]) is not bool: raise ValueError(f'{k} must be boolean')
+    if preparation and st['save_all_syndromes']:
+        raise ValueError('surface_prep_fixed requires bounded retention; save_all_syndromes is unsupported')
     dg=cfg.setdefault('diagnostics',{})
     fields(dg,'bp_lsd_stats structural_metrics','diagnostics')
     choice(dg.setdefault('bp_lsd_stats','sampled'),['off','sampled'],'bp_lsd_stats')

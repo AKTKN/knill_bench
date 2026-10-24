@@ -18,6 +18,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from enum import Enum
+from time import perf_counter_ns
 from typing import Iterable, Sequence
 
 import numpy as np
@@ -355,6 +356,7 @@ class TemporalMatching:
         marks those differences by checking both modes.  Use a fixed mode
         within a run; a false flag must not be treated as a compact-shot witness.
         """
+        started = perf_counter_ns()
         shots = np.asarray(syndromes)
         if (shots.ndim != 2 or shots.shape[1] != self.num_detectors
                 or not np.isin(shots, [0, 1]).all()):
@@ -386,6 +388,7 @@ class TemporalMatching:
         base_features[valid_ids] = predictions0[:, fixed_count + 2:]
         w0[valid_ids] = weights0
         status[valid_ids] = TemporalStatus.NO_COMPLEMENTARY_SOLUTION.value
+        baseline_done = perf_counter_ns()
 
         rhs = np.empty((len(valid_ids), self.num_detectors + 2), dtype=np.uint8)
         rhs[:, :self.num_detectors] = valid_shots ^ _parities(fixed, self._h_fixed)
@@ -412,5 +415,6 @@ class TemporalMatching:
             debug_matches[valid_ids] = matches0
             debug_matches[comp_ids] &= matches1
 
+        self.last_timings_ns = dict(baseline=baseline_done-started, complementary=perf_counter_ns()-baseline_done)
         return TemporalMatchingResult(base_features, comp_features, w0, w1, gaps,
                                       status, errors0, errors1, debug_matches, frozen, past, future)

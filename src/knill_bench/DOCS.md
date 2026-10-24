@@ -9,7 +9,8 @@ explicit observable expressions and production batch splitting. See
 [theory, exact integration sites and remaining gates](../../docs/temporal_preparation_theory.md).
 The [preparation guide](../../docs/surface_preparation.md) documents actual
 native round/flow/noise checks, physical/nominal model roles and the tiny
-Python usage. CLI simulation build/run remains guarded pending step 04.
+Python usage. Prompt 04 now integrates CLI build/run/resume and saved-count
+analysis through the existing ordered chunk scheduler.
 Prompt 02's [boundary model API](../../docs/temporal_boundary_model.md) compiles
 and certifies static X models, preserves float/integer costs and original
 columns/features in hashed JSON artifacts, and loads without DEM parsing.
@@ -19,7 +20,13 @@ Prompt 03 adds strict prediction/diagnostic contracts,
 `decoding.preparation_prefix` model and evaluator-only
 `simulation.preparation_metrics`. Their [API guide](../../docs/preparation_decoder.md)
 documents cached batch/single/packed decoding, same-mode witnesses, validity
-denominators and inclusive gap cuts. No simulation table or runner is added.
+denominators and inclusive gap cuts. Prompt 04's
+[execution/schema guide](../../docs/preparation_execution.md) covers the
+separate result tables, model/map serialization, bounded worker cache/staging,
+canonical sample hashes, ordered publication and pre-cleanup resume checks.
+The shared PreparationSampleMap is the minimal saved production detector/
+label namespace accepted by split_preparation_samples, avoiding reconstructed
+evaluator circuits in workers while retaining the same isolated batch types.
 
 `analysis.RunRegistry`, `NotebookPlots` and `FigureStyle` provide saved-only
 v2 notebook comparisons with deferred keyed loading, six editable Matplotlib

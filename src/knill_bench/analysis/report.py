@@ -18,6 +18,10 @@ def wilson(errors,shots,z=1.959963984540054):
 
 
 def analyze(run):
+    parameters=json.loads((Path(run)/'parameters.json').read_text())
+    if any(p.get('id')=='surface_prep_fixed' for p in parameters['config'].get('protocols',[])):
+        from .preparation import analyze as analyze_preparation
+        return analyze_preparation(run)
     import matplotlib
     matplotlib.use('Agg')
     import matplotlib.pyplot as plt

@@ -5,6 +5,16 @@ provenance, incremental worker parts/checkpoints and compatibility behavior.
 They are unchanged in B0. Their specification is
 [data_schema.md](../../../docs/data_schema.md).
 
+Prompt 04 adds `preparation.py` Arrow schemas (preparation_result_version=1)
+registered in storage.SCHEMAS, while old schemas remain exact. Preparation
+uses its own case/chunk/compact-shot/retained/call/stopping tables; only the
+protocol-neutral batches table is shared. Explicit validity masks accompany
+nullable sign/code/logical flags and unavailable costs/gaps. The existing
+streamed retention filter accepts a table-name parameter for global bounded
+failure quotas. Publication stays in the ordered parent; checkpoint hashes,
+sample identities and pre-cleanup artifact/data validation protect resume.
+See [schema/retention contract](../../../docs/preparation_execution.md).
+
 `storage_v2.py` is independent: `schemas(point)`, `PointWriter`, `PointResult`
 and parent-run helpers supply one `logical_error` table per d/p and one
 aligned `logical_gaps` table for factory points. IDs are non-null uint64,

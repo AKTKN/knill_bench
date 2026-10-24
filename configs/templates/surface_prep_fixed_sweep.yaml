@@ -1,0 +1,37 @@
+# Parse-only larger example. Run explicitly after reviewing time/storage cost.
+# R is fixed; use a separate config for another preparation depth.
+schema_version: 1
+experiment:
+  name: surface_prep_fixed_sweep
+  code: rotated_surface
+  distances: [3, 5, 7, 9]
+  bases: [z]
+  physical_error_rates: [0.001, 0.003, 0.005]
+  master_seed: 617
+  output_root: results
+noise: {profile: hex_legacy}
+decoders:
+  temporal: {kind: temporal_gap, weight_scale: 1000, output_mode: compact}
+protocols:
+  - id: surface_prep_fixed
+    decoders: [temporal]
+    rounds: 3
+    prep_basis: z
+    sign_sector: x
+    readout_basis: z
+    logical_evaluation: prefix_frame_only
+    adaptive: false
+sampling:
+  workers: 4
+  native_threads_per_worker: 1
+  shots_per_case: 10000
+  chunk_size: 256
+  max_pending_chunks_per_worker: 1
+  model_cache_size: 1
+  stop_rule: fixed_shots
+timing: {warmup_shots: 4, latency_sample_count_per_case: 16}
+storage:
+  save_shot_results: false
+  save_decoder_calls: true
+  retained_uniform_samples_per_case: 8
+  retained_failure_samples_per_case: 8

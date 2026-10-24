@@ -35,6 +35,39 @@ def _check_rows(names, metric):
     return tuple(by_index[i] for i in range(len(by_index)))
 
 
+def describe_temporal_models(x_model, z_model, *, output_mode="compact", logical_evaluation="prefix_frame_only"):
+    """Static identity only; no matching graph or sampler construction."""
+    if output_mode not in {"compact", "full_witness"} or logical_evaluation != "prefix_frame_only":
+        raise PreparationCapabilityError("unsupported temporal decoder mode/frame")
+    x_rows = _check_rows(x_model.feature_ids, "tau_x")
+    _check_rows(z_model.feature_ids, "tau_z")
+    if z_model.feature_ids.count("logical_z") != 1 or x_model.weight_scale != z_model.weight_scale:
+        raise ValueError("inconsistent temporal feature/weight definitions")
+    active = z_model.active_columns
+    frozen = tuple(int(j) for j in x_model.active_columns if j in set(x_model.frozen_columns))
+    import knill_bench.decoding.temporal_matching as kernel
+    import knill_bench.decoding.preparation_prefix as prefix
+    definition = dict(
+        kind="temporal_gap", definition_version=1, output_mode=output_mode,
+        logical_evaluation=logical_evaluation, physical_correction_applied=False,
+        terminal_recovery=False, x_model_sha256=x_model.artifact_sha256, z_model_sha256=z_model.model_sha256,
+        weight_scale=x_model.weight_scale, gap_unit="quantized_natural_log_score",
+        weight_rounding=x_model.weight_rounding, pymatching_version=pymatching.__version__,
+        tie_policy="native_same_solve_fixed_output_mode_invisible_zero_v1",
+        parallel_policy="private_degree_two_subdivision_v1",
+        x_feature_ids=[x_model.feature_ids[i] for i in x_rows], z_feature_ids=list(z_model.feature_ids),
+        x_active_columns=x_model.active_columns.tolist(), z_active_columns=active.tolist(),
+        x_mechanism_ids=[x_model.mechanism_ids[j] for j in x_model.active_columns],
+        z_mechanism_ids=[z_model.mechanism_ids[j] for j in active],
+        frozen_original_columns=list(frozen),
+        z_scope=z_model.scope, z_detector_ids=list(z_model.detector_ids),
+        accepted_input="unpacked_bool_or_explicit_little_endian_packed_method",
+        source_hashes={name: hashlib.sha256(Path(path).read_bytes()).hexdigest() for name, path in
+                       (("adapter", __file__), ("matching_core", kernel.__file__), ("prefix_model", prefix.__file__))},
+    )
+    return dict(definition=definition, model_sha256=hashlib.sha256(_canonical_json(definition).encode()).hexdigest())
+
+
 class TemporalGapDecoder:
     """Cache the supplied two-solve core and one ordinary Z-prefix topology.
 
@@ -81,26 +114,8 @@ class TemporalGapDecoder:
             self.z_matcher.prepare_full_witness()
         z_ns = perf_counter_ns() - begin
         self.frozen_original_columns = tuple(int(x_model.active_columns[j]) for j in self.x_core.frozen_columns)
-        import knill_bench.decoding.temporal_matching as kernel
-        import knill_bench.decoding.preparation_prefix as prefix
-        definition = dict(
-            kind="temporal_gap", definition_version=1, output_mode=output_mode,
-            logical_evaluation=logical_evaluation, physical_correction_applied=False,
-            terminal_recovery=False, x_model_sha256=x_model.artifact_sha256, z_model_sha256=z_model.model_sha256,
-            weight_scale=self.weight_scale, gap_unit="quantized_natural_log_score",
-            weight_rounding=x_model.weight_rounding, pymatching_version=pymatching.__version__,
-            tie_policy="native_same_solve_fixed_output_mode_invisible_zero_v1",
-            parallel_policy="private_degree_two_subdivision_v1",
-            x_feature_ids=[x_model.feature_ids[i] for i in self.x_rows], z_feature_ids=list(z_model.feature_ids),
-            x_active_columns=x_model.active_columns.tolist(), z_active_columns=active.tolist(),
-            x_mechanism_ids=list(kwargs["mechanism_ids"]),
-            z_mechanism_ids=[z_model.mechanism_ids[j] for j in active],
-            frozen_original_columns=list(self.frozen_original_columns),
-            z_scope=z_model.scope, z_detector_ids=list(z_model.detector_ids),
-            accepted_input="unpacked_bool_or_explicit_little_endian_packed_method",
-            source_hashes={name: hashlib.sha256(Path(path).read_bytes()).hexdigest() for name, path in
-                           (("adapter", __file__), ("matching_core", kernel.__file__), ("prefix_model", prefix.__file__))},
-        )
+        definition = describe_temporal_models(x_model, z_model, output_mode=output_mode,
+            logical_evaluation=logical_evaluation)["definition"]
         self._definition_json = _canonical_json(definition)
         self.model_sha256 = hashlib.sha256(self._definition_json.encode()).hexdigest()
         self.setup_timings_ns = dict(x_graphs=x_ns, z_graph=z_ns, total=perf_counter_ns() - started)
@@ -160,7 +175,8 @@ class TemporalGapDecoder:
             baseline_valid, complementary_valid, zvalid, status, self.weight_scale,
             result if full else None, diagnostics,
         )
-        self.last_decode_timings_ns = dict(x_comparative=x_ns, z_prefix=z_ns, total=perf_counter_ns() - started)
+        self.last_decode_timings_ns = dict(x_comparative=x_ns, x_baseline=self.x_core.last_timings_ns["baseline"],
+            x_complementary=self.x_core.last_timings_ns["complementary"], z_prefix=z_ns, total=perf_counter_ns() - started)
         return prediction
 
     def decode_one(self, online_x_detectors, online_z_detectors) -> PreparationPrediction:

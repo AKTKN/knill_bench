@@ -101,6 +101,32 @@ class PreparationLabels:
 
 
 @dataclass(frozen=True)
+class PreparationSampleMap:
+    """Saved production row namespace, without a compiled model/evaluator."""
+
+    num_detectors: int
+    num_observables: int
+    online_x_detector_ids: tuple[int, ...]
+    online_z_detector_ids: tuple[int, ...]
+    labels: PreparationLabels
+
+    def __post_init__(self):
+        detectors = self.online_x_detector_ids + self.online_z_detector_ids
+        labels = self.labels.tau_x + self.labels.tau_z + self.labels.logical_z
+        if (type(self.num_detectors) is not int or type(self.num_observables) is not int
+                or any(type(i) is not int for i in (*detectors, *labels))
+                or sorted(detectors) != list(range(self.num_detectors))
+                or sorted(labels) != list(range(self.num_observables))
+                or not self.labels.tau_x or not self.labels.tau_z or len(self.labels.logical_z) != 1):
+            raise ValueError("invalid preparation production row/label namespace")
+
+
+def preparation_sample_map(compiled: CompiledPreparationExperiment) -> PreparationSampleMap:
+    return PreparationSampleMap(compiled.circuit.num_detectors, compiled.circuit.num_observables,
+        compiled.online_x_detector_ids, compiled.online_z_detector_ids, compiled.labels)
+
+
+@dataclass(frozen=True)
 class PreparationObservable:
     """A deterministic evaluation parity in its owning circuit's records."""
 
@@ -404,7 +430,7 @@ class PreparationDecoder(Protocol):
                      online_z_detectors: BoolArray) -> PreparationPrediction: ...
 
 
-def split_preparation_samples(compiled: CompiledPreparationExperiment,
+def split_preparation_samples(compiled: CompiledPreparationExperiment | PreparationSampleMap,
                               detectors: BoolArray, observables: BoolArray) -> PreparationBatch:
     """Split a production detector-sampler batch using explicit compiled maps.
 
@@ -414,14 +440,15 @@ def split_preparation_samples(compiled: CompiledPreparationExperiment,
     """
     _boolean_batch(detectors, "detectors")
     _boolean_batch(observables, "observables")
-    if detectors.shape != (len(observables), compiled.circuit.num_detectors):
+    mapping = compiled if isinstance(compiled, PreparationSampleMap) else preparation_sample_map(compiled)
+    if detectors.shape != (len(observables), mapping.num_detectors):
         raise ValueError("production detector count/shot count does not match compiled maps")
-    if observables.shape[1] != compiled.circuit.num_observables:
+    if observables.shape[1] != mapping.num_observables:
         raise ValueError("production observable count does not match compiled labels")
     return PreparationBatch(
-        PreparationObservations(detectors[:, compiled.online_x_detector_ids].copy(),
-                                detectors[:, compiled.online_z_detector_ids].copy()),
-        PreparationTruth(observables[:, compiled.labels.tau_x].copy(),
-                         observables[:, compiled.labels.tau_z].copy(),
-                         observables[:, compiled.labels.logical_z].copy()),
+        PreparationObservations(detectors[:, mapping.online_x_detector_ids].copy(),
+                                detectors[:, mapping.online_z_detector_ids].copy()),
+        PreparationTruth(observables[:, mapping.labels.tau_x].copy(),
+                         observables[:, mapping.labels.tau_z].copy(),
+                         observables[:, mapping.labels.logical_z].copy()),
     )

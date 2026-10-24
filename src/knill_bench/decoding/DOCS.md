@@ -38,7 +38,7 @@ disagreement; solver-input and original DEM column orders remain distinct.
 These kernels have synthetic exhaustive-optimum tests. Current-pin native
 model certification, R2 readout/data/two-qubit Pauli responses and strict
 artifact round-trips are now tested. Prompt 03 adds a high-level X/Z adapter;
-the worker remains prompt 04. See
+prompt 04 now supplies ordered workers/persistence. See
 [proofs, units, assumptions and scientific gates](../../../docs/temporal_preparation_theory.md).
 
 `preparation_model.compile_preparation_prefix_model` selects the production
@@ -53,6 +53,12 @@ provides exact unmerged graph handling; no new matching optimizer is written.
 and P/F labels, masked by baseline validity. `prepare_full_witness` prewarms
 the existing optional debug graphs. Objectives/RHS/costs/tie handling are
 unchanged. See [adapter and metrics](../../../docs/preparation_decoder.md).
+Prompt 04 adds strict Z-prefix to_artifact/from_artifact reconstruction from
+original supports/probabilities/row maps, without Stim parsing. The adapter's
+static descriptor and live constructor share one definition/hash function.
+The unchanged core solves now expose separate baseline/complement wall
+timers, including their respective bookkeeping. Worker phase/replay times
+are separate in [the execution guide](../../../docs/preparation_execution.md).
 
 ## Existing conversion and audits
 

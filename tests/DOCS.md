@@ -1,5 +1,16 @@
 # Bench regression tests
 
+`test_preparation_execution.py` adds prompt-04 bounded d3/<=7-shot gates:
+one/two-worker equality, interrupted/completed resume, aggregate/compact/bin
+equivalence, pre-cleanup model/map/partition/data rejection, assigned-unobserved
+worker failures and partial-parent-promotion recovery, immutable same-mode
+retained rows regenerated with original chunk sample hashes, no setup live
+graphs or worker DEM parsing, bounded cache eviction/rebuild, truth isolation,
+p0/R1 nulls and two decoders sharing one physical chunk. The larger template
+is parse-only with physics forbidden. Legacy execution tests remain; the old
+pre-output guard test now checks invalid preparation config before output,
+since valid preparation execution is implemented.
+
 `test_temporal_dem.py` and `test_temporal_matching.py` are the reviewed supplied
 fixed-R decoder seed tests: 67 synthetic cases independently enumerate small
 optima and check original-column temporal paths, all frozen assignments,

@@ -21,6 +21,8 @@ def main(argv=None):
     elif hasattr(args,'run'):cfg=json.loads((Path(args.run)/'parameters.json').read_text())['config']
     else:cfg={'sampling':{'native_threads_per_worker':1}}
     threads=cfg['sampling']['native_threads_per_worker']
+    if any(p.get('id')=='surface_prep_fixed' for p in cfg.get('protocols',[])) and args.command in {'benchmark-latency','audit-faults'}:
+        parser.error('surface_prep_fixed uses saved preparation_calls replay timings; legacy benchmark-latency/audit-faults are unsupported')
     for key in ('OMP_NUM_THREADS','OPENBLAS_NUM_THREADS','MKL_NUM_THREADS'):
         if key in os.environ and os.environ[key]!=str(threads):parser.error(f'{key} must equal native_threads_per_worker={threads}')
         os.environ.setdefault(key,str(threads))

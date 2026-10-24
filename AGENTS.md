@@ -662,3 +662,55 @@ Prompt 03 final source-frozen gate:
 with 55 new adapter/metric cases. Focused: 312 passed. pip check, compileall,
 documentation links/whitespace and unchanged dependency/user/legacy scope
 checks pass. No failed unit gate or dependency patch was needed in this phase.
+
+## Fixed-R surface preparation: prompt 04 (2026-10-24)
+
+The user authorized committing/pushing prompt 03 as 03, then implementing
+surface_timegap/prompts/04_monte_carlo_parallel.md. Checkpoint 6fa15c5 is
+pushed on surface-prep-fixed. Keep prompt 04 as a local diff; do not push it,
+start prompt 05 or launch production sweeps without a later request. Hex,
+all dependency pins and other worktrees remain unchanged/read-only. Use
+Conda knill_system, bounded d3 <=7-shot new physical fixtures and the tiny
+installed CLI/shell smoke. The larger d3/5/7/9 YAML is parse-only in tests.
+
+Read docs/preparation_execution.md. This phase delegates setup/sample/model/
+evaluation to simulation/preparation.py while reusing the existing ordered
+spawn/commit loop, worker CACHE and seed function. No second scheduler,
+adaptive partitioning, terminal recovery or new quantum physics is introduced.
+Static describe builds no Matching; workers load X/Z artifacts without DEM
+parsing, cache graphs per bounded entry, and compile a fresh sampler for each
+fixed chunk seed/call shape. Only the production circuit is sampled once per
+chunk; every decoder receives the same online batch, never evaluator truth.
+
+New preparation_result_version=1 tables keep sign/code/logical semantics
+separate from legacy logical_failure/errors and v2. Invalid flags/costs/gaps
+are nullable with independent masks. Aggregate/compact modes share the same
+per-check/joint/gap-bin counters. All-shot syndrome retention is rejected;
+uniform and first-failure examples are globally bounded under ordered commit.
+Same-mode witnesses expand active columns to original DEM order. Canonical
+sample hashes include bool dtype, names/shapes, row-padded little-endian bits
+and serialization version. No singleton resampling is assumed to replay.
+
+Preparation preflight verifies saved config/grid/environment, complete setup
+artifacts and published part checksums/schema/count/seed/sample IDs BEFORE
+staging/orphan cleanup. Checkpoints are publication markers, not jointly
+atomic table renames. Parent fsyncs data directories before markers; unmarked
+partial publications retry from original chunk seed. Missing published
+markers and noncontiguous committed groups reject. Failed workers retain
+assigned/unobserved history without fabricating scientific shot results.
+
+Saved analyze is count/timing-only and never samples/resumes; calibration,
+interval/figure reports remain prompt 05. Keep warmup/replay/setup/I/O out of
+primary decode timers and state memory/latency/throughput measurement scopes.
+The guide records tiny measured values/limits, not scaling or physics claims.
+Retain minimal legacy decoder case dictionaries without a protocol key when
+dispatching; use guarded lookups and support empty legacy protocol lists.
+
+Prompt 04 final source-frozen gate:
+`bash scripts/python.sh -m pytest -q --disable-warnings` — 902 passed,
+1788 existing-category warnings, 234.42 s. All 883 earlier tests remain;
+19 execution/artifact/recovery cases were added. The initial fixture tuple
+mutation and legacy minimal-case guard regressions/fixes are recorded in
+TEST.md. Tiny installed shell/CLI run/resume/analyze, pip check, compileall,
+guide/whitespace and dependency/user/physics scope checks pass. No production
+sweep or dependency source patch was run.
