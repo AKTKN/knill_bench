@@ -259,7 +259,7 @@ not schema-v2 auto scheduling. Preserve all old protocols/CLI calls/hashes:
 | Step | Concrete input, output and connection |
 |---|---|
 | 01 circuit/config | Extend `config.resolve/grid` for a separate `protocols[].id=surface_prep_fixed` case, then `circuits/preparation.py` builds the compiled contract from `Code.rotated` and native initialization/X/Z primitives. Never call `Builder.initialize(...noisy_preparation)` or reinterpret cycles. A preparation-only config omits cycles and legacy initial/final boundary settings; mixed legacy/preparation configs are initially rejected. Old config paths remain exact. |
-| 02 model | `completed_dem_to_temporal_model(completed_dem, detector_roles=..., num_observables=..., weight_scale=...)` returns `BoundaryConstraintModel`. Add production/completed marginal equivalence and injected-fault certification at the actual pin. Z model retains the production initial anchor; it has its own feature/row maps. |
+| 02 model | `compile_preparation_boundary_model(compiled, weight_scale=...)` checks nominal production/completed marginals and delegates to `completed_dem_to_temporal_model`, returning `BoundaryConstraintModel`. `write_temporal_model`/`read_temporal_model` preserve its full-column artifact/hash without DEM parsing. Actual-pin injected faults certify output maps. Z inference retains the production initial anchor in step 03; it has its own feature/row maps. |
 | 03 adapter/evaluator | `adapters/temporal_gap.py` constructs `TemporalMatching(**model.matching_kwargs())` plus a cached Z-prefix matcher. `decode_batch` returns `PreparationPrediction`. Only `simulation/preparation_metrics.py` joins it with truth, forming per-sector/code/logical/joint counts. No alternate decoder core or terminal recovery. |
 | 04 setup | Add a preparation delegation in `simulation.runner.prepare` before its legacy `build/describe/convert_dem` path. Store circuits, completed DEM, row/feature maps, column order/probabilities and hashes. `adapters.decoders.describe/construct` delegate the new protocol to its descriptor/adapter, leaving old branches unchanged. |
 | 04 execution | `simulation.worker.model` retains its bounded cache and delegates preparation compilation/loading to `simulation/preparation.py`; `execute` delegates this task before legacy logical-flip accounting. Cache both X graphs, Z graph and maps under physical+decoder identity. Sampler compiles per fixed chunk seed/call shape; only production circuit is sampled. |
@@ -293,7 +293,7 @@ Remaining gates, to complete in their owning steps:
 - [x] 01: actual output-cut faults after last X are visible to truth;
   independently injected first/final readout, intermediate and corner faults
   match online/past/future/tau/logical responses without gate-name inference.
-- [ ] 02: production/completed **same-sector** marginalized models agree at
+- [x] 02: production/completed **same-sector** marginalized models agree at
   the current Hex pin, including zero-online labels; Z-anchor comparison is
   separate. Row/feature/column serialization preserves identities.
 - [ ] 03: actual X/Z adapter never receives truth; changing only all oracle

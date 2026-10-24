@@ -576,3 +576,44 @@ Prompt 01 full gate: `bash scripts/python.sh -m pytest -q --disable-warnings`
 config/kernel/legacy gate: 216 passed. Installed config CLI, pip check,
 compileall and a three-shot R1/zero-online-X boundary smoke pass. See TEST.md
 for exact commands, the corrected placeholder assertion and unchanged scope.
+
+## Fixed-R surface preparation: prompt 02 (2026-10-24)
+
+The user authorized committing/pushing prompt 01 as 01, then implementing
+surface_timegap/prompts/02_dem_boundary_constraints.md. Checkpoint 3cdc594
+is pushed on surface-prep-fixed. Prompt 02 remains a local diff until a later
+commit request. Hex and all dependency sources/pins stay read-only; no new
+production sampling is authorized. Continue using Conda knill_system.
+
+Read docs/temporal_boundary_model.md for setup/model/artifact interfaces.
+TemporalDemModel remains the single boundary-column authority and the
+supplied TemporalMatching core is unchanged. Keep full completed supports,
+roles, duplicate/evaluation-only/inactive columns, feature order and original
+float/common integer weights. p0 is excluded by matching_kwargs; active
+rounded-zero costs stay zero without clipping. Every full-degree-one spatial
+port is frozen, even future-only. No ordinary-DEM/gate-name boundary guesses,
+separator splitting or online-signature inference merging is allowed.
+
+compile_preparation_boundary_model certifies nominal production/completed
+same-X online/all-evaluation parity models with exact independent XOR
+aggregation (binary64 tolerance recorded), builder maps and source provenance.
+The known initial-Z anchor stays separate. Version-1 model artifacts preserve
+full column/label order and a canonical payload hash; loading validates
+schema/ranges/derived policy and reconstructs sparse arrays without Stim DEM
+parsing. The future runner owns artifact persistence/hash/publication; its
+pre-output guard remains until prompt 04. High-level X/Z adapter/metrics are
+prompt 03, not implemented here. Keep full-witness/compact adapter identity
+separate from the static model hash when adding that adapter.
+
+New tests use synthetic columns and d3/5 exact DEM fixtures, with three-row
+zero-syndrome core decodes and no physical sampling. They independently
+check R2 readout/data/two-qubit gate-Pauli responses, invisible labels,
+future spatial ports, two-future cancellation, fixed zeros/ones and strict
+artifact round-trips. Append all gate results/corrections to TEST.md.
+
+Prompt 02 final source-frozen gate:
+`bash scripts/python.sh -m pytest -q --disable-warnings` — 828 passed,
+1628 existing-category warnings, 191.44 s. Focused: 247 passed. All 762
+previous tests remain, plus 66 model/artifact cases. Three-shot artifact/core
+smoke, pip check, compileall and documentation/whitespace/scope checks pass.
+TEST.md records the corrected empty-target negative-control fixture.

@@ -33,6 +33,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 from enum import Enum
 import hashlib
+import json
 from numbers import Integral
 from typing import Mapping, Sequence
 
@@ -43,6 +44,14 @@ import stim
 
 MAX_EDGE_WEIGHT = 2**24 - 1
 MAX_EXACT_TOTAL_WEIGHT = 2**53 - 1
+
+
+def _canonical_json(value) -> str:
+    return json.dumps(value, sort_keys=True, separators=(",", ":"), allow_nan=False)
+
+
+def _hash_payload(value) -> str:
+    return hashlib.sha256(_canonical_json(value).encode("utf-8")).hexdigest()
 
 
 class DetectorRole(str, Enum):
@@ -95,11 +104,77 @@ class TemporalDemModel:
     active_columns: np.ndarray
     inactive_columns: np.ndarray
     terms: tuple[CompletedDemTerm, ...]
+    float_weights: np.ndarray
+    num_observables: int
+    feature_observable_ids: tuple[int, ...]
+    feature_ids: tuple[str, ...]
+    provenance_json: str
     weight_scale: float
     source_dem_sha256: str
     provenance_kind: str = "completed_dem_term"
     strictness: str = "completed_individual_degree_le_2_no_separators_v1"
     weight_rounding: str = "numpy_rint_ties_to_even"
+
+    @property
+    def full_detector_support(self) -> tuple[tuple[int, ...], ...]:
+        return tuple(term.detector_ids for term in self.terms)
+
+    @property
+    def unidentifiable_columns(self) -> np.ndarray:
+        """Evaluation-labelled events with no completed syndrome evidence."""
+        return np.flatnonzero((np.diff(self.h_completed.indptr) == 0)
+                              & (np.diff(self.feature_map.indptr) != 0))
+
+    @property
+    def metadata(self) -> dict:
+        """Finite JSON weight policy and full-column provenance descriptor.
+
+        Null float costs mean +infinity for impossible p=0 events. Active
+        rounded-zero costs are allowed, without clipping; the matching core
+        chooses zero for invisible columns and may choose tied visible edges.
+        """
+        return dict(
+            provenance_kind=self.provenance_kind, strictness=self.strictness,
+            provenance=json.loads(self.provenance_json), source_dem_sha256=self.source_dem_sha256,
+            weight_scale=self.weight_scale, weight_rounding=self.weight_rounding,
+            float_weight_formula="log1p(-p)-log(p)", cost_unit="common_integer_scaled_natural_log",
+            probability_range="0 <= p < 0.5", max_edge_weight=MAX_EDGE_WEIGHT,
+            max_exact_total_weight=MAX_EXACT_TOTAL_WEIGHT,
+            inactive_policy="p0_excluded_from_solver_float_cost_positive_infinity",
+            active_zero_policy="retain_quantized_zero_no_clipping",
+            float_weights=[float(w) if np.isfinite(w) else None for w in self.float_weights],
+            active_columns=self.active_columns.tolist(), inactive_columns=self.inactive_columns.tolist(),
+            unidentifiable_columns=self.unidentifiable_columns.tolist(),
+            mechanism_ids=list(self.mechanism_ids), feature_ids=list(self.feature_ids),
+            feature_observable_ids=list(self.feature_observable_ids),
+        )
+
+    def to_artifact(self) -> dict:
+        """Versioned full-column artifact; no DEM text or live solver needed.
+
+        Explicit terms, roles and label order are authoritative. Loading
+        validates and reconstructs sparse arrays, never reparses a Stim DEM.
+        The hash detects accidental modification; it is not authentication.
+        """
+        payload = dict(
+            artifact_version=1, num_observables=self.num_observables,
+            detector_roles=[role.value for role in self.detector_roles],
+            terms=[dict(term_index=t.term_index, instruction_index=t.instruction_index,
+                        detector_ids=list(t.detector_ids), observable_ids=list(t.observable_ids))
+                   for t in self.terms],
+            probabilities=self.probabilities.tolist(), weights=self.weights.tolist(),
+            metadata=self.metadata,
+        )
+        return dict(payload=payload, sha256=_hash_payload(payload))
+
+    @property
+    def artifact_sha256(self) -> str:
+        return self.to_artifact()["sha256"]
+
+    @classmethod
+    def from_artifact(cls, artifact: Mapping) -> TemporalDemModel:
+        """Load with schema, hash, range and derived-policy checks (no Stim)."""
+        return _model_from_artifact(artifact)
 
     @property
     def num_mechanisms(self) -> int:
@@ -212,6 +287,9 @@ def completed_dem_to_temporal_model(
     detector_roles: Sequence[DetectorRole | str] | Mapping[int, DetectorRole | str] | None,
     num_observables: int | None = None,
     weight_scale: float = 1000,
+    feature_observable_ids: Sequence[int] | None = None,
+    feature_ids: Sequence[str] | None = None,
+    model_provenance: Mapping | None = None,
 ) -> TemporalDemModel:
     """Parse a completed selected-CSS DEM without inferring missing boundaries.
 
@@ -220,6 +298,12 @@ def completed_dem_to_temporal_model(
     Detector metadata must cover precisely ``range(dem.num_detectors)``;
     builders should declare zero-response detector rows in the DEM explicitly.
     Row order within each returned block is ascending original detector ID.
+    DEM L targets are the evaluation response map. Optional ordered unique
+    ``feature_observable_ids`` selects/reorders its rows; ``feature_ids`` names
+    them. All original observable signatures remain in ``terms``. Provenance
+    is static finite JSON, never a sampled fault location or hidden outcomes.
+    Standalone ordinary DEMs lack the required boundary information; passing
+    invented roles does not establish a valid completion/equivalence proof.
 
     Every error term must have at most two *individual* completed detector
     endpoints before boundary contraction.  A single endpoint means a spatial
@@ -231,6 +315,8 @@ def completed_dem_to_temporal_model(
         dem = stim.DetectorErrorModel(dem)
     if not isinstance(dem, stim.DetectorErrorModel):
         raise TypeError("dem must be a Stim DetectorErrorModel or its text")
+    if model_provenance is not None and not isinstance(model_provenance, Mapping):
+        raise ValueError("model_provenance must be a finite JSON mapping")
     roles = _roles(detector_roles, dem.num_detectors)
     if num_observables is None:
         num_observables = dem.num_observables
@@ -240,10 +326,6 @@ def completed_dem_to_temporal_model(
         raise ValueError("num_observables must be an integer at least dem.num_observables")
     num_observables = int(num_observables)
 
-    detector_rows: list[int] = []
-    detector_columns: list[int] = []
-    feature_rows: list[int] = []
-    feature_columns: list[int] = []
     probabilities: list[float] = []
     terms: list[CompletedDemTerm] = []
     for instruction_index, instruction in enumerate(dem.flattened()):
@@ -257,8 +339,12 @@ def completed_dem_to_temporal_model(
             if target.is_separator():
                 raise ValueError("DEM separators are unsupported: correlated components cannot be independent edges")
             if target.is_relative_detector_id():
+                if not 0 <= target.val < len(roles):
+                    raise ValueError("DEM detector ID out of range")
                 detectors.symmetric_difference_update((target.val,))
             elif target.is_logical_observable_id():
+                if not 0 <= target.val < num_observables:
+                    raise ValueError("DEM observable ID out of range")
                 observables.symmetric_difference_update((target.val,))
             else:
                 raise ValueError(f"Unsupported DEM error target: {target}")
@@ -269,20 +355,58 @@ def completed_dem_to_temporal_model(
         column = len(terms)
         detector_ids = tuple(sorted(detectors))
         observable_ids = tuple(sorted(observables))
-        detector_rows.extend(detector_ids)
-        detector_columns.extend([column] * len(detector_ids))
-        feature_rows.extend(observable_ids)
-        feature_columns.extend([column] * len(observable_ids))
         probabilities.append(instruction.args_copy()[0])
         terms.append(CompletedDemTerm(column, instruction_index, detector_ids, observable_ids))
 
+    return _assemble_model(
+        roles, tuple(terms), probabilities, num_observables, weight_scale,
+        feature_observable_ids, feature_ids,
+        _canonical_json(dict(model_provenance) if model_provenance is not None
+                        else {"source": "caller_supplied_completed_dem", "completion_certified": False}),
+        hashlib.sha256(str(dem).encode("utf-8")).hexdigest(),
+    )
+
+
+def _ordered_ids(values, count, name):
+    try:
+        ids = tuple(values)
+    except TypeError as error:
+        raise ValueError(f"{name} must be unique integer IDs in range") from error
+    if (any(isinstance(j, (bool, np.bool_)) or not isinstance(j, Integral) or not 0 <= j < count for j in ids)
+            or len(set(ids)) != len(ids)):
+        raise ValueError(f"{name} must be unique integer IDs in range")
+    return tuple(map(int, ids))
+
+
+def _assemble_model(roles, terms, probabilities, num_observables, weight_scale,
+                    feature_observable_ids, feature_ids, provenance_json, source_dem_sha256):
+    """Single column/feature construction path for DEM parsing and artifacts."""
     count = len(terms)
+    selected = _ordered_ids(range(num_observables) if feature_observable_ids is None else feature_observable_ids,
+                            num_observables, "feature_observable_ids")
+    if isinstance(feature_ids, (str, bytes)):
+        raise ValueError("feature_ids must be unique nonempty strings, one per feature")
+    try:
+        names = tuple(f"L{j}" for j in selected) if feature_ids is None else tuple(feature_ids)
+    except TypeError as error:
+        raise ValueError("feature_ids must be unique nonempty strings, one per feature") from error
+    if (len(names) != len(selected) or any(not isinstance(name, str) or not name for name in names)
+            or len(set(names)) != len(names)):
+        raise ValueError("feature_ids must be unique nonempty strings, one per feature")
+    mapping = {label: row for row, label in enumerate(selected)}
+    detector_rows, detector_columns, feature_rows, feature_columns = [], [], [], []
+    for column, term in enumerate(terms):
+        detector_rows.extend(term.detector_ids)
+        detector_columns.extend([column] * len(term.detector_ids))
+        rows = [mapping[j] for j in term.observable_ids if j in mapping]
+        feature_rows.extend(rows)
+        feature_columns.extend([column] * len(rows))
     h_completed = csc_matrix((np.ones(len(detector_rows), dtype=np.uint8),
                               (detector_rows, detector_columns)),
-                             shape=(dem.num_detectors, count))
+                             shape=(len(roles), count))
     features = csc_matrix((np.ones(len(feature_rows), dtype=np.uint8),
                            (feature_rows, feature_columns)),
-                          shape=(num_observables, count))
+                          shape=(len(selected), count))
     online_ids = np.asarray([i for i, role in enumerate(roles) if role == DetectorRole.ONLINE], dtype=np.int64)
     past_ids = np.asarray([i for i, role in enumerate(roles) if role == DetectorRole.PAST], dtype=np.int64)
     future_ids = np.asarray([i for i, role in enumerate(roles) if role == DetectorRole.FUTURE], dtype=np.int64)
@@ -294,8 +418,13 @@ def completed_dem_to_temporal_model(
     if (augmented_degree > 2).any():
         # Defensive invariant: endpoint contraction cannot create new incidence.
         raise ValueError("Temporally augmented mechanism columns are not graphlike")
+    if ((full_degree != 1) & (augmented_degree == 1)).any():
+        raise ValueError("Unfrozen degree-one augmented mechanism: completed boundary scope is insufficient")
     probs = np.asarray(probabilities, dtype=np.float64)
     weights = bernoulli_integer_weights(probs, weight_scale=weight_scale)
+    float_weights = np.full(len(probs), np.inf)
+    positive = probs > 0
+    float_weights[positive] = np.log1p(-probs[positive]) - np.log(probs[positive])
     return TemporalDemModel(
         h_completed=h_completed,
         h_online=h_online,
@@ -313,6 +442,55 @@ def completed_dem_to_temporal_model(
         active_columns=np.flatnonzero(probs > 0),
         inactive_columns=np.flatnonzero(probs == 0),
         terms=tuple(terms),
+        float_weights=float_weights, num_observables=num_observables,
+        feature_observable_ids=selected, feature_ids=names, provenance_json=provenance_json,
         weight_scale=float(weight_scale),
-        source_dem_sha256=hashlib.sha256(str(dem).encode("utf-8")).hexdigest(),
+        source_dem_sha256=source_dem_sha256,
     )
+
+
+def _model_from_artifact(artifact) -> TemporalDemModel:
+    try:
+        if not isinstance(artifact, Mapping) or set(artifact) != {"payload", "sha256"}:
+            raise ValueError("invalid artifact envelope")
+        payload = artifact["payload"]
+        if artifact["sha256"] != _hash_payload(payload):
+            raise ValueError("artifact SHA256 mismatch")
+        if (set(payload) != {"artifact_version", "num_observables", "detector_roles", "terms",
+                             "probabilities", "weights", "metadata"}
+                or type(payload["artifact_version"]) is not int or payload["artifact_version"] != 1):
+            raise ValueError("unsupported artifact schema/version")
+        num_observables = payload["num_observables"]
+        if type(num_observables) is not int or num_observables < 0:
+            raise ValueError("invalid num_observables")
+        roles = _roles(payload["detector_roles"], len(payload["detector_roles"]))
+        terms = []
+        last_instruction = -1
+        for column, raw in enumerate(payload["terms"]):
+            if set(raw) != {"term_index", "instruction_index", "detector_ids", "observable_ids"}:
+                raise ValueError("invalid term schema")
+            if (type(raw["term_index"]) is not int or raw["term_index"] != column
+                    or type(raw["instruction_index"]) is not int or raw["instruction_index"] <= last_instruction):
+                raise ValueError("invalid original term/instruction order")
+            detectors = _ordered_ids(raw["detector_ids"], len(roles), "detector_ids")
+            observables = _ordered_ids(raw["observable_ids"], num_observables, "observable_ids")
+            if tuple(sorted(detectors)) != detectors or len(detectors) > 2 or tuple(sorted(observables)) != observables:
+                raise ValueError("invalid individual completed support")
+            terms.append(CompletedDemTerm(column, raw["instruction_index"], detectors, observables))
+            last_instruction = raw["instruction_index"]
+        if len(payload["probabilities"]) != len(terms):
+            raise ValueError("probability/column count mismatch")
+        meta = payload["metadata"]
+        if not isinstance(meta["provenance"], Mapping):
+            raise ValueError("model provenance must be a finite JSON mapping")
+        source = meta["source_dem_sha256"]
+        if not isinstance(source, str) or len(source) != 64 or any(c not in "0123456789abcdef" for c in source):
+            raise ValueError("invalid source DEM hash")
+        model = _assemble_model(roles, tuple(terms), payload["probabilities"], num_observables,
+                                meta["weight_scale"], meta["feature_observable_ids"], meta["feature_ids"],
+                                _canonical_json(meta["provenance"]), source)
+        if _canonical_json(model.to_artifact()["payload"]) != _canonical_json(payload):
+            raise ValueError("artifact derived metadata/weights disagree with original columns")
+        return model
+    except (KeyError, TypeError, ValueError, OverflowError) as error:
+        raise ValueError(f"Invalid temporal model artifact: {error}") from error

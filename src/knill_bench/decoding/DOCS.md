@@ -1,6 +1,6 @@
 # DEM conversion and physical fault audits (schema v1)
 
-## Fixed-R temporal decoder seed (prompt 00)
+## Fixed-R completed DEM model (prompts 00/02)
 
 `temporal_dem.completed_dem_to_temporal_model(dem, detector_roles=...,
 num_observables=..., weight_scale=1000)` requires an explicitly completed
@@ -12,6 +12,21 @@ there is no duplicate container. Positive-probability variables enter
 `matching_kwargs()`; p=0 terms stay in full provenance/labels. `expand_errors`
 restores solver witnesses to that full order.
 
+Prompt 02 adds optional ordered `feature_observable_ids`/`feature_ids` and
+finite JSON `model_provenance`, full_detector_support, original float costs,
+unidentifiable evaluation-only columns and complete quantization policy
+metadata. `to_artifact`/`from_artifact` and `temporal_artifact` exclusive
+fsynced JSON I/O preserve original terms, labels, inactive columns and their
+canonical payload hash. Loading validates schema/ranges/derived costs and
+does not parse Stim DEM text.
+
+`preparation_model.compile_preparation_boundary_model(compiled, weight_scale)`
+certifies actual-pin nominal production/completed X-online/all-evaluation
+outputs and supplies explicit map/source/Hex provenance. It uses
+`temporal_validation`'s validation-only independent XOR parity aggregation,
+never an aggregated inference graph. Missing/changed map/label/probability
+models fail. See [model API and artifact policy](../../../docs/temporal_boundary_model.md).
+
 `temporal_matching.TemporalMatching(**model.matching_kwargs())` caches two
 static graphs. `decode_batch(unpacked_binary_syndromes, return_errors=False)`
 returns baseline/complement features/costs, gaps and status. Common integral
@@ -20,10 +35,10 @@ nodes preserve parallel mechanisms. Unavailable gaps are NaN, not confidence.
 Optional debug uses same-solve full witnesses and reports compact tie
 disagreement; solver-input and original DEM column orders remain distinct.
 
-These kernels have synthetic exhaustive-optimum tests. Prompt 01's physical
-builder now supplies explicit completed DEM/row maps, with selected current-pin
-marginal and actual sampler/core isolation checks; the high-level adapter and
-worker remain later steps. See
+These kernels have synthetic exhaustive-optimum tests. Current-pin native
+model certification, R2 readout/data/two-qubit Pauli responses and strict
+artifact round-trips are now tested; the high-level X/Z adapter and worker
+remain later steps. See
 [proofs, units, assumptions and scientific gates](../../../docs/temporal_preparation_theory.md).
 
 ## Existing conversion and audits

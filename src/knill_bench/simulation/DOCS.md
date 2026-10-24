@@ -5,6 +5,10 @@ config parsing and before directory creation. Its circuit and truth APIs
 are available through Python, but the existing memory/Knill accounting must
 not be used as a preparation worker. Ordered chunk integration is step 04;
 see [current preparation capabilities](../../../docs/surface_preparation.md).
+Prompt 02 provides setup-time boundary certification and exclusive/fsynced
+artifact I/O in decoding; the step-04 delegation will save its hash and load
+that validated model rather than parsing a DEM during decode. No worker or
+runner source changes are part of prompt 02.
 
 `runner.py` retains v1 prepare/execute/resume, bounded spawn scheduling,
 parent commits and count/stopping behavior. `worker.py` caches compiled

@@ -7,8 +7,10 @@ Fixed-R surface preparation is beginning on `surface-prep-fixed`. The
 output-state labels, offline temporal boundaries and two-solve gap definition.
 The native fixed-R circuit builder, strict config validation and isolated
 evaluation labels are now available through the Python API; see the
-[prompt 01 guide and tiny template](docs/surface_preparation.md). Decoder and
-CLI simulation-runner integration remain later steps.
+[circuit guide and tiny template](docs/surface_preparation.md). The
+[completed boundary model](docs/temporal_boundary_model.md) now has strict
+provenance, production-model equivalence checks and portable hashed artifacts.
+High-level decoder and CLI simulation-runner integration remain later steps.
 
 Saved v2 datasets can also be compared from notebooks with lazy keyed path
 registration, six editable figure types and `plotting_lib` APS styling at

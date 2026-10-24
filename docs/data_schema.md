@@ -3,7 +3,13 @@
 The [fixed-R preparation contract](temporal_preparation_theory.md) defines
 in-memory online/truth/prediction types at prompt 00; prompt 01 adds explicit
 circuit record/observable maps and detached production batch splitting.
-It changes no persisted table. Future preparation results require a separate versioned
+Prompt 02 adds an explicitly requested setup artifact through
+`temporal_artifact.write_temporal_model`: version-1 JSON, canonical payload
+SHA256, original ordered term supports/probabilities, typed detector rows,
+feature order, float/integer costs/policies and model provenance. Loading
+strictly reconstructs sparse arrays without a DEM parser; the future runner
+will persist/verify the owning hash. See [artifact details](temporal_boundary_model.md).
+It changes no persisted shot table. Future preparation results require a separate versioned
 sign/code/logical schema; existing `logical_failure`/`errors` columns and v2
 point files must retain their meanings.
 

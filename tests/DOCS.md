@@ -27,6 +27,19 @@ fixed defaults/axes, duplicate/unsafe/invalid fields, physical versus nominal
 noise identities/seeds, pre-output runner guard and exact legacy resolved
 config/grid goldens. Existing legacy circuit goldens and all tests remain.
 
+`test_temporal_model_artifact.py` and `test_preparation_boundary_model.py`
+add prompt 02 coverage: hand-derived XOR probability/log-odds and active-zero
+cost paths, full/inactive/parallel column retention, explicit feature reordering,
+fixed-zero/one solver offsets, strict/tampered/rehashed/duplicate-key artifact
+rejection and loading/decoding with Stim DEM construction forbidden. Native
+d3/5 models at R=1/2/3/5, p0/.003 certify nominal production/completed
+online/all-evaluation marginals. R2 independent readout/data/two-qubit Pauli
+injections verify past/online/future/tau and spatial ports, including future-
+only and two-future augmented-zero mechanisms. Wrong maps/probabilities,
+stripped evaluation labels and coordinate inference negative controls fail
+as intended. New native decodes contain three synthetic zero syndromes;
+the injection tests use exact DEMs, without physical sampling.
+
 `test_notebook_plotting.py` uses only six-row synthetic v2 tables (no physical
 sampling). It checks lazy keyed registration, scalar/membership/alias filters,
 unambiguous grouping, all six editable figure APIs, APS/300-dpi context/export,

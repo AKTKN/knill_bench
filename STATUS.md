@@ -886,3 +886,35 @@ No production sampling, existing data/config/notebook edits or dependency
 changes are part of this phase. Prompt 01 remains an uncommitted local diff.
 Final source-frozen full gate: 762 passed, 1496 existing-category warnings,
 187.01 s. The R1 empty-online-X boundary also passes a three-shot p0 smoke.
+
+## 2026-10-24 — Completed DEM boundary models (prompt 02)
+
+Committed/pushed prompt 01 as 3cdc594 (`01: implement fixed-R preparation
+and isolated truth`) on surface-prep-fixed, then implemented the requested
+boundary-model phase as a local diff. The supplied matching core is unchanged.
+TemporalDemModel now preserves named/ordered feature maps, full detector
+supports, unidentifiable evaluation terms, original float costs, common
+quantization policy and static provenance. Existing positive-probability
+projection/inactive restoration and all spatial frozen ports remain exact.
+
+Setup certification compares nominal production/completed same-X online
+and all evaluation outputs using independent XOR parity probabilities, with
+explicit maps/source/Hex hashes and recorded binary64 bounds. It rejects
+changed maps/probabilities or missing evaluation responses. Version-1 JSON
+artifacts preserve original columns/features, metadata and a canonical hash;
+loading validates the model without parsing a Stim DEM. Exclusive/fsynced
+artifact I/O is available to the future runner. No existing simulation table,
+runner, circuit builder, config hash, matching core or dependency source was
+changed; high-level X/Z inference/metrics and ordered execution remain 03/04.
+
+Focused final gate: 247 passed, 272 existing-category warnings, 10.74 s.
+New tests use hand-derived synthetic models and tiny d3/5 DEMs, including R2
+readout/data/two-qubit Pauli responses, future-only ports, two-future
+cancellation, fixed-zero/one offsets, active-zero costs and strict portable
+artifact round-trips. pip check, compileall and a three-shot production/core
+artifact smoke pass. Full-gate results and exact commands are in TEST.md.
+No production sweep, user notebook/config/.gitignore edits, saved-data change,
+Hex edit or dependency-pin change is part of this phase.
+Final source-frozen full gate: 828 passed, 1628 existing-category warnings,
+191.44 s. All 762 previous tests are retained; 66 model/artifact cases were
+added. Documentation links, new-file whitespace and git diff checks pass.

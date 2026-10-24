@@ -11,7 +11,9 @@ through to the ordinary memory runner.
 See [theory, proofs and interfaces](temporal_preparation_theory.md) for the
 scientific contract. Hex remains unchanged at HEX-K1
 `8fa2200315cc4feaccf341a461f91739233de08a`. The prompt 00 bench checkpoint
-`e3de069` is pushed on `surface-prep-fixed`; prompt 01 is a local diff.
+`e3de069` and prompt 01 checkpoint `3cdc594` are pushed on
+`surface-prep-fixed`. Prompt 02's [boundary certification/artifact API](temporal_boundary_model.md)
+is implemented locally; decoder/runner integration remains later work.
 
 ## Small example
 
@@ -156,6 +158,6 @@ production/completed **same-X-sector** marginalized DEM parity probabilities,
 including all evaluation labels, using exact independent XOR aggregation.
 
 These are structural tests, not logical-error calibration or a confidence/FT
-claim. Full Z inference, comparative-model certification/serialization,
-metrics, worker/restart/output and reports remain the later prompts. Exact
+claim. Prompt 02 now supplies comparative-model certification/serialization;
+full Z inference, metrics, worker/restart/output and reports remain later prompts. Exact
 commands/results and corrections are recorded in [TEST.md](../TEST.md).

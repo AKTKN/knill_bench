@@ -10,6 +10,10 @@ explicit observable expressions and production batch splitting. See
 The [preparation guide](../../docs/surface_preparation.md) documents actual
 native round/flow/noise checks, physical/nominal model roles and the tiny
 Python usage. CLI simulation build/run remains guarded pending step 04.
+Prompt 02's [boundary model API](../../docs/temporal_boundary_model.md) compiles
+and certifies static X models, preserves float/integer costs and original
+columns/features in hashed JSON artifacts, and loads without DEM parsing.
+The native builder and matching core remain unchanged in that step.
 
 `analysis.RunRegistry`, `NotebookPlots` and `FigureStyle` provide saved-only
 v2 notebook comparisons with deferred keyed loading, six editable Matplotlib

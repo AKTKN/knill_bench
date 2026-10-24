@@ -8,6 +8,13 @@ see [actual APIs and limits](surface_preparation.md). Existing memory/Knill
 numerical paths remain unchanged. Preparation decoder/runner integration is
 deferred, with an explicit pre-output guard.
 
+Prompt 02 supplies [certified boundary models](temporal_boundary_model.md):
+unmerged completed-term H/P/F/S/feature maps, original float/common integer
+costs and versioned full-column artifacts. Setup compares nominal production
+and completed same-X-sector online/evaluation parity models, preserving the
+separate known-Z anchor. Artifact loading needs no DEM parsing. The supplied
+matching core is unchanged; X/Z adapter and runner remain prompts 03/04.
+
 The original schema-v1 design below remains unchanged. B1 adds an independent
 [eight-cycle Fig.4(d) experiment](fig4d.md) using actual Hex full Knill modules,
 configurable preparation rounds on each resource (default d) and noisy final

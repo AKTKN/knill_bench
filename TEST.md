@@ -1727,3 +1727,73 @@ Commands/results from Conda knill_system:
 Full gate was started after all Python source/tests were finalized; subsequent
 edits are documentation only. Prompt 01 remains a local diff, preserving the
 user's notebooks/configs/.gitignore, all saved data and clean dependency sources.
+
+## 2026-10-24 — Prompt 02 completed DEM and boundary constraints
+
+The user authorized checkpointing prompt 01 before implementing prompt 02.
+`git diff --check` passed; staged only the 21 prompt-01 files and ran
+`git commit -m '01: implement fixed-R preparation and isolated truth'`, then
+`git push origin surface-prep-fixed`. Commit **3cdc594** is on the remote.
+Hex remains clean on auxiliary-system at HEX-K1; no artificial dependency
+commit, source edit, pin update or other-worktree change was made.
+
+Reused the supplied TemporalDemModel/TemporalMatching; only the model layer
+was extended. New setup certification and artifact I/O do not construct a
+sampler/matcher. Native injected-fault tests use exact one-fault DEMs, not
+sampling. New restored-core fixtures use three zero syndromes; one separate
+manual physical smoke uses three d3/R2 shots. No production sweep was run.
+
+- `bash scripts/python.sh -m pytest -q tests/test_temporal_dem.py tests/test_temporal_matching.py tests/test_preparation_contract.py --disable-warnings > /tmp/knill_prep_02_seed.log 2>&1`
+  — **85 passed**, 0.86 s after the parser/model refactor.
+- `bash scripts/python.sh -m pytest -q tests/test_temporal_model_artifact.py --disable-warnings > /tmp/knill_prep_02_artifact.log 2>&1`
+  — **32 passed**, 0.70 s for the initial artifact/cost cases.
+- `bash scripts/python.sh -m pytest -q tests/test_preparation_boundary_model.py tests/test_temporal_model_artifact.py --disable-warnings > /tmp/knill_prep_02_models.log 2>&1`
+  — initial **1 failed, 52 passed**, 124 warnings, 4.73 s. The sole failure
+  was the stripped-evaluation negative-control fixture: Stim's append helper
+  rejected an empty target list on an error term after removing its labels.
+  Constructed that test instruction with explicit `stim.DemInstruction`;
+  no scientific condition, parser rule or expected response was relaxed.
+  The corrected 53-case gate passes before the additional edge cases below.
+- `bash scripts/python.sh -m pytest -q tests/test_temporal_dem.py tests/test_temporal_matching.py tests/test_temporal_model_artifact.py tests/test_preparation_boundary_model.py tests/test_preparation_contract.py tests/test_preparation_circuits.py tests/test_preparation_config.py --disable-warnings > /tmp/knill_prep_02_focused.log 2>&1`
+  — **244 passed**, 272 warnings, 10.35 s. Later additions cover active-zero
+  cost paths, dropped invisible labels and malformed artifact provenance.
+- `bash scripts/python.sh -m pytest -q tests/test_temporal_model_artifact.py tests/test_preparation_boundary_model.py tests/test_temporal_dem.py tests/test_temporal_matching.py tests/test_preparation_contract.py tests/test_preparation_circuits.py tests/test_preparation_config.py --disable-warnings > /tmp/knill_prep_02_focused_final.log 2>&1`
+  — final **247 passed**, **272 existing-category warnings**, **10.74 s**.
+  Native d3/5 R1/2/3/5 noiseless/.003 models certify same-X online and all
+  evaluation signatures/probabilities. Distinct physical/nominal p is checked.
+  Explicit R2 first/final readout, corner/interior data and correlated
+  two-qubit Pauli injections give independently predicted full detector,
+  temporal parity and tau responses. Tests retain future-only spatial ports,
+  two-future contracted-zero labels, invisible logical events and parallel/
+  inactive mechanisms. Hand-derived .1 XOR .2 = .26 prevents probability
+  summation. Source coordinates do not affect classification. Synthetic
+  fixed-one/zero solver costs and active quantized-zero paths are verified.
+  Artifact tests preserve original columns/feature order, forbid DEM parsing
+  during load/decode, reject invalid ranges/roles/schema/derived costs even
+  after rehashing, reject duplicate JSON keys and check owning-run hashes.
+- `bash scripts/python.sh -m compileall -q src tests` — passes;
+  `bash scripts/python.sh -m pip check` — no broken requirements.
+- Three-shot d3/R2/p=.003 production sampler (seed=617), split, certified
+  artifact write/read, matching decode and full-column witness expansion:
+  actual original-column syndrome and feature products agree with the
+  restored-core predictions. JSON summary is `/tmp/knill_prep_02_smoke.json`.
+  Artifacts were written only in a temporary directory and removed afterward.
+- Smoke results: all three statuses are ok, integer gaps are 9372, original
+  and active mechanism counts are both 92; maximum marginalized probability
+  difference is 3.469446951953614e-18. The persisted/reloaded payload SHA256 is
+  b1a7f21fdaa41dfaf5e93d2ce8446986463ced6631e9d13f258e0fb7183c4672.
+- `bash scripts/python.sh -m pytest -q --disable-warnings > /tmp/knill_prep_02_full_gate.log 2>&1`
+  — **828 passed**, **1628 existing-category warnings**, **191.44 s**.
+  All 762 previous tests remain, with 66 new model/artifact cases. No Python
+  source or tests changed during this successful first full gate.
+- Changed/new guide link targets and new-file whitespace pass, as does
+  `git diff --check`. Git scope checks confirm no changes to existing configs,
+  notebooks, .gitignore or dependency/environment pins. Hex, lomatching,
+  surface-sim and external plotting_lib source checkouts stay clean.
+
+All Python source/tests were finalized before the full suite. Only repository
+documentation was edited while that source-frozen validation ran. The
+high-level adapter/metrics, runner-owned artifact publication and saved-data
+analysis are still their later prompts; the existing pre-output guard remains.
+Prompt 02 is left as the requested local implementation diff; only the
+explicitly requested prompt-01 checkpoint was committed/pushed this turn.
