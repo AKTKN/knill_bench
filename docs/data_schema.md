@@ -1,5 +1,11 @@
 # Output and schema version 1
 
+The [fixed-R preparation contract](temporal_preparation_theory.md) defines
+in-memory online/truth/prediction types only at prompt 00. It changes no
+persisted table. Future preparation results require a separate versioned
+sign/code/logical schema; existing `logical_failure`/`errors` columns and v2
+point files must retain their meanings.
+
 B1 retains this v1 layout and the B0 v2 table types below. Its independent
 [Fig.4(d) runner](fig4d.md) writes only one logical_error table per point,
 actual shot/error counts and a nested execution descriptor in the existing

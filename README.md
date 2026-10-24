@@ -2,6 +2,12 @@
 
 Reproducible physical Stim memory experiments comparing repeated surface-code syndrome extraction with three Knill strategies. The package uses the requested Hex checkout and user-owned LOM/surface-sim forks. It keeps circuit identity, decoder choice, classical work, and live hardware resources separate.
 
+Fixed-R surface preparation is beginning on `surface-prep-fixed`. The
+[theory and typed contract](docs/temporal_preparation_theory.md) fixes the
+output-state labels, offline temporal boundaries and two-solve gap definition.
+Only contracts and synthetic-tested decoder kernels are available at this
+stage; `surface_prep_fixed` circuit/config/CLI execution is not yet integrated.
+
 Saved v2 datasets can also be compared from notebooks with lazy keyed path
 registration, six editable figure types and `plotting_lib` APS styling at
 300 dpi. Five non-stacked figures include pointwise 95% Wilson shades

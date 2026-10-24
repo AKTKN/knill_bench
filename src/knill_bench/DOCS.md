@@ -1,5 +1,13 @@
 # knill_bench package map
 
+`preparation.py` defines the independent fixed-R preparation contracts:
+compiled physical/evaluation/offline circuits, explicit ledgers/cut/maps,
+separate online observations and evaluator truth, predictions and a decoder
+Protocol. `BoundaryConstraintModel` aliases the reviewed temporal DEM type;
+legacy `models.py` remains unchanged. This is prompt 00, without a physical
+builder or new config/runner/CLI. See
+[theory, exact integration sites and remaining gates](../../docs/temporal_preparation_theory.md).
+
 `analysis.RunRegistry`, `NotebookPlots` and `FigureStyle` provide saved-only
 v2 notebook comparisons with deferred keyed loading, six editable Matplotlib
 figures and optional local plotting_lib APS/300-dpi style. See

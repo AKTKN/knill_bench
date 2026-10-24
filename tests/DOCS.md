@@ -1,5 +1,17 @@
 # Bench regression tests
 
+`test_temporal_dem.py` and `test_temporal_matching.py` are the reviewed supplied
+fixed-R decoder seed tests: 67 synthetic cases independently enumerate small
+optima and check original-column temporal paths, all frozen assignments,
+fixed costs/offsets, parallel edges, invisible labels, p0 exclusion, strict
+roles/degree/separator/probability/weight validation and infeasibility.
+`test_preparation_contract.py` checks explicit integer R/supported defaults,
+online/evaluator shot/dtype isolation (including disjoint shared-buffer
+views), truth-independent core outputs and the single boundary-model type's
+source/strictness metadata. It constructs no physical circuit or runner.
+Actual physical integration and Monte Carlo calibration are pending; see
+[the contract checklist](../docs/temporal_preparation_theory.md).
+
 `test_notebook_plotting.py` uses only six-row synthetic v2 tables (no physical
 sampling). It checks lazy keyed registration, scalar/membership/alias filters,
 unambiguous grouping, all six editable figure APIs, APS/300-dpi context/export,

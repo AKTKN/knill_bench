@@ -1,5 +1,31 @@
 # DEM conversion and physical fault audits (schema v1)
 
+## Fixed-R temporal decoder seed (prompt 00)
+
+`temporal_dem.completed_dem_to_temporal_model(dem, detector_roles=...,
+num_observables=..., weight_scale=1000)` requires an explicitly completed
+selected-CSS model. It retains original DEM term columns and full individual
+supports, rejects separators/hyperedges/missing roles, freezes every spatial
+open column and records source DEM SHA256, strictness and ties-to-even
+rounding. `TemporalDemModel` is also the high-level `BoundaryConstraintModel`;
+there is no duplicate container. Positive-probability variables enter
+`matching_kwargs()`; p=0 terms stay in full provenance/labels. `expand_errors`
+restores solver witnesses to that full order.
+
+`temporal_matching.TemporalMatching(**model.matching_kwargs())` caches two
+static graphs. `decode_batch(unpacked_binary_syndromes, return_errors=False)`
+returns baseline/complement features/costs, gaps and status. Common integral
+costs preserve fixed-zero/one and temporal/cost offsets; private subdivision
+nodes preserve parallel mechanisms. Unavailable gaps are NaN, not confidence.
+Optional debug uses same-solve full witnesses and reports compact tie
+disagreement; solver-input and original DEM column orders remain distinct.
+
+These kernels have synthetic exhaustive-optimum tests; there is no fixed-R
+physical circuit/adapter/worker yet. See
+[proofs, units, assumptions and scientific gates](../../../docs/temporal_preparation_theory.md).
+
+## Existing conversion and audits
+
 `dem.py` converts Stim events into complete detector/logical signatures,
 XOR-merges identical supports, preserves logical-only effects and handles
 fixed probabilities. `audit.py` inserts bounded controlled physical faults

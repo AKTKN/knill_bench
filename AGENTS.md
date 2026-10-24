@@ -510,3 +510,36 @@ Latest general-Knill gate: 581 passed, 1356 warnings, 182.02 s; targeted
 read-only Hex gate: 41 passed, 188 warnings, 26.54 s. Tiny two-worker fixed/
 auto runs and completed resume/saved plots pass for both prior modes. See
 TEST.md; the supplied 200000-shot/d5..11 grid is parse-only validation.
+
+## Fixed-R surface preparation: prompt 00 (2026-10-24)
+
+The user requested committing/pushing incoming changes first: checkpoint
+2e618b9 is on auxiliary-system. The supplied surface_timegap prompt/plan then
+requires a child implementation branch and no implementation push. Work is
+on surface-prep-fixed; retain this local diff unless later explicitly directed.
+This supersedes the historical auxiliary-system-only rule for this task.
+Read docs/temporal_preparation_theory.md before later preparation steps.
+
+Prompt 00 adds theory, shared preparation contracts and the reviewed supplied
+temporal DEM/matching seed with synthetic tests. The surface_prep_fixed
+physical builder/config/CLI/worker/report is not yet implemented. Defaults
+are z preparation, X sign gap, Z readout, prefix_frame_only and adaptive=false;
+R is an explicit positive integer, not cycles/d/round-multiple syntax. Output
+truth is after the final Z extraction. Both X/Z sign inference and deterministic
+logical-Z labels are required; decoder inputs exclude evaluator truth.
+
+BoundaryConstraintModel aliases TemporalDemModel; keep one H/P/F/S/B/column
+authority. Preserve original completed term identities, all spatial open
+columns including zero-online columns, p0 exclusions and common integer costs.
+Unsupported proof/noise/graph conditions fail explicitly. Kernel graph tests
+are not physical calibration at the current pin. Later integration reuses
+the ordered chunk infrastructure in simulation/worker.py and runner.py via
+new-protocol delegations, preserving every existing protocol/API/schema.
+Hex remains clean/read-only at HEX-K1, all pins unchanged; use Conda and only
+tiny d3/5 physical fixtures when their circuit step is implemented. Do not
+run the supplied older-pin scripts' large sampling budgets or production runs.
+
+Prompt 00 final gate: `bash scripts/python.sh -m pytest -q --disable-warnings`
+— 666 passed, 1356 inherited-category warnings, 276.16 s. Focused kernels/
+contracts: 85 passed. TEST.md records the initial source-edit-during-test
+resume rejection and the clean-source rerun; no resume guard was weakened.

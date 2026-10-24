@@ -832,3 +832,28 @@ full gate: 581 passed, 1356 warnings, 182.02 s. Read-only Hex: 41 passed,
 188 warnings, 26.54 s. Two-worker fixed/auto CLI smokes, complete resume and
 saved plots pass for both modes (local d3/5 d-rounds; prefix d3 one-round).
 Hex/pins/v1 and user .gitignore/notebook/previous plotting work are preserved.
+
+## 2026-10-24 — Fixed-R preparation theory and contracts (prompt 00)
+
+Committed/pushed the user's incoming notebook/.gitignore changes as checkpoint
+2e618b9 on auxiliary-system, then created surface-prep-fixed as requested by
+the supplied implementation plan. New implementation remains a local diff.
+docs/temporal_preparation_theory.md fixes the actual post-Z output cut,
+X/Z sign and deterministic logical-Z labels, hidden-probe assumptions,
+P–F graph-parity proof, common objective/frozen constraints, capability errors
+and step-by-step integration/acceptance gates against the actual checkout.
+
+preparation.py supplies separate compiled/online/truth/prediction contracts,
+strict explicit integer R and supported defaults, and an online/truth shared-
+buffer guard. BoundaryConstraintModel aliases the supplied TemporalDemModel.
+Reviewed/applied the four-file decoder seed; its solver/tests remain exact,
+with source DEM SHA256, strictness and rounding metadata added to the model.
+No physical builder/config/CLI/worker/report is claimed at this stage.
+Hex remains clean at HEX-K1; other pins/sources, existing v1/v2 numerical
+paths, all user notebooks/configs and saved data are unchanged by this phase.
+No supplied large validation script or production sampling was executed.
+
+Focused gate: 85 passed, 1.32 s. Full-gate commands, an initial validation
+source-edit/resume rejection and its correction are recorded in TEST.md.
+Final source-frozen full gate: 666 passed, 1356 inherited-category warnings,
+276.16 s. pip check, compileall, documentation links and whitespace pass.

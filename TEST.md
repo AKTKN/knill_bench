@@ -1593,3 +1593,65 @@ inference assumptions, without erasing physical prep/past residuals. Hex and
 all dependency source/pins are unchanged/clean. Incoming and ongoing user
 notebook/.gitignore edits, earlier plotting source changes and existing saved
 data are preserved. No benchmark, threshold or exact posterior claim.
+
+## 2026-10-24 — Fixed-R preparation prompt 00
+
+First reviewed the existing two-file diff, parsed both notebook versions as
+JSON and ran `git diff --check`. Checkpoint command:
+`git add -- .gitignore notebooks/saved_figures.ipynb && git commit -m "chore: checkpoint notebook updates and local timegap workspace ignore" && git push origin auxiliary-system`.
+Commit 2e618b9 was pushed successfully. `git switch -c surface-prep-fixed`
+then created the requested child branch. No implementation commit/push ran.
+
+Audited the actual AGENTS/guides, legacy compiled types/decoder and ordered
+worker/runner/storage interfaces plus v2 scheduler differences. Actual Hex
+remains clean at 8fa2200315cc4feaccf341a461f91739233de08a; LOM/surface-sim
+are clean at their unchanged pins. The supplied validation's older Hex pin
+and larger physical shot counts were not substituted for current evidence.
+The initial attempted external/refs.lock.yaml read found no such file;
+the authoritative pins were read from pyproject.toml and actual dependency HEADs.
+
+Seed review/application:
+
+- `git apply --stat surface_timegap/seed_knill_bench.patch` and
+  `git apply --check surface_timegap/seed_knill_bench.patch` pass. Reviewed
+  full original DEM/matching code and synthetic tests before
+  `git apply surface_timegap/seed_knill_bench.patch`.
+- Input patch SHA256:
+  170de7a2a95ece2eacb57aa30a0b8f164566d42992b263d3f661b22b51aec20e.
+  A reconstruction comparison confirms temporal_matching.py and both seed
+  test files are byte-identical; temporal_dem.py only adds source SHA256,
+  strictness and rounding metadata. No competing H/P/F/S/B dataclass exists.
+- `bash scripts/python.sh -m pytest -q tests/test_temporal_dem.py tests/test_temporal_matching.py --disable-warnings`
+  — **67 passed**, **1.13 s**, in the actual Conda interpreter.
+- `bash scripts/python.sh -m pytest -q tests/test_preparation_contract.py tests/test_temporal_dem.py tests/test_temporal_matching.py --disable-warnings`
+  — initially **84 passed**, **2.06 s**; after adding the one-shot disjoint-
+  buffer back-reference regression, **85 passed**, **1.32 s**. All new cases
+  are synthetic. They check the supplied exhaustive optimum/path/constraint
+  gates, explicit integer R/defaults, dtype/count validation, separate truth
+  interface/storage and source metadata. They do not certify the later
+  physical adapter, its oracle isolation or physical calibration.
+
+Full validation correction:
+
+- `bash scripts/python.sh -m pytest -q --disable-warnings > /tmp/knill_surface_prep_gate.log 2>&1`
+  — **1 failed, 665 passed**, **1348 warnings**, **244.78 s**. I added the
+  completed-label map field in preparation.py while this gate was running.
+  The existing test_streaming_aggregate_only_matches_full_shot_run then
+  correctly rejected resume with a source/environment mismatch. Comparing
+  its archived knill_bench-source.tar.gz to current source identifies only
+  preparation.py as changed. No decoder or resume rule was weakened.
+- `bash scripts/python.sh -m pytest -q tests/test_execution.py::test_streaming_aggregate_only_matches_full_shot_run --disable-warnings > /tmp/knill_surface_prep_failure_check.log 2>&1`
+  — **1 passed**, **16 warnings**, **22.47 s**, with source edits finished.
+  A fresh full gate was started with Python source held fixed.
+- `bash scripts/python.sh -m pytest -q --disable-warnings > /tmp/knill_surface_prep_gate_final.log 2>&1`
+  — **666 passed**, **1356 inherited-category warnings**, **276.16 s**.
+  All existing tests are retained; 85 new synthetic cases were added.
+  This is the complete gate against the final Python source. No new physical
+  sampling test, Hex modification or production sweep is part of prompt 00.
+
+`bash scripts/python.sh -m pip check` reports no broken requirements;
+`bash scripts/python.sh -m compileall -q src` passes. A local-link audit
+resolves README/theory/package/decoder/test guide targets. Documentation patch
+context errors were corrected using the actual file headings/endings, without
+partial file edits. `git diff --check` passes. The checkpoint notebook and
+.gitignore have no subsequent diff; dependency repositories remain clean.

@@ -1,5 +1,11 @@
 # Design and scientific conventions
 
+The new [fixed-R preparation contract](temporal_preparation_theory.md) defines
+output-state X/Z sign inference, deterministic logical-Z evaluation and a
+boundary-completed comparative decoder. Prompt 00 supplies separate types and
+synthetic-tested kernels only. Existing memory/Knill builders and execution
+remain unchanged; this is not yet an executable protocol.
+
 The original schema-v1 design below remains unchanged. B1 adds an independent
 [eight-cycle Fig.4(d) experiment](fig4d.md) using actual Hex full Knill modules,
 configurable preparation rounds on each resource (default d) and noisy final
