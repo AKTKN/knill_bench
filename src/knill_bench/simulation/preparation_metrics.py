@@ -140,3 +140,17 @@ def summarize_preparation(evaluation: PreparationEvaluation, *, threshold=-np.in
         status_counts={str(name): int(n) for name, n in zip(names, counts)},
         unconditional=table(np.ones(count, dtype=bool)), selected=table(accepted),
     )
+
+
+def paired_counts(evaluations):
+    """Bounded per-chunk paired 2x2 event tables, only jointly valid rows."""
+    from itertools import combinations
+    out=[]
+    for a,b in combinations(sorted(evaluations),2):
+        left,right=evaluations[a],evaluations[b]
+        for metric,error,valid in (('sign_x','sign_miss_x','x_valid'),('sign_z','sign_miss_z','z_valid'),
+                ('code_space','code_space_miss','code_valid'),('logical_z','logical_z_error','logical_valid')):
+            mask=getattr(left,valid)&getattr(right,valid)
+            cells=np.bincount((2*getattr(left,error)[mask]+getattr(right,error)[mask]).astype(int),minlength=4)
+            out.append(dict(left=a,right=b,metric=metric,counts=cells.tolist(),jointly_valid=int(mask.sum())))
+    return out

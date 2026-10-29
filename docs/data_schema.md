@@ -221,3 +221,8 @@ Local execution declares preparation/past residuals excluded from inference;
 prefix declares their inclusion. Publication/resume/saved readers validate
 the selected scope. Neither prior changes physical point IDs or seeds. See
 [metadata and scopes](knill_sim.md).
+
+
+## Preparation analysis version 1
+
+Simulation table schemas remain unchanged. The first decoder chunk summary_json now optionally stores paired_comparisons with jointly valid 00/01/10/11 event counts; historical summaries without them remain readable. Separate analysis directories contain typed conditional_rates.parquet (metric/common-valid denominators, occupancy, events, Wilson endpoints), threshold_curve.parquet (inclusive cut, attempts/accepted/invalid/valid rejects, A/U/Q), joint/paired JSON and validation/source hashes. Empty estimates are null, zero-event upper bounds positive. See [complete schema and probability definitions](preparation_reports.md).

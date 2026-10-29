@@ -198,3 +198,13 @@ estimate. `decoder.setup_timings_ns` and `last_decode_timings_ns` expose the
 same wall-time boundaries. Raw JSON was `/tmp/knill_prep_03_timings.json`;
 commands/gates are recorded in [TEST.md](../TEST.md). These isolated timings
 are descriptive single calls, with no throughput/scaling inference.
+
+
+## Saved-data validation and figures (prompt 05)
+
+[Report validation](preparation_reports.md) now independently checks original-
+column same-mode witnesses, common integer costs and P–F difference paths,
+and writes pointwise Wilson gap/risk figures with separate validity masks.
+Bounded paired event counters compare decoder variants on the same samples.
+See [getting started](preparation_getting_started.md) for simulation/report
+commands; this adds no physical correction, posterior or FT claim.

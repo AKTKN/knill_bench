@@ -170,3 +170,8 @@ Current Knill-noise dependency pin: Hex HEX-K1 `8fa2200315cc4feaccf341a461f91739
 HEX-N2 pin. Bootstrap/bundles require that clean exact checkout; runtime
 checks the new native policy and fixed Knill API, with strict source/resource
 hashes for installed wheels.
+
+
+## Fixed-R simulation and reanalysis
+
+run_simulation.sh CONFIG delegates the schema-v1 preparation run through Conda. Use python.sh -m knill_bench.cli analyze RUN --output NEW_DIR with optional repeated --gap-threshold=VALUE for saved-only reporting. No new scheduler or cluster submission is added. The validation template is 14 total physical shots; the larger sweep remains opt-in/unexecuted. See [commands](../docs/preparation_getting_started.md).

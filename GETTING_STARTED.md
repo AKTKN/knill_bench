@@ -301,3 +301,8 @@ d3/d-round preparation; the prefix template uses a supported one-round case.
 Run either with run_knill_ec_memory.sh, then resume/plot-knill. The existing
 knill_ec_memory kind also accepts these options. See
 [scope, compatibility and limits](docs/knill_sim.md).
+
+
+## Fixed-R surface preparation
+
+For the fixed-R single-patch preparation simulator, use the separate schema-v1 [step-by-step simulation guide](docs/preparation_getting_started.md). It covers Conda setup, small configs, build/run/resume, retained witnesses and saved-data report commands. This protocol uses `knill-bench`, literal integer R and fixed seeded chunks. The schema-v2 commands/round rules above do not apply to it.

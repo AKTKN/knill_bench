@@ -13,7 +13,7 @@ def main(argv=None):
         p=sub.add_parser(name);p.add_argument('config')
     p=sub.add_parser('resume');p.add_argument('run');p.add_argument('--workers',type=int);p.add_argument('--max-new-chunks',type=int,help=argparse.SUPPRESS)
     p=sub.add_parser('benchmark-latency');p.add_argument('run');p.add_argument('--workers',type=int,default=1)
-    p=sub.add_parser('analyze');p.add_argument('run')
+    p=sub.add_parser('analyze');p.add_argument('run');p.add_argument('--output');p.add_argument('--gap-threshold',type=float,action='append')
     p=sub.add_parser('validate-references')
     p=sub.add_parser('audit-faults');p.add_argument('run');p.add_argument('--budget',type=int,default=1000)
     args=parser.parse_args(argv)
@@ -38,7 +38,13 @@ def main(argv=None):
         print(execute_run(args.run,args.workers,args.max_new_chunks))
     elif args.command=='analyze':
         from knill_bench.analysis.report import analyze
-        rows=analyze(args.run);print(f'Analyzed {len(rows)} cases: {Path(args.run)/"report.md"}')
+        if any(p.get('id')=='surface_prep_fixed' for p in cfg.get('protocols',[])):
+            from knill_bench.analysis.preparation_report import analyze_saved
+            rows,output=analyze_saved(args.run,output=args.output,thresholds=args.gap_threshold)
+            print(f'Analyzed {len(rows)} cases: {output/"report.md"}')
+        else:
+            rows=analyze(args.run,output=args.output,thresholds=args.gap_threshold)
+            print(f'Analyzed {len(rows)} cases: {Path(args.run)/"report.md"}')
     elif args.command=='benchmark-latency':
         from knill_bench.simulation.replay import benchmark_latency
         print(f'Wrote {len(benchmark_latency(args.run,args.workers))} replay timing parts')

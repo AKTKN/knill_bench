@@ -7,7 +7,8 @@ native circuit/config and evaluator-buffer contracts described in
 model certification/artifacts; prompt 03 now supplies the
 [X/Z adapter and evaluator](preparation_decoder.md). Prompt 04 now integrates
 [ordered workers, persistence and saved counts](preparation_execution.md).
-Calibration/figure reports remain prompt 05. No production experiment is run.
+Prompt 05 adds [validated empirical gap/risk reports](preparation_reports.md).
+No production experiment is run.
 
 ## Checkout and scope
 

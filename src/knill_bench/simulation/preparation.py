@@ -271,7 +271,7 @@ def execute(task):
                 if rep*total+start<=i<rep*total+start+count}
     uniform=local_indices(cfg['storage']['retained_uniform_samples_per_case'],'retention')
     latency=local_indices(cfg['timing']['latency_sample_count_per_case'],'timing')
-    tables={name:[] for name in TABLES};predictions={};failures=np.zeros(count,dtype=bool)
+    tables={name:[] for name in TABLES};predictions={};evaluations={};failures=np.zeros(count,dtype=bool)
     tables['batches']=[dict(common,seed=physical_seed,shot_start=start,shots=count,requested_shots=count,
         sampling_wall_ns=sampling_ns,sampling_cpu_ns=None,conversion_wall_ns=split_ns,pid=os.getpid(),
         workers=cfg['sampling']['workers'],status='complete',sample_hash=signature)]
@@ -282,7 +282,7 @@ def execute(task):
             begin=time.perf_counter_ns();decoder.decode_batch(x[:warm],z[:warm]);warm_ns=time.perf_counter_ns()-begin
         prediction=decoder.decode_batch(x,z);predictions[name]=prediction
         timings=decoder.last_decode_timings_ns.copy();begin=time.perf_counter_ns()
-        evaluation=evaluate_preparation(batch.truth,prediction);summary=summarize_preparation(evaluation)
+        evaluation=evaluate_preparation(batch.truth,prediction);evaluations[name]=evaluation;summary=summarize_preparation(evaluation)
         bins=_summary_bins(evaluation);eval_ns=time.perf_counter_ns()-begin
         failures |= evaluation.code_space_miss | evaluation.logical_z_error | ~evaluation.eligible
         tables['preparation_chunks'].append(dict(common,case_id=cid,decoder=name,shots=count,assigned_shots=count,
@@ -326,6 +326,11 @@ def execute(task):
                     raise RuntimeError('preparation batch/single replay mismatch')
             if cfg['storage']['save_decoder_calls']:
                 tables['preparation_calls'].append(dict(common,case_id=cid,shot_index=start+local,phase='latency',shots=1,wall_ns=elapsed,replay=True,warmup=False))
+    if len(evaluations)>1:
+        from .preparation_metrics import paired_counts
+        first=tables['preparation_chunks'][0]
+        summary=json.loads(first['summary_json']);summary['paired_comparisons']=paired_counts(evaluations)
+        first['summary_json']=canonical(summary)
     failure_locals=set(np.flatnonzero(failures)[:cfg['storage']['retained_failure_samples_per_case']].tolist())
     def nullable(value): return float(value) if np.isfinite(value) else None
     for local in sorted(uniform|failure_locals):

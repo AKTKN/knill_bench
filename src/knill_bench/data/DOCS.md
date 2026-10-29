@@ -92,3 +92,8 @@ publication and completed resume additionally reject inconsistent custom noise
 provenance/scope. No table column, mandatory artifact, row-ID, buffering or
 pair-publication boundary changes. See
 [custom noise](../../../docs/factory_custom_noise.md).
+
+
+## Preparation analysis outputs
+
+Prompt-05 report tables live in an exclusively created analysis directory, never among simulation tables. Analysis version 1 has typed bin occupancy/mask/event counts, Wilson endpoints and threshold A/U/Q with explicit denominators. Optional paired_comparisons inside existing chunk summary_json are backward compatible. No storage writer/schema changes are needed. See [analysis schemas](../../../docs/preparation_reports.md).

@@ -208,3 +208,8 @@ module-local Stim or native full-prefix inference through adapters.knill_priors.
 Existing kinds/default hashes remain supported. See
 [Knill simulation](../../docs/knill_sim.md) for syntax, physical independence,
 scopes, metadata, cache lifetime and unsupported models.
+
+
+## Fixed-R preparation reports
+
+The schema-v1 preparation analyze dispatch now creates a separate saved-data report directory, with exact counts, pointwise Wilson intervals, same-solve original-column witness/path validation and PNG/PDF/SVG figures. `analyze --output DIR --gap-threshold VALUE` is preparation-only; legacy report outputs stay unchanged. See [getting started](../../docs/preparation_getting_started.md) and [report contracts](../../docs/preparation_reports.md).

@@ -1,0 +1,28 @@
+# Bounded prompt-05 stress smoke: 14 physical shots, shared by both decoders.
+schema_version: 1
+experiment:
+  name: surface_prep_fixed_validation
+  code: rotated_surface
+  distances: [3]
+  bases: [z]
+  physical_error_rates: [0.0, 0.02]
+  master_seed: 617
+  output_root: results
+noise: {profile: hex_legacy}
+decoders:
+  temporal: {kind: temporal_gap, weight_scale: 1000, output_mode: compact}
+  witness: {kind: temporal_gap, weight_scale: 1000, output_mode: full_witness}
+protocols:
+  - id: surface_prep_fixed
+    decoders: [temporal, witness]
+    rounds: 2
+    prep_basis: z
+    sign_sector: x
+    readout_basis: z
+    logical_evaluation: prefix_frame_only
+    adaptive: false
+    # Positive inference model for noiseless and matched noisy sampling.
+    decoding_p: 0.02
+sampling: {workers: 2, shots_per_case: 7, chunk_size: 3, stop_rule: fixed_shots}
+timing: {warmup_shots: 1, latency_sample_count_per_case: 2}
+storage: {save_shot_results: true, retained_uniform_samples_per_case: 3, retained_failure_samples_per_case: 2}

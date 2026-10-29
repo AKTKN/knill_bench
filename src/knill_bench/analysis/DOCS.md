@@ -1,13 +1,17 @@
 # Saved-data analysis (schema v1)
 
-`report.analyze` delegates surface_prep_fixed to `preparation.analyze`, which
-validates saved artifacts/checkpoints/parts before streaming published chunk
-counters. It writes a JSON/count/timing report with independent sign/code/
-logical denominators, joint counts, bounded replay latency percentiles and
-explicit memory/I/O timer scopes. It never simulates or resumes. Missing/
-modified published parts reject; uncommitted failure attempts remain separate
-from scientific denominators. Gap calibration/interval curves remain prompt
-05. See [current saved-count API](../../../docs/preparation_execution.md).
+`report.analyze` delegates surface_prep_fixed to preparation.analyze and the
+preparation_report.analyze_saved entry point. It validates published hashes,
+counts, online/evaluation maps and model marginals; preparation_validation
+independently checks full witnesses and original-column P–F paths. It writes
+new typed gap-bin/threshold tables, joint/paired counts, source/validation JSON
+and preparation_figures PNG/PDF/SVG exports to a NEW analysis directory.
+Compact rows support arbitrary exact cuts; aggregate-only data require saved
+bin edges. All denominators/nulls and pointwise Wilson scopes are explicit.
+No sampler/live matcher or simulation/resume is constructed. The Python
+analyze wrapper retains its list return; analyze_saved returns (rows,path).
+See [report contracts](../../../docs/preparation_reports.md) and
+[simulation commands](../../../docs/preparation_getting_started.md).
 
 ## Notebook figures (schema v2)
 

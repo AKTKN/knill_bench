@@ -48,3 +48,8 @@ The B2 factory delegates circuit/decoder/gap work to Hex CompiledFactory;
 no simulation Python in this directory is changed. See
 [the B2 guide](../../../docs/logical_zero_factory.md) for two-support reuse,
 units, evaluation-only oracle, exact paired outputs and supported-model limits.
+
+
+## Bounded paired preparation counters
+
+preparation_metrics.paired_counts compares each decoder pair on the same physical batch and saves jointly valid event cells 00/01/10/11 for X/Z/code/logical metrics. preparation.execute adds these bounded counters to the first decoder summary_json. No shot selection, physical identity, seed or table schema changes. [Saved reports](../../../docs/preparation_reports.md) preserve pairing and explicitly mark historical missing pairs unavailable.

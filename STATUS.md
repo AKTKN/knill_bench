@@ -987,3 +987,53 @@ Final source-frozen full gate: 902 passed, 1788 existing-category warnings,
 234.42 s. All 883 earlier tests remain, with 19 new execution/recovery cases.
 Guide links, whitespace and dependency/user/physics scope audits pass.
 Prompt 04 remains an uncommitted local diff; prompt 05 has not been started.
+
+## 2026-10-24 — fixed-R preparation prompt 05
+
+Prompt 04 committed/pushed as **70074e6** on **surface-prep-fixed** before
+starting this phase. Prompt 05 adds saved-only validation/risk reports and
+[simulation getting started](docs/preparation_getting_started.md), with the
+[report contract](docs/preparation_reports.md) and
+[actual validation/smoke results](docs/preparation_validation_report.md).
+This implementation stays uncommitted/unpushed as requested by prompt 05.
+
+Analysis creates a new explicit directory and validates published artifact/
+part hashes, online/evaluation maps, nominal X/all-label marginal equivalence,
+separate known-zero Z selection, nullable metric/joint/bin counters and optional
+compact rows. Full retained same-solve witnesses pass original-column GF(2),
+fixed spatial zeros/ones, P/F, common integer costs/features and an independent
+P–F path traversal; compact witnesses are unavailable explicitly. Typed bin/
+threshold tables preserve independent and common masks, events/denominators,
+Wilson .95 pointwise intervals, separate A/U/Q and code-correct logical risk.
+New bounded paired event cells are backward-compatible summary_json content;
+physical sampling, seed derivation and simulation table schemas are unchanged.
+Matplotlib emits PNG/PDF/SVG figures and reproducible example/counterexample
+artifacts. Gap remains an independent-DEM minimum-representative score, with
+no posterior, physical-fault lift or fault-tolerance claim.
+
+Actual e2e passed via shell/module/installed CLI: d3/R2, physical p0/.02,
+nominal .02, seven records per point (14 independent physical records),
+chunks3/3/1, workers2, native1, compact/full paired modes. Noiseless metrics
+all0/7. Noisy compact X/Z/code/logical counts2/1/2/0 of7; full-witness3/1/3/0
+of7, with3 paired X/code disagreements. All masks valid. Seven full retained
+witnesses/path checks pass; seven compact witnesses unavailable. Completed
+resume preserves published science data, and aggregate-only interruption/
+1->2-worker resume reproduces every sample hash, bin/threshold table and
+paired event count. These repeats are not additional independent samples.
+The actual configs, driver/logs and complete reports remain under ignored
+results/preparation_prompt05_smoke/20261024T104907.373089Z/.
+
+Shell execution took7.383s including setup/Conda/pool/I/O; peak worker RSS
+363663360bytes. Decode-only rates and measured phase/resource scopes are
+reported separately. All observed noisy X misses were in gap[0,1), but g1's
+0/3 upper Wilson bound .5615 leaves risk unresolved; logical0/7 has upper
+.3543. No production d5/7/9 R2/3/4/5 study, adaptive continuation or factory
+efficiency experiment was launched. All native dependencies remain clean;
+user notebooks, .gitignore, fork pins, physical builders and legacy APIs stay
+unchanged. TEST.md records initial fixture/API/harness issues and fixes.
+
+Final source-frozen gate: **921 passed, 1880 warnings, 281.47s** using
+`bash scripts/python.sh -m pytest -q --disable-warnings`. Final compileall,
+local guide links, whitespace and scope checks pass; pip check passes. Only
+the requested prompt-04 checkpoint was committed/pushed; prompt-05 source,
+tests and documentation remain a reviewable local diff.

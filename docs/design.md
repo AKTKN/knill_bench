@@ -161,3 +161,8 @@ False-only restriction. Local Stim priors include the current resource CX,
 data coupling and Bell readouts; full-prefix uses native Hex causal projection.
 Both leave physical preparation/frames/noise/readout unchanged, with explicitly
 different inference scope and strict unsupported-model errors.
+
+
+## Preparation report boundary (prompt 05)
+
+Saved-only analysis validates published chunks and original-column witnesses, writes typed bin/threshold/joint/paired counts and standard scientific figures to an exclusively created analysis directory. No sampler/live decoder or simulation mutation is involved. Paired event counters are bounded per chunk in summary_json; physical sampling, seeds and schema remain unchanged. See [report architecture and premises](preparation_reports.md) and [simulation setup](preparation_getting_started.md).

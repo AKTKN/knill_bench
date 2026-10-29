@@ -54,7 +54,8 @@ def test_one_two_workers_interrupted_resume_schemas_and_saved_analysis(tmp_path)
     with pytest.MonkeyPatch.context() as patch:
         patch.setattr(stim.Circuit,'compile_detector_sampler',lambda *a,**k:pytest.fail('analysis cannot sample'))
         result=analyze(two)
-    assert result[0]['shots']==7 and (two/'preparation_summary.json').exists()
+    assert result[0]['shots']==7 and len(list((two/'analysis').glob('*/preparation_summary.json')))==1
+    assert not (two/'preparation_summary.json').exists()
 
 
 def test_aggregate_only_matches_compact_rows_and_gap_bins(tmp_path):

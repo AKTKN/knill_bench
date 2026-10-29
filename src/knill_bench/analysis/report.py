@@ -17,11 +17,13 @@ def wilson(errors,shots,z=1.959963984540054):
     return max(0.,float(center-half)),min(1.,float(center+half))
 
 
-def analyze(run):
+def analyze(run, *, output=None, thresholds=None):
     parameters=json.loads((Path(run)/'parameters.json').read_text())
     if any(p.get('id')=='surface_prep_fixed' for p in parameters['config'].get('protocols',[])):
         from .preparation import analyze as analyze_preparation
-        return analyze_preparation(run)
+        return analyze_preparation(run, output=output, thresholds=thresholds)
+    if output is not None or thresholds is not None:
+        raise ValueError('analysis output/threshold options require surface_prep_fixed')
     import matplotlib
     matplotlib.use('Agg')
     import matplotlib.pyplot as plt

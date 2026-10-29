@@ -7,8 +7,8 @@ exactly R full X-then-Z rounds, then ideal evaluation. The
 [X/Z batch decoder and metrics](preparation_decoder.md) are now implemented;
 the [ordered runner and saved-count summary](preparation_execution.md) are
 now integrated. `knill-bench build/run/resume/analyze` dispatch to preparation
-artifacts/results without ordinary memory error accounting. Calibration and
-figure reports remain prompt 05.
+artifacts/results without ordinary memory error accounting. [Validated saved-data figures/reports](preparation_reports.md) now complete
+prompt 05; see [simulation getting started](preparation_getting_started.md).
 
 See [theory, proofs and interfaces](temporal_preparation_theory.md) for the
 scientific contract. Hex remains unchanged at HEX-K1
@@ -165,5 +165,5 @@ These are structural tests, not logical-error calibration or a confidence/FT
 claim. Prompt 02 now supplies comparative-model certification/serialization;
 prompt 03 implements separate known-zero Z inference and metrics.
 Worker/restart/output integration is covered by prompt 04; calibration/figures
-remain prompt 05. Exact
+are implemented in [prompt-05 reports](preparation_reports.md). Exact
 commands/results and corrections are recorded in [TEST.md](../TEST.md).

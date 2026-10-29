@@ -1,4 +1,4 @@
-"""Prompt-04 saved-count summary; calibration curves/figures belong to 05."""
+"""Saved fixed-R counters and the prompt-05 report entry point."""
 from collections import defaultdict
 import json
 from pathlib import Path
@@ -10,7 +10,7 @@ from knill_bench.data.storage import atomic_json, read_rows
 from knill_bench.simulation.preparation import validate_run
 
 
-def analyze(run):
+def summarize(run, output=None):
     """Validate published parts and stream chunk counters; never simulate/resume."""
     run=Path(run).resolve()
     parameters=json.loads((run/'parameters.json').read_text())
@@ -60,12 +60,17 @@ def analyze(run):
             sampling_ns=sum(c['sampling_ns'] for c in points),sampler_compile_ns=sum(c['sampler_compile_ns'] for c in points))
     published={p.stem for p in (run/'checkpoints').glob('*.json')}
     pending_failed=sum(f['shots'] for f in manifest['failed_chunks'] if f['key'] not in published)
-    atomic_json(run/'preparation_summary.json',dict(preparation_result_version=1,status=manifest['status'],
+    if output is not None: atomic_json(Path(output)/'preparation_summary.json',dict(preparation_result_version=1,status=manifest['status'],
         failed_attempt_assigned_shots_unpublished=pending_failed,cases=rows))
     text='# Fixed-R preparation saved-count summary\n\n'
     text+='Logical-Z errors use prefix_frame_only readout semantics. Gap calibration and confidence curves are not included in this count summary.\n\n'
     text+='| d | R | p | decoder | shots | X misses/valid | Z misses/valid | code misses/valid | logical-Z errors/valid |\n|---|---|---|---|---|---|---|---|---|\n'
     for r in rows:
         text+=f"| {r['distance']} | {r['rounds']} | {r['p']} | {r['decoder']} | {r['shots']} | {r['sign_miss_x']}/{r['baseline_valid']} | {r['sign_miss_z']}/{r['z_decoder_valid']} | {r['code_sign_miss']}/{r['code_valid']} | {r['logical_z_errors']}/{r['logical_valid']} |\n"
-    (run/'report.md').write_text(text)
+    if output is not None: (Path(output)/'report.md').write_text(text)
     return rows
+
+
+def analyze(run, *, output=None, thresholds=None):
+    from .preparation_report import analyze_saved
+    return analyze_saved(run, output=output, thresholds=thresholds)[0]

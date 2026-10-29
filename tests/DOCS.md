@@ -289,3 +289,8 @@ exact local ideal-Bell/capacity sector DEM equality, p0/unsupported rejection
 before sampler setup, fixed/auto output, saved readers, tamper rejection and
 fixed serial/spawn equality. New physical batches are <=7 shots. The obsolete
 knill_ec_memory True-rejection expectation is removed; legacy tests remain.
+
+
+## Preparation validation/report tests (prompt 05)
+
+test_preparation_reports.py independently enumerates spatial assignments/temporal RHSs and a spatial-escape counterexample, checks direct terminal tableau Pauli signs and diagnostic ideal Z MPP versus destructive H_Z bits, first/last/continuous readout ambiguity, nullable denominators/joints/Wilson zero events, compact/aggregate equality, paired events, retained constraints/costs/paths, source corruption and exclusive output. Physical fixtures stay d3 and <=7 shots. Existing execution tests retain worker/resume/truth-isolation coverage; the saved-analysis output expectation follows the new explicit subdirectory contract. Full commands/results and end-to-end smoke are in TEST.md.

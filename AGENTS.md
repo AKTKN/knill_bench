@@ -714,3 +714,41 @@ mutation and legacy minimal-case guard regressions/fixes are recorded in
 TEST.md. Tiny installed shell/CLI run/resume/analyze, pip check, compileall,
 guide/whitespace and dependency/user/physics scope checks pass. No production
 sweep or dependency source patch was run.
+
+## Fixed-R preparation: prompt 05 validation and reports
+
+The user authorized pushing the prompt-04 checkpoint first; 70074e6 is pushed
+on surface-prep-fixed. Prompt 05 adds saved-only reports and simulation getting
+started, with bounded end-to-end smoke validation. Keep this implementation
+local until a later commit/push request; do not publish production results.
+Hex/pins/other worktrees, user notebooks and existing results stay unchanged.
+See docs/preparation_getting_started.md and docs/preparation_reports.md.
+
+Analysis exclusively creates a new explicit directory (default RUN/analysis),
+verifies published files/maps/counters and static X/all-label marginals plus
+known-zero Z selection, and never samples or constructs a live decoder.
+Wilson intervals are fixed .95 pointwise fixed-shot summaries; default cuts
+are exploratory. Preserve independent metric masks, common gap-valid counts,
+null/invalid scores, separate A/U/Q and code-correct logical conditioning.
+Compact rows allow arbitrary exact inclusive cuts; aggregate-only uses saved
+bin edges/infinities. New bounded paired event counters live in summary_json,
+without simulation schema/physical seed changes.
+
+Same-mode retained full witnesses are checked in original DEM column order,
+including inactive columns, every frozen zero/one, syndrome/P/F, integer costs,
+features and an independent P–F support traversal. Compact witness checks are
+explicitly unavailable. The theorem concerns estimated independent-DEM graph
+representatives; no sampled-fault lift, posterior, FT or adaptive/factory
+performance claim follows. Physical unit batches remain <=7 shots at d3/5.
+The separate smoke template has two d3/R2 physical p points (0/.02), seven
+attempts each and positive matched nominal .02; this is a bounded stress
+smoke, not a production/statistical sweep. Source must remain frozen across
+full gates and prepare/resume provenance checks. Append actual results below.
+
+Prompt-05 final gate: `bash scripts/python.sh -m pytest -q --disable-warnings`
+— **921 passed, 1880 warnings, 281.47 s**. Tiny shell/module/installed-CLI run,
+completed resume, saved analysis and aggregate interruption/1->2-worker replay
+pass; seven full witnesses/path traversals pass. See TEST.md and
+docs/preparation_validation_report.md for actual event counts, broad Wilson
+bounds, cost scopes and all corrected fixture/API/harness issues. Prompt 05
+remains local; no production sweep or later phase was started.

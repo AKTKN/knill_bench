@@ -154,3 +154,12 @@ unchanged. Synthetic tests cover hand-derived XOR probabilities, fixed-one
 and fixed-zero costs, inactive/active-zero terms, original-column/feature
 round-trips and invalid/tampered artifacts. No production sweep or new large
 physical sampling is used. Exact gates and corrections are in [TEST.md](../TEST.md).
+
+
+## Independent saved-witness validation
+
+Prompt-05 [saved reports](preparation_reports.md) recheck original-column
+constraints, fixed zero/one ports, both temporal flips, integer costs and
+independently traverse the difference support. Static model/source hashes
+and original mechanism/active mappings accompany retained examples. This
+certifies a graph path in estimated representatives, not sampled faults.

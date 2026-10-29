@@ -1955,3 +1955,123 @@ before output; valid CLI execution is intentionally implemented. Saved-count
 analysis remains separate from prompt 05 calibration/interval/figure work.
 Only the explicitly requested prompt-03 checkpoint was committed/pushed.
 The prompt-04 implementation is left uncommitted and prompt 05 was not started.
+
+## Fixed-R preparation prompt 05: validation/report implementation
+
+- Before new implementation, `git commit -m '04: integrate ordered preparation Monte Carlo and persistence'`
+  created **70074e6** and `git push origin surface-prep-fixed` succeeded.
+  Prompt-05 implementation remains local, following its no-push instruction.
+- Initial saved-analysis regression: **1 failed**, 8 warnings, **16.67 s**.
+  The new report used TemporalDemModel.model_sha256 instead of its authoritative
+  artifact_sha256 property. Corrected the report; no decoder/model change.
+- Initial `tests/test_preparation_reports.py` run: **7 failed, 1 passed**,
+  40 warnings, **11.51 s**. Four diagnostic fixtures used a nonexistent Stim
+  PauliString.to_target_list; changed them to explicit ideal MPP strings.
+  The new exhaustive graph fixture initially called the native solver on an
+  infeasible RHS; it now checks feasibility independently, includes the frozen
+  temporal offsets and skips native decode for infeasible RHSs. Remaining two
+  report cases shared the corrected hash-property failure above.
+- First combined report/execution retry: **1 failed, 26 passed**, 112 warnings,
+  **71.44 s**. The new private-kernel test passed a list to its ndarray-only
+  feasibility helper; converted the fixture RHS to uint8 ndarray. No production
+  feasibility handling changed.
+- `bash scripts/python.sh -m pytest -q tests/test_preparation_reports.py --disable-warnings > /tmp/knill_prep_05_reports_retry.log 2>&1`
+  — **14 passed**, 52 warnings, **20.31 s** at that revision.
+- `bash scripts/python.sh -m pytest -q tests/test_preparation_reports.py tests/test_preparation_execution.py tests/test_temporal_matching.py tests/test_preparation_circuits.py --disable-warnings > /tmp/knill_prep_05_acceptance.log 2>&1`
+  — **101 passed**, **272 warnings**, **83.95 s**. This includes the final
+  15 report/validation cases, all 19 existing execution cases and retained
+  deterministic native/graph tests. New physical batches are d3, <=7 shots.
+  Independent exhaustive assignments/RHS feasibility and costs, direct
+  tableau Pauli signs, ideal Z-MPP versus destructive H_Z readout and
+  first/last/continuous readout temporal ambiguity are covered. Existing
+  tests preserve first-X randomness, exact rounds/cut/noise, separate CSS
+  injected faults, marginal equivalence, no truth leak, batch/single,
+  worker/resume equality and compact/full tie identity.
+- Report checks cover nullable/common denominators, eight joint cells,
+  inclusive arbitrary compact cuts, saved-edge-only aggregate cuts, positive
+  Wilson upper bounds at zero events, p0/no-complement nulls, paired event
+  cells, exact compact/aggregate report equality, original-column full
+  witnesses and independent BFS paths. Corrupted files/witness costs/parities/
+  padding and output reuse/protected paths reject. Monkeypatches forbid both
+  samplers and live matching construction during analysis, and source files
+  are byte-checked unchanged before/after report creation.
+- `bash scripts/python.sh -m pip check` — no broken requirements.
+  All four dependency worktrees remain clean; .gitignore, user notebooks,
+  source dependency pins, circuit physics and seed derivation are unchanged.
+- First full prompt-05 regression:
+  `bash scripts/python.sh -m pytest -q --disable-warnings > /tmp/knill_prep_05_full_gate.log 2>&1`
+  — **917 passed**, **1848 warnings**, **254.53 s**. Review afterward found
+  that the final enriched summary replaced prompt-04's execution status/schema
+  version and unpublished failed-assignment count fields. Those fields are now
+  preserved and included in the report; assertions cover their preservation.
+  Four additional direct-tableau/Z-MPP interior-qubit cases complement the
+  existing boundary-qubit cases. These source changes require a new final gate.
+- Final report subset after preserving execution status/failure fields and
+  adding explicit interior Pauli fixtures:
+  `bash scripts/python.sh -m pytest -q tests/test_preparation_reports.py --disable-warnings > /tmp/knill_prep_05_reports_final.log 2>&1`
+  — **19 passed**, **92 warnings**, **35.69 s**.
+- Visual inspection of actual PNG output found a long clipped footer caption
+  and compressed low-gap bins. Captions now wrap to figure width with reserved
+  footer space/tight export, and gap axes use a zero-preserving base-two symlog
+  coordinate with explicit bin-edge labels. The synthetic graph gets its own
+  caption, without implying it is physical sampled data. Counts/intervals/cuts
+  are unchanged. The then-running full rerun was deliberately interrupted for
+  this source correction: **308 passed**, 1120 warnings, **140.92 s**, explicit
+  KeyboardInterrupt; this was not a failed scientific test/final gate.
+- First actual shell/CLI smoke sampled/published the intended 14 d3/R2 shots
+  and completed resume successfully. Its diagnostic harness then incorrectly
+  treated the refreshed preparation_stopping.parquet timing/status table as
+  immutable science data and raised an assertion. Corrected only the external
+  `/tmp/knill_prep_05_e2e.py` harness: completed-resume checks published chunk
+  parts/checkpoints/static artifacts; analysis checks all input data including
+  stopping metadata. No production resume/writer behavior was weakened.
+  Initial raw artifacts remain under ignored
+  `results/preparation_prompt05_smoke/20261024T104817.113854Z/`; these repeated
+  fixed-seed records are not added to independent scientific denominators.
+- `bash scripts/python.sh /tmp/knill_prep_05_e2e.py > /tmp/knill_prep_05_e2e_retry.log 2>&1`
+  — **passed**. Reproducible driver/config/logs/raw assertions and primary plus
+  aggregate reports remain in ignored
+  `results/preparation_prompt05_smoke/20261024T104907.373089Z/`. The driver is
+  copied there as reproduce_smoke.py; it creates new output directories.
+  Exact reanalysis commands, all counts/CIs/cost scopes and limits are in
+  docs/preparation_validation_report.md. The final figures were visually
+  inspected; wrapped captions and explicit zero-preserving gap-bin ticks fit.
+  Actual shell run **7.383 s**; completed resume **3.298 s**; installed CLI
+  saved-report export **13.523 s**. Aggregate interruption/resume/export
+  **6.434/6.718/10.155 s**. Four figure types export PNG (300dpi), PDF and SVG,
+  plus an actual retained-miss diagnostic when available.
+- Smoke: d3/R2, physical p0/.02, nominal .02, 7 attempts each, seed617,
+  chunks3/3/1, workers2/native1, compact and full_witness paired on the same
+  **14 physical records**. Noiseless metrics all0/7; noisy compact X/Z/code/LZ
+  **2/1/2/0** out of7; noisy full-witness **3/1/3/0** out of7. X/code paired
+  cells [3,2,1,1] show3 disagreements; Z/logical decisions agree. All primary
+  masks valid. Seven full witnesses pass original-column constraints, costs,
+  features and independent BFS; seven compact witnesses explicitly unavailable.
+  Original published parts/checkpoints/static artifacts survive completed
+  resume; analysis changes none of the input simulation data. Repeated
+  aggregate-only fixed-seed records after interruption/1->2-worker resume have
+  identical sample hashes, bin/threshold tables and paired counters. They are
+  not pooled as independent samples (nor are the initial harness's repeats).
+- All observed noisy X/code misses lie in [0,1); g1 accepts3/7 with0/3 misses.
+  The Wilson upper endpoint .5615 leaves conditional risk unresolved; no-cut
+  logical0/7 has upper .3543. Compact/full X errors have wide overlapping
+  paired intervals. No FT, posterior, scaling, production sweep or adaptive/
+  factory-efficiency result follows. Peak worker RSS363663360bytes; selected
+  both-decoder sparse buffers10528bytes; max raw sample arrays63bytes. Primary
+  decode rates compact2542/4727 and full1333/1802shots/s at p0/.02 exclude all
+  setup/sampling/warmup/replay/evaluation/I/O; see the report for scope limits.
+- **Final frozen-source full gate**:
+  `bash scripts/python.sh -m pytest -q --disable-warnings > /tmp/knill_prep_05_full_gate_verified.log 2>&1`
+  — **921 passed**, **1880 warnings**, **281.47 s**. All 902 prior tests
+  remain; 19 new report/validation cases are added. The warnings are inherited
+  numerical/native categories exercised by small extra fixtures. Source/tests
+  stayed frozen through this complete gate and the successful final e2e smoke;
+  subsequent edits only record documentation/results. The final log is also
+  preserved with the ignored smoke artifacts as full_pytest.log.
+- Final `bash scripts/python.sh -m compileall -q src tests`, changed/new guide
+  link checks (18 guides, zero broken local targets), new-file whitespace
+  scan and `git diff --check` pass. pip check passed earlier with no dependency
+  changes afterward. All four dependency checkouts are still clean; Hex is
+  exactly 8fa2200315cc4feaccf341a461f91739233de08a. Scope audit confirms unchanged
+  .gitignore, notebooks, environment/locks/pins and dependency source; no staged
+  prompt-05 files, production sweep, cluster submission or implementation push.

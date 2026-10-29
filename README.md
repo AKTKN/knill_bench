@@ -2,7 +2,7 @@
 
 Reproducible physical Stim memory experiments comparing repeated surface-code syndrome extraction with three Knill strategies. The package uses the requested Hex checkout and user-owned LOM/surface-sim forks. It keeps circuit identity, decoder choice, classical work, and live hardware resources separate.
 
-Fixed-R surface preparation is beginning on `surface-prep-fixed`. The
+Fixed-R surface preparation is implemented on `surface-prep-fixed`. The
 [theory and typed contract](docs/temporal_preparation_theory.md) fixes the
 output-state labels, offline temporal boundaries and two-solve gap definition.
 The native fixed-R circuit builder, strict config validation and isolated
@@ -14,8 +14,9 @@ The [batch X/Z decoder and evaluator](docs/preparation_decoder.md) now provide
 separate sign/code/logical metrics and validity-aware gap cuts. The
 [ordered Monte Carlo runner](docs/preparation_execution.md) now supports
 build/run/resume, aggregate or compact outputs, bounded retention and a
-saved-count summary. The larger example is parse-only; no production sweep
-has been run.
+[saved-data validation and figures](docs/preparation_reports.md). Start with
+[simulation getting started](docs/preparation_getting_started.md). The larger
+example is parse-only; no production sweep has been run.
 
 Saved v2 datasets can also be compared from notebooks with lazy keyed path
 registration, six editable figure types and `plotting_lib` APS styling at
@@ -198,3 +199,10 @@ projection). False retains unit Hamming. Physical noise/readout is independent
 of that choice. Full-prefix retains its structural limits and never falls
 back. See [Knill simulation](docs/knill_sim.md) for exact scopes and tiny
 [local](configs/templates/knill_sim.yaml)/[prefix](configs/templates/knill_sim_full_prefix.yaml) templates.
+
+
+## Fixed-R surface preparation simulation
+
+Start with [the simulation guide](docs/preparation_getting_started.md) and the three-shot [template](configs/templates/surface_prep_fixed.yaml). The schema-v1 `knill-bench` CLI runs exactly R physical extraction rounds; saved-only analysis now produces validated gap/risk figures, Wilson intervals and independent X/Z/code/logical counts in a new analysis subdirectory. [Report definitions](docs/preparation_reports.md) explain graph premises, paired counters and limits. Prompt 04 is pushed as 70074e6; prompt 05 is a local implementation. No production sweep has been run.
+
+Actual prompt-05 final results: [921-test gate and bounded end-to-end smoke](docs/preparation_validation_report.md).

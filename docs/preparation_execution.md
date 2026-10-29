@@ -4,7 +4,7 @@
 spawn scheduler. It uses the [native circuit](surface_preparation.md),
 [completed boundary model](temporal_boundary_model.md) and
 [X/Z adapter/evaluator](preparation_decoder.md). Prompt 03 was pushed as
-`6fa15c5` on `surface-prep-fixed`; prompt 04 remains a reviewable local diff.
+`6fa15c5` on `surface-prep-fixed`; prompt 04 is pushed as `70074e6`.
 Hex and its HEX-K1 pin are unchanged. No production sweep was launched.
 
 ## Commands and budgets
@@ -23,9 +23,10 @@ bash scripts/python.sh -m knill_bench.cli analyze RUN
 `build` creates a fresh prepared run without sampling or live graph
 construction. `run` creates another fresh run and executes it. `resume`
 continues the saved partition; changing workers is allowed. `analyze` reads
-published saved counters only and writes `preparation_summary.json` and
-`report.md`; it never simulates or resumes. This count/timing summary is not
-prompt 05's gap-calibration/interval/figure analysis. Legacy `audit-faults`
+published saved data only and now writes reports, typed gap/risk tables and
+figures to a newly created analysis subdirectory. It never simulates or resumes.
+See [prompt-05 analysis](preparation_reports.md) and the
+[getting-started commands](preparation_getting_started.md). Legacy `audit-faults`
 and `benchmark-latency` reject preparation runs; the worker already saves
 explicit, bounded replay timings in `preparation_calls`.
 
@@ -237,7 +238,7 @@ are retained. The larger template is parsed with circuit construction
 forbidden. Exact commands, fixture correction and full gates are in
 [TEST.md](../TEST.md).
 
-Prompt 05 still owns calibrated gap/error curves, interval/plot/report
-validation and broader scientific acceptance. New physical/protocol claims
+Prompt 05 adds empirical gap/error curves, interval/plot/report validation
+and broader scientific acceptance; see [the report guide](preparation_reports.md). New physical/protocol claims
 need their own evidence; no FT, posterior, threshold or rare-event agreement
 is inferred from these software/structural tests.
