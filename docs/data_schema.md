@@ -1,5 +1,14 @@
 # Output and schema version 1
 
+Optional converter kinds retain schema-v2 table types but use
+`points/<case_id>/logical_error.parquet` with parent-published `circuit.lstim`,
+`circuit.stim`, `metadata.json` and optional deep-Clifford
+`logical_stabilizers.json`. Registration hashes, portable relative paths,
+saved ID/count checks and whole-point recovery are in
+[the converter contract](converter_integration.md). Prepare reserves empty
+directories; converter scientific run/resume remain unimplemented. Existing
+Hex output schemas/layouts and v1 are unchanged.
+
 B1 retains this v1 layout and the B0 v2 table types below. Its independent
 [Fig.4(d) runner](fig4d.md) writes only one logical_error table per point,
 actual shot/error counts and a nested execution descriptor in the existing

@@ -1,5 +1,15 @@
 # Independent schema-v2 experiment infrastructure (B0)
 
+Phase 0 converter kinds route to separate frozen consumer config/point types
+through parse_config, without importing the optional scientific backend.
+RunStore selects converter/stimflow provenance for those kinds and supports
+parent-owned point-relative sidecar registration, full file/ID/count validation
+and recovery. Shared adaptive execution accepts a parent artifact-builder hook;
+converter fixed chunks use a separate deterministic seed stream. Existing Hex
+fixed/auto behavior and identities are preserved. Dispatcher and default model
+compilation explicitly reject unfinished converter scientific runners. See
+[the converter guide](../../../docs/converter_integration.md).
+
 - `config_v2.py`: strict SafeLoader, `ConfigDocument`, `ExperimentConfig`,
   `ExperimentPoint`, `load_config`/`parse_config`, canonical identities and
   exact literal-plus filenames. Only d/p sweep, all other values are fixed.

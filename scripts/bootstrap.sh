@@ -2,6 +2,13 @@
 set -euo pipefail
 ROOT=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/.." && pwd)
 cd -- "$ROOT"
+WITH_CONVERTER=false
+if [[ "${1:-}" == "--with-converter" && $# == 1 ]]; then
+    WITH_CONVERTER=true
+elif [[ $# != 0 ]]; then
+    echo "Usage: bash scripts/bootstrap.sh [--with-converter]" >&2
+    exit 2
+fi
 mkdir -p external
 # Existing checkouts/worktrees are never reset. Exact base revisions are checked.
 checkout() {
@@ -29,5 +36,10 @@ else
 fi
 conda run --no-capture-output -n knill_system python -m pip install --no-deps --no-build-isolation \
     -e external/Hex -e external/lomatching -e external/surface-sim -e '.[research,dev]'
+if "$WITH_CONVERTER"; then
+    # Install exact VCS wheels; leave any user-owned converter checkout alone.
+    conda run --no-capture-output -n knill_system python -m pip install \
+        -c requirements.lock -c requirements-research.lock -r requirements-converter.lock
+fi
 conda run --no-capture-output -n knill_system python -m pip check
 conda run --no-capture-output -n knill_system python -m knill_bench.cli validate-config configs/smoke.yaml >/dev/null

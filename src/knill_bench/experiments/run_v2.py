@@ -12,7 +12,7 @@ from knill_bench.data.storage_v2 import (
     PointResult, acquire_lock, atomic_json, clear_stale_lock,
     restart_incomplete_point, validate_point_files,
 )
-from .config_v2 import ConfigDocument, load_saved_config, LOCAL_PRIOR_APPROXIMATION
+from .config_v2 import CONVERTER_KINDS, ConfigDocument, load_saved_config, LOCAL_PRIOR_APPROXIMATION
 from .provenance import collect_environment
 from .seeds import SEED_DERIVATION, point_seed
 from .noise_v2 import validate_noise_execution
@@ -28,8 +28,10 @@ def utc_now():
 def _compatibility(environment):
     return {"python": environment["python"], "os": environment["os"],
             "dependencies": environment["dependencies"],
-            **{name: {key: environment[name][key] for key in ("commit", "source_sha256")}
-               for name in ("bench", "hex")}}
+            **{name: {key: environment[name][key] for key in (
+                ("commit", "source_sha256", "required_revision", "origin_url", "subdirectory", "version")
+                if name in {"converter", "stimflow"} else ("commit", "source_sha256"))}
+               for name in (("bench", "converter", "stimflow") if "converter" in environment else ("bench", "hex"))}}
 
 
 class RunStore:
@@ -42,8 +44,8 @@ class RunStore:
 
     @classmethod
     def create(cls, document: ConfigDocument):
-        env = collect_environment()  # Validate actual imported Hex before output.
         config = document.config
+        env = collect_environment(config.kind) if config.kind in CONVERTER_KINDS else collect_environment()
         root = Path(config.output_root).expanduser().resolve()
         root.mkdir(parents=True, exist_ok=True)
         instant = utc_now().astimezone(RUN_TIMEZONE)
@@ -63,6 +65,9 @@ class RunStore:
                 output.flush()
                 os.fsync(output.fileno())
             store = cls(path, document)
+            if config.kind in CONVERTER_KINDS:
+                for point in config.points():
+                    (path / point.directory).mkdir(parents=True)
             store._metadata = dict(
                 schema_version=2, kind=config.kind, name=config.name,
                 started_at=utc_now().isoformat(), ended_at=None, status="running",
@@ -76,7 +81,8 @@ class RunStore:
                 projected_approximation=config.projected_approximation,
                 points={p.case_id: dict(p.sampling_identity, status="pending", seed=point_seed(config.master_seed, p),
                                        shots=0, logical_errors=0, wall_seconds=0., started_at=None,
-                                       ended_at=None, files=[p.filename(t) for t in p.tables])
+                                       ended_at=None, files=(list(p.files) if config.kind in CONVERTER_KINDS
+                                                             else [p.filename(t) for t in p.tables]))
                         for p in config.points()},
             )
             store._save()
@@ -115,7 +121,7 @@ class RunStore:
                     or (config.create_codecapacity_dem
                         and value.get("projected_approximation") != config.projected_approximation)):
                 raise ValueError("saved prior policy changed; create a new run")
-            env = collect_environment()
+            env = collect_environment(config.kind) if config.kind in CONVERTER_KINDS else collect_environment()
             if _compatibility(value["environment"]) != _compatibility(env):
                 raise ValueError("source/dependency environment changed; create a new run")
             points = {p.case_id: p for p in config.points()}
@@ -127,12 +133,21 @@ class RunStore:
                 if (any(info.get(name) != setting for name, setting in point.sampling_identity.items())
                         or info.get("seed") != point_seed(config.master_seed, point)):
                     raise ValueError("saved physical point identity/seed changed")
-                if info["files"] != [point.filename(t) for t in point.tables]:
+                converter = config.kind in CONVERTER_KINDS
+                if converter:
+                    from knill_bench.converter.artifacts import registered_files, validate_artifacts, validate_counts
+                    expected_files = registered_files(point, info.get("artifacts"))
+                else:
+                    expected_files = [point.filename(t) for t in point.tables]
+                if info["files"] != expected_files:
                     raise ValueError("saved point filenames changed")
                 if info["status"] == "complete":
                     validate_noise_execution(point, info.get("execution"),
                                              create_codecapacity_dem=config.create_codecapacity_dem, codecapacity_prior=config.codecapacity_prior)
                     validate_point_files(path, point, config.shots)
+                    if converter:
+                        validate_artifacts(path, point, info.get("artifacts"))
+                        validate_counts(path, point, config.shots, info["logical_errors"])
                     if (type(info["shots"]) is not int or info["shots"] != config.shots
                             or type(info["logical_errors"]) is not int
                             or not 0 <= info["logical_errors"] <= info["shots"]):
@@ -148,6 +163,10 @@ class RunStore:
                     value["points"][key].update(status="pending", shots=0, logical_errors=0,
                                                started_at=None, ended_at=None, wall_seconds=0.)
                     value["points"][key].pop("error", None)
+                    if config.kind in CONVERTER_KINDS:
+                        value["points"][key].pop("artifacts", None)
+                        value["points"][key].pop("execution", None)
+                        value["points"][key]["files"] = list(point.files)
             store._metadata = value
             store._previous_wall = value["wall_seconds"]
             if value["status"] != "complete":
@@ -196,6 +215,10 @@ class RunStore:
                 or result.files != tuple(point.filename(t) for t in point.tables)):
             raise ValueError("invalid point result identity/counts")
         validate_point_files(self.path, point, config.shots)
+        if config.kind in CONVERTER_KINDS:
+            from knill_bench.converter.artifacts import validate_artifacts, validate_counts
+            validate_artifacts(self.path, point, self._metadata["points"][point.case_id].get("artifacts"))
+            validate_counts(self.path, point, config.shots, result.logical_errors)
         validate_noise_execution(point, execution, create_codecapacity_dem=config.create_codecapacity_dem, codecapacity_prior=config.codecapacity_prior)
         if execution is not None:
             if not isinstance(execution, dict):
@@ -209,6 +232,20 @@ class RunStore:
         value.update(status="complete", shots=result.shots, logical_errors=result.logical_errors,
                      wall_seconds=time.monotonic() - self._point_starts[point.case_id],
                      ended_at=utc_now().isoformat())
+        self._save()
+
+    def publish_point_artifacts(self, point, artifacts):
+        """Publish/register converter sidecars in the parent; complete commits them."""
+        self._check_owner()
+        expected = {p.case_id: p for p in self.document.config.points()}
+        if point.kind not in CONVERTER_KINDS or expected.get(point.case_id) != point:
+            raise ValueError("converter point does not belong to this run")
+        info = self._metadata["points"][point.case_id]
+        if self._metadata["status"] != "running" or info["status"] != "running":
+            raise ValueError("artifacts must belong to a running point")
+        from knill_bench.converter.artifacts import publish_artifacts, registered_files
+        registry = publish_artifacts(self.path, point, artifacts)
+        info.update(artifacts=registry, files=registered_files(point, registry))
         self._save()
 
     def finish(self):

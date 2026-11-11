@@ -1,5 +1,12 @@
 # Schema-v2 auxiliary experiments: B0–B3
 
+Converter Phase 0 adds optional `converter_se_memory`, `converter_knill_memory`
+and `converter_deep_clifford` configuration/prepare support with separate
+point-relative artifacts. Existing Hex identities and layout are preserved.
+Converter run/resume explicitly refuse unfinished scientific runners. See
+[the converter contract](converter_integration.md) for YAML, dependency,
+model, execution, provenance and recovery details.
+
 B1 now implements the Fig.4(d) runner, bounded point workers, resume and
 saved-data Agresti-Coull plotting. See [the B1 guide](fig4d.md) for scientific
 constraints, commands, actual seed use and validation. The foundation below

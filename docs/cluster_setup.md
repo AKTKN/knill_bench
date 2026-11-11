@@ -1,5 +1,13 @@
 # Conda 環境とクラスターマシンへの配布
 
+Optional converter backend: add `--with-converter` to bootstrap and the bundle
+builder. `requirements-converter.lock` pins exact converter/stimflow VCS
+commits and additional runtime packages without changing numerical pins. With
+`--download-deps`, the six-project-wheel bundle supports offline converter
+provenance/prepare without Git on the target. Existing four-wheel Hex bundles
+are unchanged. Converter scientific runners are not implemented in Phase 0.
+See [installation and cluster details](converter_integration.md).
+
 研究用環境は **knill_system**、Python は **3.12.15** です。数値・解析・
 作図・ノートブック関連は pip でインストールします。従来の `.venv` は使用しません。
 

@@ -79,6 +79,10 @@ class ChunkSizer:
 
 
 def _compile_model(point, seed, options):
+    from .config_v2 import CONVERTER_KINDS
+    if point.kind in CONVERTER_KINDS:
+        from knill_bench.converter.models import require_scientific_runner
+        require_scientific_runner(point.kind)
     if point.kind == "se_memory":
         from knill_bench.adapters.hex_memory import HexMemory
         model = HexMemory(point, seed=seed)
@@ -146,11 +150,21 @@ def _validate_result(task, result):
             raise ValueError("adaptive worker requires finite nonnegative aligned gaps")
     elif gaps is not None:
         raise ValueError("Fig.4(d) cannot return gaps")
+    from .config_v2 import CONVERTER_KINDS
+    if task.point.kind in CONVERTER_KINDS and result.execution is not None:
+        try:
+            if not isinstance(result.execution, dict) or len(canonical(result.execution).encode()) > 65_536:
+                raise ValueError("oversize or non-mapping metadata")
+        except (TypeError, ValueError) as error:
+            raise ValueError("converter workers return compact JSON metadata only; keep native objects local") from error
 
 
-def _execute_point(store, point, pool, worker, options):
+def _execute_point(store, point, pool, worker, options, prepare_point=None):
     config = store.document.config
     store.start_point(point)
+    if prepare_point is not None:
+        store.publish_point_artifacts(point, prepare_point(point))
+    policy = POLICY if config.batch_size == "auto" else "converter_fixed_chunks_v1"
     sizer = ChunkSizer(config.target_chunk_seconds, min(config.output_buffer_shots, MAX_CHUNK_SHOTS))
     next_start = next_chunk = write_chunk = 0
     pending, ready = {}, {}
@@ -165,9 +179,10 @@ def _execute_point(store, point, pool, worker, options):
 
     def task_for_next():
         nonlocal next_start, next_chunk
-        count = sizer.count(config.shots - next_start, config.workers)
+        count = (sizer.count(config.shots - next_start, config.workers) if config.batch_size == "auto"
+                 else min(config.batch_size, config.shots - next_start))
         task = ChunkTask(point, next_chunk, next_start, count,
-                         chunk_seed(config.master_seed, point, next_chunk, stream=POLICY))
+                         chunk_seed(config.master_seed, point, next_chunk, stream=policy))
         partition.update(canonical([task.chunk_id, task.start, task.shots, task.seed]).encode() + b"\n")
         next_start += count
         next_chunk += 1
@@ -216,9 +231,9 @@ def _execute_point(store, point, pool, worker, options):
                 future.cancel()
             raise
     execution = dict(execution)
-    execution.update(sampling="independently_chunk_seeded_stim_samplers", parallel_execution=POLICY,
+    execution.update(sampling="independently_chunk_seeded_stim_samplers", parallel_execution=policy,
                      buffer_shot=config.output_buffer_shots, target_chunk_seconds=config.target_chunk_seconds,
-                     chunk_seed_stream=POLICY, chunk_partition_sha256=partition.hexdigest(),
+                     chunk_seed_stream=policy, chunk_partition_sha256=partition.hexdigest(),
                      chunk_count=chunks, chunk_shots_min=min_count, chunk_shots_max=max_count,
                      chunk_seconds_min=min_seconds, chunk_seconds_max=max_seconds,
                      sampling_decode_seconds=total_seconds, worker_setup_seconds=setup_seconds,
@@ -227,7 +242,7 @@ def _execute_point(store, point, pool, worker, options):
     store.record_complete(result, execution=execution)
 
 
-def execute_adaptive(store, *, worker=None, **options):
+def execute_adaptive(store, *, worker=None, prepare_point=None, **options):
     """Use all workers within each point; parent owns writers and metadata.
 
     One pool persists across points, with one cached model per worker. Results
@@ -244,12 +259,12 @@ def execute_adaptive(store, *, worker=None, **options):
     try:
         if config.workers == 1:
             for point in points:
-                _execute_point(store, point, None, worker, options)
+                _execute_point(store, point, None, worker, options, prepare_point)
         else:
             with ProcessPoolExecutor(max_workers=config.workers,
                                      mp_context=multiprocessing.get_context("spawn")) as pool:
                 for point in points:
-                    _execute_point(store, point, pool, worker, options)
+                    _execute_point(store, point, pool, worker, options, prepare_point)
         store.finish()
     finally:
         _MODEL = None

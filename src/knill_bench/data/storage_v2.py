@@ -80,6 +80,11 @@ class PointWriter:
         if type(expected_shots) is not int or not 1 <= expected_shots < 2**63:
             raise ValueError("expected_shots must be positive and fit int64")
         self.run, self.point = Path(run), point
+        from knill_bench.experiments.config_v2 import CONVERTER_KINDS
+        if point.kind in CONVERTER_KINDS:
+            owner = json.loads((self.run / ".run.lock").read_text())
+            if owner != dict(pid=os.getpid(), host=socket.gethostname()):
+                raise RuntimeError("only the owning parent may write converter point files")
         self.expected_shots = expected_shots
         self._lock = self.run / f".point-{point.case_id}.lock"
         self._schemas = schemas(point)
@@ -100,10 +105,15 @@ class PointWriter:
             raise
 
     def _public(self, table):
+        from knill_bench.experiments.config_v2 import CONVERTER_KINDS
+        if self.point.kind in CONVERTER_KINDS:
+            from knill_bench.converter.artifacts import relative_path
+            return relative_path(self.run, self.point.filename(table))
         return self.run / self.point.filename(table)
 
     def _temp(self, table):
-        return self.run / ("." + self.point.filename(table) + ".incomplete")
+        public = self._public(table)
+        return public.with_name("." + public.name + ".incomplete")
 
     def write_batch(self, shot_id, logical_error, gaps=None):
         if self._closed:
@@ -250,8 +260,13 @@ class PointBuffer:
 
 
 def validate_point_files(run: Path, point: ExperimentPoint, expected_shots: int):
+    from knill_bench.experiments.config_v2 import CONVERTER_KINDS
     for name, schema in schemas(point).items():
-        info = pq.ParquetFile(run / point.filename(name))
+        path = run / point.filename(name)
+        if point.kind in CONVERTER_KINDS:
+            from knill_bench.converter.artifacts import relative_path
+            path = relative_path(run, point.filename(name))
+        info = pq.ParquetFile(path)
         if info.metadata.num_rows != expected_shots or not info.schema_arrow.equals(schema, check_metadata=True):
             raise ValueError("public point file has incorrect schema or row count")
 
@@ -259,6 +274,15 @@ def validate_point_files(run: Path, point: ExperimentPoint, expected_shots: int)
 def restart_incomplete_point(run: Path, point: ExperimentPoint):
     """Parent-only call, after acquiring the run lock; never for complete points."""
     clear_stale_lock(run / f".point-{point.case_id}.lock")
+    from knill_bench.experiments.config_v2 import CONVERTER_KINDS
+    if point.kind in CONVERTER_KINDS:
+        from knill_bench.converter.artifacts import relative_path
+        for name in (*point.files, *(f"{point.directory}/{n}" for n in point.optional_artifact_names)):
+            relative_path(run, name)  # Preflight before removing any point files.
     for table in point.tables:
         (run / point.filename(table)).unlink(missing_ok=True)
-        (run / ("." + point.filename(table) + ".incomplete")).unlink(missing_ok=True)
+        public = run / point.filename(table)
+        public.with_name("." + public.name + ".incomplete").unlink(missing_ok=True)
+    if point.kind in CONVERTER_KINDS:
+        from knill_bench.converter.artifacts import restart_artifacts
+        restart_artifacts(run, point)

@@ -1,0 +1,17 @@
+# Phase 0: validate-config/prepare only; scientific run/resume are not implemented.
+schema_version: 2
+kind: converter_se_memory
+name: converter_se_memory_small
+code: rotated_surface
+noise: converter_uniform
+decoder: mwpm
+sweep:
+  d: [3, 5]
+  p: [0.001]
+rounds: d
+input_preparation: noisy
+shots: 7
+batch_size: 3
+workers: 1
+master_seed: 12345
+output_root: results

@@ -1593,3 +1593,64 @@ inference assumptions, without erasing physical prep/past residuals. Hex and
 all dependency source/pins are unchanged/clean. Incoming and ongoing user
 notebook/.gitignore edits, earlier plotting source changes and existing saved
 data are preserved. No benchmark, threshold or exact posterior claim.
+
+## 2026-11-12 — Converter Phase 0 contracts, exact VCS wheels and lazy integration
+
+All commands below use Conda knill_system through scripts/python.sh or explicit
+conda run. Implementation branch feature/converter-simulations starts at the
+prompt's auxiliary-system@2e618b9; the surface-prep-fixed branch is unchanged.
+`git ls-remote --heads origin` in bench and converter confirms the requested
+remote branches/revisions. The converter clone remains clean on main@64e139d;
+required 457dc519 is on feature/parallel-knill-deep-clifford-api.
+
+- Installed dependency with
+  `conda run --no-capture-output -n knill_system python -m pip install -c requirements.lock 'logical-to-stim-converter @ git+https://github.com/AKTKN/logical_to_stim_converter.git@457dc519adec6a11b38843a03e1c8fbbd6495f5a'`.
+  Exact stimflow VCS dependency resolves to ffe0d043 (glue/stimflow), version
+  1.17.dev0. Converter is 0.0.1, Python 3.12.15, Stim remains 1.16.0 and
+  PyMatching remains 2.4.0. Optional transitive versions are captured in the
+  new requirements-converter.lock; base numerical/research locks are unchanged.
+- `bash scripts/python.sh -m pytest -q tests/test_converter_config.py tests/test_converter_infrastructure.py tests/test_converter_provenance.py --disable-warnings`
+  initially encountered two new test-decorator syntax errors, fixed together.
+  The next pass reported 12 failures / 149 passes: converter publication reached
+  a Hex-only noise_model field, and the public compiler fixture omitted required
+  PATCH index=0. Added the converter-specific boundary to the Hex noise validator
+  and corrected the fixture; no dependency patch or physical-model change.
+  Final focused result: **161 passed, 5.95 s**. Coverage includes strict YAML
+  for all kinds, exact round resolution/equality, physical/circuit seed identity,
+  all 14 pre-change Hex config hashes/point IDs/seeds, public converter API/DEM
+  compatibility with no sampling, VCS revision/RECORD/grammar checks, blocked
+  optional imports during real three-shot d3 Hex execution, portable paths,
+  numeric IPC/spawn equality, parent ownership, seven-row fixed/auto publication,
+  artifact rollback and incomplete recovery, corruption rejection before cleanup.
+- **Full bench gate:** `bash scripts/python.sh -m pytest -q --disable-warnings`
+  — **742 passed, 1356 inherited-category warnings, 132.90 s**. This includes
+  all existing config/storage/execution/provenance/cluster-packaging tests and
+  the unchanged v1/Hex-adapter regression fixtures. Log retained locally at
+  /tmp/knill-converter-full-pytest.log. No excluded tests or changed warning policy.
+- `bash scripts/python.sh scripts/build_cluster_bundle.py --with-converter --output results/converter_phase0/bundle`
+  — six project wheels built successfully; all 72 Hex matrix resources retained.
+  Converter grammar, public sources and exact stimflow revision are included.
+  New manifests/RECORDs are added only inside staging wheels. Original dependency
+  repositories and local branches remain unchanged.
+- `bash scripts/python.sh -m pip install --no-deps --no-compile --target results/converter_phase0/installed results/converter_phase0/bundle/wheels/*.whl`
+  and `bash scripts/python.sh /tmp/knill_converter_wheel_smoke.py`
+  — all three installed-wheel CLI validate/prepare cases pass, at d3/5 with
+  pending zero-shot points. The script sets PYTHONPATH to the installed target
+  and PATH empty: actual bench/converter/stimflow/Hex wheel provenance and direct
+  RunStore pending recovery work without Git. Public run/resume each exit 2
+  with explicit unimplemented errors, without creating/changing point data.
+  Current environment supplies numerical dependencies; this smoke does not
+  provision a new fully offline Python environment or claim scientific execution.
+  Logs/manifest/configs/prepared directories stay under ignored
+  results/converter_phase0. No converter shots were sampled.
+- `bash scripts/python.sh -m pip check`,
+  `bash scripts/python.sh -m compileall -q src scripts/build_cluster_bundle.py tests/test_converter_config.py tests/test_converter_infrastructure.py tests/test_converter_provenance.py`,
+  `bash -n scripts/bootstrap.sh scripts/python.sh scripts/cluster_run_simualtion.sh`
+  and `git diff --check` pass.
+
+No production sweep or converter scientific/decoder implementation belongs to
+this phase. Hex, lomatching, surface-sim and converter source checkouts, existing
+simulation configs, user notebooks, .gitignore, v1 numerical APIs and output
+schemas are unchanged. Windows path/serialization contracts are tested on Linux;
+no Windows platform run is claimed. Implementation/design details are in
+docs/converter_integration.md and docs/converter_phase0_report.md.

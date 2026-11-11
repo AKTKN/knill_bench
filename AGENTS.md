@@ -510,3 +510,33 @@ Latest general-Knill gate: 581 passed, 1356 warnings, 182.02 s; targeted
 read-only Hex gate: 41 passed, 188 warnings, 26.54 s. Tiny two-worker fixed/
 auto runs and completed resume/saved plots pass for both prior modes. See
 TEST.md; the supplied 200000-shot/d5..11 grid is parse-only validation.
+
+## Converter integration — user-authorized Phase 0 (2026-11-12)
+
+The user requested the attached Phase 0 prompt, branch inspection, Conda
+knill_system implementation and commit/push. Work starts at auxiliary-system
+2e618b9bbe66ce6d79f1a002183155a42954411d on the new branch
+feature/converter-simulations; this supersedes the historical auxiliary-only
+and surface-preparation no-push instructions for this task. Preserve the
+independent surface-prep-fixed branch and all dependency source checkouts.
+
+Read docs/converter_integration.md and docs/converter_phase0_report.md.
+Pin converter 457dc519adec6a11b38843a03e1c8fbbd6495f5a from
+feature/parallel-knill-deep-clifford-api, plus its exact stimflow revision.
+The user's converter clone stays clean on main; installation uses VCS wheels.
+Never import private converter modules, copy its implementation, downgrade
+Stim 1.16.0 or change existing Hex hashes/seeds/layout/schemas/physics.
+
+Phase 0 supports strict converter config/prepare, model/execution/artifact
+contracts and actual installed provenance only. Scientific run/resume remain
+explicitly unimplemented for all three converter kinds. Parent owns converter
+writers/sidecars; only compact numeric results cross spawn boundaries.
+Unit fixtures are synthetic <=7 rows; public compiler compatibility is d3
+without sampling. No converter physical LER or production sweep is authorized.
+Stop after this Phase 0 commit/push; subsequent scientific phases need a later
+request. Optional converter installs/bundles use requirements-converter.lock
+and --with-converter. Preserve the ordinary Hex setup without this extra.
+
+Phase 0 gate: 742 bench tests passed (1356 inherited warnings, 132.90 s),
+including 161 new contracts; six-wheel/no-Git CLI/provenance/recovery smokes and
+pip check pass. See TEST.md for initial test fixes and exact commands.

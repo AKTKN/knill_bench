@@ -1,0 +1,360 @@
+{
+  "configs/fig4d_v2_example.yaml": {
+    "config_hash": "476cdef95984120a277f9190989a631edaff63533842d840376cd7ede6ebc675",
+    "points": [
+      [
+        "6747d17fcd7d42a0a9ad10b59f7a1a3876011dc7e827b778b5cb8538e8a80b22",
+        7749775356753141079
+      ],
+      [
+        "5905945badee50299e013a83870cb6b597d0956ba9cf2766c2a43ffbdc05086c",
+        15335623649653130125
+      ],
+      [
+        "dd1b25d3338525c13cc897d00ac5331b561c707b2a0edba5aa4cc8fc4215660b",
+        4449001610911068132
+      ],
+      [
+        "377af4845facef068f966caa59251a030d8796281a1f7bcc39de23c55fc31466",
+        4270373461528647095
+      ]
+    ]
+  },
+  "configs/logical_zero_factory.yaml": {
+    "config_hash": "29099b8d1ade4d1fa61e17ebd395d9fae164cd1ffbcf9e4c7e259e8bcbdd5e34",
+    "points": [
+      [
+        "6a9ac3a46e5cab8a66a4459bb92eed630cd4765c7896106d4a3bed3f74c26558",
+        14440836524900115690
+      ],
+      [
+        "70d3ecf399ce2397d0f67f3304e97d5ccc9d228da8a4989f90b68a35668e8108",
+        9079553366245007524
+      ],
+      [
+        "ab8590e5e37a450f0f375886340f67e6df63547ac27205f438a52c556a1eda54",
+        1037648507685945486
+      ],
+      [
+        "6766ee3b0fbd7c8fc2d28a3673c7ae15cab5acbfa5532e510fa8ea8238cc5463",
+        13505001870845287567
+      ],
+      [
+        "265531edb4adcca0642a94980021249a51fe2d58d8632fdd8759c71fe3041a73",
+        17459710617537800192
+      ],
+      [
+        "940f3ac3350c11778d785bf9ce3c3fafbd92ba031aa9ba0d1f706c89c5578cc0",
+        4905388901417545076
+      ]
+    ]
+  },
+  "configs/logical_zero_factory_v2_example.yaml": {
+    "config_hash": "5179fb25e1002a20719a66f0f54935367f8b96dd227532b429193cd2354a2554",
+    "points": [
+      [
+        "a93018ee92ec5b3d73a5025c0a7de60349a6c5e5ec8977b5139131dfc7e030c9",
+        1120827878117354437
+      ],
+      [
+        "dcf68937f5d1e4db4ab57ac1610dcdf7287e727c5541f1a248a32b821539cc2d",
+        13260953650194168368
+      ],
+      [
+        "9d74b615263707506fe3bcf15d6f0d49e39a162f066b8cafac9ca29bd836578f",
+        7257564173793426761
+      ],
+      [
+        "c4ff03ad073585237d18fedcf100ac6d6138439326454e6fa92225c3bd861cf4",
+        15266334609273708011
+      ],
+      [
+        "dd8c1c00127b9d9bde08a3443de797369e677f09473979e1c63e9b6c51c908b8",
+        14803857241570590800
+      ],
+      [
+        "b8b6fa998686be0bedb00c4ef61f3de8f7de8048f5c309238ecc96d00ab2583c",
+        7308716484940747055
+      ],
+      [
+        "77ac6376d4682f2c953b4fe8ec9ae2facbfd2c2a1e6494c29ae6aee77c12c3ad",
+        11243469107940049808
+      ],
+      [
+        "ea294ffcf93e4fc159bc3c071af20d45ab370d6c971ef303a9d0a4d5f4e6b3d2",
+        11746023263802435406
+      ],
+      [
+        "932bd736dd79bdf64ba8f44f278acffc35119d5314de35c239fd05197ebde1d2",
+        12401455738741637781
+      ]
+    ]
+  },
+  "configs/fig4d.yaml": {
+    "config_hash": "6815dc4a51ee0b8f6d618348c5c6d89712c693e6b6dac148ab15ee9a341e9149",
+    "points": [
+      [
+        "caf1d305b0f8ac17b81036dd52a9a061b6bce1b9c8868280fec2f3130b0cbcee",
+        15132010873372140812
+      ],
+      [
+        "5d1a02d02410057086ba2d8607a8923a1325b6b420f05c4cfc3cfa0a20e61510",
+        15612641955995200118
+      ],
+      [
+        "49f06be6dfbbcad976f11f18e0bb3d345734eb8b725b891ca08f5ea0f472ac1c",
+        13642981652326614609
+      ],
+      [
+        "025d975a9da8047c29389b9029fdb6fe27067e7bd83b9f4650eecf784aea5c11",
+        10621543890579000255
+      ],
+      [
+        "802b0d4272b8abc9e922c02bd70d74cf66d210fbe1e6a52e61ade2adc84c1a57",
+        16868857927246888592
+      ],
+      [
+        "9569767665f015c59d10ffc5079bf43aef71b91fd67c04b4193efd7a83605aab",
+        17611813401482214187
+      ],
+      [
+        "2491e1a494534e7a5eb872e69f4109c030b7ffb2a02a4dd64d5ee6b569a20c15",
+        13696026457909345902
+      ],
+      [
+        "9ee5b9cc61a3e8757facfd173d391c5aac74a83e1298dced31f68533f5edda8d",
+        613727994110450551
+      ],
+      [
+        "6e8cdf7c6a496c6d173205659537c72df3a0d049a7ea415ae776d702c2550ada",
+        8683335891622575376
+      ],
+      [
+        "0ed4819bbec966bd691087380949dc4e7b54b265fdfda56b41657e85ef8c8d59",
+        17583445086692967470
+      ],
+      [
+        "7bef12c24ecdecb020dbc5f5284f2884398e5332825e8e46324f2f9ea61aa239",
+        10704011308474062533
+      ],
+      [
+        "30280a638c53634b0173a387400992ee3ae5148654687aefc1124e60b077c601",
+        12710951920997240965
+      ],
+      [
+        "8ac416b3c3615cd4ef9b02f70e4f55bb4108def4b7612da81a0748daad5e9b89",
+        7488354994665414534
+      ],
+      [
+        "eb7bc8e4e2577bdb524100a5e1a5ebe8cb00b6e1347ec42e07eca48654ca8a1f",
+        4275840199423435761
+      ],
+      [
+        "93696b6c2d9e8291c39dcad24a38a4f6fedc30b50a37249cc3805b0fd0015bdc",
+        6315284554618480932
+      ],
+      [
+        "7821e0d99c2b4209f469c4cbc436dbf96f54d4c5f0f442ef34230b4029268ab9",
+        1934526401389339958
+      ],
+      [
+        "368e4e9121919e97e49cc7d24b5d91dab7f2d1865ae4b4fa2be1736a3b6c2c75",
+        11521369166389282425
+      ],
+      [
+        "ef40f8607f56e83fa02936e244fab61448763acbcb59e0739fe0feb7eae4dfa8",
+        14569239095120472535
+      ],
+      [
+        "a566bf58a7b73aca85618f88e2990b7175ab2c09e4a40214c6a0e2a8085c426d",
+        15339371724358578362
+      ],
+      [
+        "9c8efc3940e7e450dfb9170d1d34d31d786d08ec0a11efe84ecac843331689af",
+        6104511254112898258
+      ],
+      [
+        "4004da73beff60a92dc81c49334eecca3f43f50bfe2812bb575b964169319ba0",
+        2390042317279208031
+      ],
+      [
+        "48a0fe0da127cf0b2a2efd052991106c15702ecc8efcb168cf6f2ec608b8ed8a",
+        16107228101902907514
+      ],
+      [
+        "0eee64c7fc8a6c4be9235df2727b5317652ac980b02a57252117e8047979748e",
+        8802544038058265928
+      ],
+      [
+        "552f6684e49a92e36bf88766a9daf90d3e58e4a3a7126a59438747bf0fe7cb21",
+        1891333966614833503
+      ],
+      [
+        "1c0823c21505707c010bb7fd66dad588970644f567921f524c751e71db2a4fc5",
+        1876237520688485418
+      ],
+      [
+        "d14a68bc2813811cb609e9447c105182a3586dbe40eb2854fe80ace027229d27",
+        18032991733957634355
+      ],
+      [
+        "93bb650a9993bd09a4bf01178d1a0c75db05002e37703203d21b4673a6c5adfb",
+        13104283763789690867
+      ],
+      [
+        "6d34f2ecf15ae7339572b4fce4d2f5eff0d4ad03b8de29146e87b5617426a18a",
+        190323500577400256
+      ]
+    ]
+  },
+  "configs/se_memory_v2_example.yaml": {
+    "config_hash": "badefa5326bf57587de8837be1f23cbe2073a53cd5805e7af1bf881199f8a565",
+    "points": [
+      [
+        "271136aa395d7e1c09814857e6730ee23bef48e0bae1d9cf36118811a107b76b",
+        16050205909297673157
+      ],
+      [
+        "438f63f2a3c159ee97aba5623748e48cacf244e022da36ee75e530a929946c0e",
+        862387222071317830
+      ],
+      [
+        "52275f36541a86b36dc88fa90dc000fe660100491673ea88c59e5b47ce801c85",
+        17521358683589946884
+      ],
+      [
+        "e2dd66b51ea57386d228de5fff8e9d6ba6e7316f180b154fa80f1e7ea491081d",
+        10615798627025249257
+      ]
+    ]
+  },
+  "configs/templates/logical_zero_factory_custom_noise.yaml": {
+    "config_hash": "c25c0d9c0511c7fa6ab5579df0809691bc5d0cd0c0abaa26692555a1e647da5f",
+    "points": [
+      [
+        "7df55f528f3338f8c5819b1bc5cd5a083c8447052a6718c989681aa57e3b9c90",
+        5167460164286154543
+      ]
+    ]
+  },
+  "configs/templates/logical_zero_factory.yaml": {
+    "config_hash": "991ad47ce4b5a9cae44036455ef8a8954b4940e6a5a8e0cf4ac2169b499064b6",
+    "points": [
+      [
+        "88b4fcbe98a7c4141f07a454c4f3d751a1caaf7bcbaf400ef2fdfb8d0b4380bb",
+        12585661337073927167
+      ],
+      [
+        "6a9ac3a46e5cab8a66a4459bb92eed630cd4765c7896106d4a3bed3f74c26558",
+        14440836524900115690
+      ],
+      [
+        "314c3d1a4f351d48f3ca35bc1019c30999170b91c56a342bec1700e492efa900",
+        16042571251118373544
+      ],
+      [
+        "6766ee3b0fbd7c8fc2d28a3673c7ae15cab5acbfa5532e510fa8ea8238cc5463",
+        13505001870845287567
+      ]
+    ]
+  },
+  "configs/templates/fig4d.yaml": {
+    "config_hash": "71676732c3a02ffc82c7dedce9fc2a0d3b8464b50d271bb3481a95b5e5a712e8",
+    "points": [
+      [
+        "cac0a4e2b9019ef19d4aa89120b0d1de4324f172cd2afc2bcdefdb292d35a2a8",
+        6550516463324062761
+      ],
+      [
+        "5905945badee50299e013a83870cb6b597d0956ba9cf2766c2a43ffbdc05086c",
+        15335623649653130125
+      ],
+      [
+        "4db1ecb431954bce14c931f0fad83664df9636505dc5cc5197299497e3a6862f",
+        3768765504506013010
+      ],
+      [
+        "377af4845facef068f966caa59251a030d8796281a1f7bcc39de23c55fc31466",
+        4270373461528647095
+      ]
+    ]
+  },
+  "configs/templates/knill_sim_full_prefix.yaml": {
+    "config_hash": "3047e96dbb30f7ff69533dc229a3f57705b5277a6202a54d19a702f881099412",
+    "points": [
+      [
+        "e07290b404482c6e3bf376f60555ad9de30e56b340d93fe961aad9b798002d14",
+        1329529267421003572
+      ]
+    ]
+  },
+  "configs/templates/se_memory.yaml": {
+    "config_hash": "badefa5326bf57587de8837be1f23cbe2073a53cd5805e7af1bf881199f8a565",
+    "points": [
+      [
+        "271136aa395d7e1c09814857e6730ee23bef48e0bae1d9cf36118811a107b76b",
+        16050205909297673157
+      ],
+      [
+        "438f63f2a3c159ee97aba5623748e48cacf244e022da36ee75e530a929946c0e",
+        862387222071317830
+      ],
+      [
+        "52275f36541a86b36dc88fa90dc000fe660100491673ea88c59e5b47ce801c85",
+        17521358683589946884
+      ],
+      [
+        "e2dd66b51ea57386d228de5fff8e9d6ba6e7316f180b154fa80f1e7ea491081d",
+        10615798627025249257
+      ]
+    ]
+  },
+  "configs/templates/knill_ec_memory_code_capacity_noise.yaml": {
+    "config_hash": "36db193405920a0f29d8e11376445c998dd00bd09eaff5b444eeacffdc30d0d9",
+    "points": [
+      [
+        "3f63e6121619baf9e628172e6a42b8fae4d8ac86a6d0a0ea3f09408353327fd0",
+        17923448733892615844
+      ],
+      [
+        "a729119365038ba77b7af6b3dd58a6139984a94b10ed102178dae56bf33199b4",
+        11523758644585351344
+      ]
+    ]
+  },
+  "configs/templates/knill_ec_memory.yaml": {
+    "config_hash": "c8dc3e1038b15df0aad53775b33f050b1bc68c3ab036945269e1dd8126fed74f",
+    "points": [
+      [
+        "f3f7f1f6fb4a806bf809d4ec862918a604ad6e2a11efa93519a84543cf8f54d3",
+        16973104817627144012
+      ],
+      [
+        "017eebe73e860a0a8f655de5621721196ea63f7d6018fcb9144a115027bf3841",
+        9862606284887647001
+      ]
+    ]
+  },
+  "configs/templates/knill_ec_memory_noiseless_bellpair.yaml": {
+    "config_hash": "437dc1eebd243e850921eba12d17b8dd8d5c444b09f9a85a4cb8109abed2e32b",
+    "points": [
+      [
+        "0a62f45a2455b7ec7c2b7a5d89ba4d5fad70a617e6c654cfae11601ae2366bff",
+        12102282770393508628
+      ],
+      [
+        "c192519c751e0017b6348e1ee274d02c751cc6cea6c1063e6305c8af2e6bdf58",
+        10519217748152999747
+      ]
+    ]
+  },
+  "configs/templates/knill_sim.yaml": {
+    "config_hash": "f2d435597761509adbf902c8b5f4caae2022bbc789ff9612f3d595ac3c0543de",
+    "points": [
+      [
+        "e63d092190227dba0d577e9dda242ed81ebb40d1176ec1a47e373776a506f0d3",
+        15344930420633982418
+      ]
+    ]
+  }
+}

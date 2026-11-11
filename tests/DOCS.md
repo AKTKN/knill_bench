@@ -1,5 +1,13 @@
 # Bench regression tests
 
+`test_converter_config.py`, `test_converter_infrastructure.py` and
+`test_converter_provenance.py` cover Phase 0 strict YAML, all three reserved
+kinds, public installed APIs/pins, source/grammar integrity, lazy Hex execution,
+portable paths, parent sidecar publication/recovery and seven-row numeric spawn
+workers. `fixtures/hex_v2_identities.json` freezes all 14 pre-integration v2
+configs' hashes/point IDs/seeds. New public compiler smoke checks a d3 DEM and
+metadata without sampling. No converter LER or production sweep is tested.
+
 `test_notebook_plotting.py` uses only six-row synthetic v2 tables (no physical
 sampling). It checks lazy keyed registration, scalar/membership/alias filters,
 unambiguous grouping, all six editable figure APIs, APS/300-dpi context/export,

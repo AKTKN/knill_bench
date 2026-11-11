@@ -1,5 +1,11 @@
 # knill_bench package map
 
+`converter/` is a separate optional-backend consumer package. Its Phase 0
+frozen config/point types, simulation-model protocol, parent sidecar registry,
+resource provenance and bounded numeric-worker execution contracts are
+documented in [converter/DOCS.md](converter/DOCS.md). Public converter scientific
+run/resume explicitly fail until later phases. Existing Hex/v1 paths are unchanged.
+
 `analysis.RunRegistry`, `NotebookPlots` and `FigureStyle` provide saved-only
 v2 notebook comparisons with deferred keyed loading, six editable Matplotlib
 figures and optional local plotting_lib APS/300-dpi style. See

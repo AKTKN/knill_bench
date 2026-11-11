@@ -1,5 +1,13 @@
 # Versioned storage and provenance
 
+Phase 0 converter points reuse the v2 logical_error Arrow schema and PointWriter
+under `points/<case_id>/logical_error.parquet`. Temporary files are siblings
+of public paths, supporting both nested converter and legacy flat Hex layouts.
+Converter PointWriter verifies parent PID/host ownership; sidecars are published
+through RunStore. Converter artifacts/counts validate before completion/resume;
+whole-point cleanup removes known sidecars and sibling temps. See
+[the artifact contract](../../../docs/converter_integration.md).
+
 `storage.py` and `provenance.py` retain all schema-v1 tables, archived
 provenance, incremental worker parts/checkpoints and compatibility behavior.
 They are unchanged in B0. Their specification is

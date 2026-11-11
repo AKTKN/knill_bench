@@ -17,6 +17,11 @@ def noise_as_dict(model):
 
 
 def validate_noise(kind, name, model, *, p=None, r_plus=None):
+    from .config_v2 import CONVERTER_KINDS
+    if kind in CONVERTER_KINDS:
+        if name != "converter_uniform" or model is not None:
+            raise ValueError("converter experiments require noise: converter_uniform")
+        return
     if isinstance(name, str) and name in {"noiseless_bellpair", "code_capacity_noise"} and model is None:
         if kind not in {"knill_sim", "knill_ec_memory"}:
             raise ValueError("special Knill noise is supported only for kind=knill_ec_memory or knill_sim")
@@ -109,6 +114,12 @@ def execution_noise(point):
 
 def validate_noise_execution(point, execution, *, create_codecapacity_dem, codecapacity_prior="module_local"):
     """Cross-check native noise provenance before publication/resume/analysis."""
+    from .config_v2 import CONVERTER_KINDS
+    if point.kind in CONVERTER_KINDS:
+        # Converter source/noise identity is checked by its point sidecar. Hex
+        # inference/noise fields do not apply to the separate backend.
+        validate_noise(point.kind, point.noise, None)
+        return
     if point.kind in {"knill_sim", "knill_ec_memory"}:
         from hex_qec.modularisation import KnillNoiseModel
         from .config_v2 import KNILL_PRIOR_POLICIES, LOCAL_PRIOR_APPROXIMATION, KNILL_PREFIX_APPROXIMATION

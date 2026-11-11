@@ -1,5 +1,15 @@
 # Dependencies and reproducible installation
 
+Optional converter support uses exact VCS wheels from
+`requirements-converter.lock`: converter `457dc519adec6a11b38843a03e1c8fbbd6495f5a`
+and stimflow `ffe0d043598ed5df0851a3e6b4920359a23fafbd`. Install with
+`bash scripts/bootstrap.sh --with-converter` or the constrained pip command in
+[the integration guide](converter_integration.md). This leaves user dependency
+checkouts and numerical pins unchanged. Hex-only commands do not require these
+packages; converter prepare records actual installed source/grammar identities.
+Cluster bundles opt in with `--with-converter` and include two additional
+staging-tagged VCS wheels, without source edits or Git on the target.
+
 ## Current Conda/cluster workflow
 
 The user requested migration to **knill_system**, replacing the project .venv.

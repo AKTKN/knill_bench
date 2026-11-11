@@ -1,5 +1,11 @@
 # Design and scientific conventions
 
+Converter Phase 0 introduces a separate consumer-owned package and three
+configuration kinds without modifying Hex circuit/decoder construction.
+Its frozen configs/points, model protocol, parent publication and optional
+backend provenance are specified in [the integration guide](converter_integration.md).
+No converter scientific simulation or LER is implemented in this phase.
+
 The original schema-v1 design below remains unchanged. B1 adds an independent
 [eight-cycle Fig.4(d) experiment](fig4d.md) using actual Hex full Knill modules,
 configurable preparation rounds on each resource (default d) and noisy final

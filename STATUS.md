@@ -832,3 +832,30 @@ full gate: 581 passed, 1356 warnings, 182.02 s. Read-only Hex: 41 passed,
 188 warnings, 26.54 s. Two-worker fixed/auto CLI smokes, complete resume and
 saved plots pass for both modes (local d3/5 d-rounds; prefix d3 one-round).
 Hex/pins/v1 and user .gitignore/notebook/previous plotting work are preserved.
+
+## 2026-11-12 — Converter integration Phase 0
+
+Implemented the attached Phase 0 on feature/converter-simulations from the
+specified auxiliary-system checkpoint 2e618b9; preserved surface-prep-fixed.
+Live branch checks locate required converter 457dc519 on
+feature/parallel-knill-deep-clifford-api, while the user's clean clone stays
+on main. Installed exact converter/stimflow VCS wheels in knill_system;
+Stim 1.16.0/PyMatching 2.4.0 and all numerical pins are unchanged.
+
+Added three strict converter schemas and small templates, exact resource-depth
+resolution, physical/circuit identities, lazy dispatch, consumer model/static
+decoder/frame contracts, installed-source/grammar provenance and resume checks.
+Parent-owned point sidecars and streamed error tables reuse existing publication,
+bounded numeric spawn/chunk/buffer and whole-point restart infrastructure.
+Converter fixed chunks have their own deterministic stream; existing Hex fixed
+and auto semantics, all 14 config hashes/point IDs/seeds and v1 are preserved.
+Optional bootstrap/cluster support supplies exact VCS wheels and staging-only
+resource manifests; dependency repositories remain clean/unchanged.
+
+New gate: 161 contract tests passed (5.95 s). Full Conda gate: 742 passed,
+1356 inherited warnings, 132.90 s. Six-wheel build, installed-wheel no-Git
+CLI validation/prepare for all kinds, explicit run/resume refusal, direct pending
+recovery, pip check, compile and shell syntax checks pass. Tests use synthetic
+<=7-row workers plus one d3 public compilation/DEM without sampling. No converter
+scientific runners, physical LER results or production sweep are implemented.
+See docs/converter_integration.md, docs/converter_phase0_report.md and TEST.md.

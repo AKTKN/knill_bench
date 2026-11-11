@@ -15,11 +15,13 @@ from .noise_v2 import noise_as_dict, parse_noise, validate_noise
 
 if TYPE_CHECKING:
     from hex_qec.circuit_generation import FactoryNoiseModel
+    from knill_bench.converter.config import ConverterConfig
 
 
 GENERAL_KNILL_KINDS = {"knill_sim", "knill_ec_memory"}
 KNILL_KINDS = GENERAL_KNILL_KINDS | {"fig4d_reproduction"}
-KINDS = KNILL_KINDS | {"logical_zero_factory", "se_memory"}
+CONVERTER_KINDS = {"converter_se_memory", "converter_knill_memory", "converter_deep_clifford"}
+KINDS = KNILL_KINDS | {"logical_zero_factory", "se_memory"} | CONVERTER_KINDS
 LOCAL_PRIOR_POLICY = "module_local_stim_dem"
 LOCAL_PRIOR_APPROXIMATION = "preparation_and_earlier_stage_residual_errors_excluded_v1"
 LEGACY_PRIOR_POLICY = "circuit_informed_projected"
@@ -301,7 +303,7 @@ class ExperimentConfig:
 
 @dataclass(frozen=True)
 class ConfigDocument:
-    config: ExperimentConfig
+    config: "ExperimentConfig | ConverterConfig"
     contents: bytes
     source_path: Path
 
@@ -310,7 +312,10 @@ class ConfigDocument:
         return hashlib.sha256(self.contents).hexdigest()
 
 
-def parse_config(raw) -> ExperimentConfig:
+def parse_config(raw) -> "ExperimentConfig | ConverterConfig":
+    if isinstance(raw, dict) and isinstance(raw.get("kind"), str) and raw["kind"] in CONVERTER_KINDS:
+        from knill_bench.converter.config import parse_converter_config
+        return parse_converter_config(raw)
     _mapping(raw, "schema_version kind name output_root code noise sweep r_0 r_plus T_tel theta "
              "create_codecapacity_dem decoder shots batch_size workers master_seed skip_circuit_validation "
              "buffer_shot target_chunk_seconds rounds get_logicalgap codecapacity_prior".split(), "root")

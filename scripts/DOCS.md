@@ -1,5 +1,14 @@
 # Scripts and entry points
 
+`bootstrap.sh --with-converter` installs the exact optional converter/stimflow
+VCS wheels and locked transitive dependencies into knill_system, without
+changing the user's clone or numerical pins. Default bootstrap remains Hex-only.
+`build_cluster_bundle.py --with-converter` adds two source-tagged VCS wheels
+and optional numeric converter-runtime pins; with --download-deps its installer
+is offline and never resolves Git URLs. Wheel tagging includes the LSTIM grammar
+and regenerated RECORD, only inside staging artifacts. See
+[the converter guide](../docs/converter_integration.md).
+
 ## Factory wall-time diagnosis
 
 `profile_factory.py CONFIG --distance D --p P --output NEW.json` measures one

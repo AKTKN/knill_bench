@@ -85,8 +85,18 @@ def validate_hex():
     return info
 
 
-def collect_environment():
+def collect_environment(kind=None):
     import knill_bench
+    from .config_v2 import CONVERTER_KINDS
+    if kind in CONVERTER_KINDS:
+        from knill_bench.converter.provenance import validate_converter
+        converter, flow = validate_converter()
+        names = ("knill-bench", "logical-to-stim-converter", "stimflow", "numpy", "scipy", "stim",
+                 "pymatching", "PyYAML", "pyarrow", "lark")
+        return dict(python=sys.version, os=platform.platform(),
+                    cpu=dict(machine=platform.machine(), processor=platform.processor(), count=os.cpu_count()),
+                    dependencies={name: metadata.version(name) for name in names},
+                    bench=source_info(knill_bench), converter=converter, stimflow=flow)
     versions = {}
     for name in ("knill-bench", "hex-qec", "numpy", "scipy", "stim", "pymatching", "ldpc",
                  "PyYAML", "pyarrow", "networkx", "stimbposd"):

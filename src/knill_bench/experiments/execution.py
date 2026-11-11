@@ -14,6 +14,10 @@ def execute_points(store, worker, **worker_options):
     bounded to workers tasks; each worker advances its sampler across chunks.
     """
     config = store.document.config
+    from .config_v2 import CONVERTER_KINDS
+    if config.kind in CONVERTER_KINDS:
+        from knill_bench.converter.models import require_scientific_runner
+        require_scientific_runner(config.kind)
     if config.batch_size == "auto":
         from .adaptive_execution import execute_adaptive
         return execute_adaptive(store, **worker_options)

@@ -2,7 +2,10 @@
 """Build resource-complete, provenance-tagged wheels without editing forks."""
 
 import argparse
+import base64
+import csv
 import hashlib
+import io
 import json
 from pathlib import Path
 import shutil
@@ -28,6 +31,59 @@ def source_hash(files):
         digest.update(len(relative).to_bytes(8, "little") + relative)
         digest.update(len(data).to_bytes(8, "little") + data)
     return digest.hexdigest()
+
+
+def tag_vcs_wheel(wheel, module, revision, url, *, subdirectory=None):
+    """Tag a staging-only exact VCS wheel; source repositories stay untouched."""
+    from knill_bench.converter.provenance import resource_hash, RESOURCE_SUFFIXES
+
+    with zipfile.ZipFile(wheel) as archive:
+        contents = {n: archive.read(n) for n in archive.namelist()}
+    prefix = module + "/"
+    resources = [(n[len(prefix):], data) for n, data in contents.items()
+                 if n.startswith(prefix) and Path(n).suffix in RESOURCE_SUFFIXES]
+    if not resources or (module == "logical_to_stim_converter" and not any(n.endswith(".lark") for n, _ in resources)):
+        raise ValueError("converter wheel omitted scientific source or LSTIM grammar")
+    info = dict(format_version=1, module=module, commit=revision, branch=None, dirty=False,
+                source_sha256=resource_hash(resources), origin_url=url, subdirectory=subdirectory)
+    contents[prefix + "_build_info.json"] = (json.dumps(info, sort_keys=True) + "\n").encode()
+    record = next(n for n in contents if n.endswith(".dist-info/RECORD"))
+    rows = io.StringIO(newline="")
+    writer = csv.writer(rows, lineterminator="\n")
+    for name, data in sorted(contents.items()):
+        if name != record:
+            sha = base64.urlsafe_b64encode(hashlib.sha256(data).digest()).rstrip(b"=").decode()
+            writer.writerow([name, "sha256=" + sha, len(data)])
+    writer.writerow([record, "", ""])
+    contents[record] = rows.getvalue().encode()
+    temporary = wheel.with_suffix(".tmp")
+    try:
+        with zipfile.ZipFile(temporary, "w", zipfile.ZIP_DEFLATED) as archive:
+            for name, data in contents.items():
+                archive.writestr(name, data)
+        temporary.replace(wheel)
+    finally:
+        temporary.unlink(missing_ok=True)
+    return dict(info, wheel=wheel.name, matrix_resources=0)
+
+
+def build_converter_wheels(output):
+    from knill_bench.converter.provenance import (
+        CONVERTER_REVISION, CONVERTER_URL, STIMFLOW_REVISION, STIMFLOW_URL,
+    )
+    result = []
+    for distribution, module, revision, url, subdirectory in (
+        ("logical-to-stim-converter", "logical_to_stim_converter", CONVERTER_REVISION, CONVERTER_URL, None),
+        ("stimflow", "stimflow", STIMFLOW_REVISION, STIMFLOW_URL, "glue/stimflow"),
+    ):
+        requirement = f"{distribution} @ git+{url}@{revision}"
+        if subdirectory:
+            requirement += "#subdirectory=" + subdirectory
+        subprocess.run([sys.executable, "-m", "pip", "wheel", "--no-deps", "--no-build-isolation",
+                        "--wheel-dir", str(output), requirement], check=True)
+        wheel = next(output.glob(distribution.replace("-", "_") + "-*.whl"))
+        result.append(tag_vcs_wheel(wheel, module, revision, url, subdirectory=subdirectory))
+    return result
 
 
 def build_project(spec, output):
@@ -81,6 +137,7 @@ def main(argv=None):
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--output", default=str(ROOT / "results/cluster_bundle"))
     parser.add_argument("--download-deps", action="store_true", help="Include binary pip dependencies for this Python/platform")
+    parser.add_argument("--with-converter", action="store_true", help="Include the two exact VCS converter/stimflow wheels")
     args = parser.parse_args(argv)
     output = Path(args.output).resolve()
     output.mkdir(parents=True, exist_ok=False)
@@ -90,6 +147,14 @@ def main(argv=None):
     specs = list(config["tool"]["knill-bench"]["sources"].values())
     specs.append(dict(distribution="knill-bench", module="knill_bench", path=".", **{"package-dir": "src/knill_bench"}))
     projects = [build_project(spec, wheels) for spec in specs]
+    if args.with_converter:
+        projects.extend(build_converter_wheels(wheels))
+        shutil.copy2(ROOT / "requirements-converter.lock", output / "requirements-converter.lock")
+        # VCS sources are already packaged above. Offline targets install these
+        # two wheels with --no-deps, never resolve a Git URL on the cluster.
+        runtime = [line for line in (ROOT / "requirements-converter.lock").read_text().splitlines()
+                   if line and not line.startswith("#") and " @ git+" not in line]
+        (output / "requirements-converter-runtime.lock").write_text("\n".join(runtime) + "\n")
     for name in ("requirements.lock", "requirements-research.lock", "environments.yaml",
                  "conda-linux-64.explicit.txt", "GETTING_STARTED.md", "README.md", "TEST.md"):
         shutil.copy2(ROOT / name, output / name)
@@ -99,11 +164,13 @@ def main(argv=None):
         # Some pinned packages (notably sinter 1.16) are published as sdists.
         # Build their wheels here, where build tools/network are available;
         # the target installs only the resulting wheels, never an sdist.
+        optional = ["-r", str(output / "requirements-converter-runtime.lock")] if args.with_converter else []
         subprocess.run([sys.executable, "-m", "pip", "wheel", "--wheel-dir", str(wheels),
-                        "-r", str(ROOT / "requirements.lock"), "-r", str(ROOT / "requirements-research.lock")], check=True)
+                        "-r", str(ROOT / "requirements.lock"), "-r", str(ROOT / "requirements-research.lock"),
+                        *optional], check=True)
     hashes = {p.name: hashlib.sha256(p.read_bytes()).hexdigest() for p in sorted(wheels.glob("*.whl"))}
     manifest = dict(bundle_version=1, python=sys.version, platform=sys.platform, projects=projects,
-                    binary_dependencies_included=args.download_deps, wheels_sha256=hashes)
+                    binary_dependencies_included=args.download_deps, converter_included=args.with_converter, wheels_sha256=hashes)
     (output / "manifest.json").write_text(json.dumps(manifest, sort_keys=True, indent=2)+"\n")
     # The target already has Conda Python 3.12.15 and pip. No Git or source
     # checkout is required. SHA verification precedes any pip installation.
@@ -117,8 +184,9 @@ for name, expected in manifest["wheels_sha256"].items():
     if hashlib.sha256((root / "wheels" / name).read_bytes()).hexdigest() != expected:
         raise SystemExit("wheel checksum mismatch: " + name)
 options = ["--no-index", "--find-links", str(root / "wheels")] if manifest["binary_dependencies_included"] else []
+extra = ["-r", str(root / "requirements-converter-runtime.lock")] if manifest.get("converter_included") else []
 subprocess.run([sys.executable, "-m", "pip", "install", *options, "-r", str(root / "requirements.lock"),
-                "-r", str(root / "requirements-research.lock")], check=True)
+                "-r", str(root / "requirements-research.lock"), *extra], check=True)
 subprocess.run([sys.executable, "-m", "pip", "install", "--no-deps",
                 *[str(root / "wheels" / p["wheel"]) for p in manifest["projects"]]], check=True)
 subprocess.run([sys.executable, "-m", "pip", "check"], check=True)

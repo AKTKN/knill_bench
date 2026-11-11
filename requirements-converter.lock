@@ -1,0 +1,10 @@
+# Optional converter backend; install with -c requirements.lock in knill_system.
+logical-to-stim-converter @ git+https://github.com/AKTKN/logical_to_stim_converter.git@457dc519adec6a11b38843a03e1c8fbbd6495f5a
+stimflow @ git+https://github.com/quantumlib/Stim.git@ffe0d043598ed5df0851a3e6b4920359a23fafbd#subdirectory=glue/stimflow
+lark==1.3.1
+pygltflib==1.16.5
+dataclasses-json==0.6.7
+deprecated==3.0.1
+marshmallow==3.26.2
+typing-inspect==0.9.0
+mypy-extensions==1.2.0
