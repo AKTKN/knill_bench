@@ -1721,3 +1721,81 @@ constructing large circuits or sampling it. No production sweep, other converter
 scientific kind, statistical paper agreement or performance claim is included.
 Existing Hex numerical sources and memory tests, v1, .gitignore, notebooks,
 dependency sources/pins and existing physical config hashes/seeds are preserved.
+
+## 2026-11-12 — Converter Knill EC memory Phase 2
+
+User-authorized implementation/commit/push continues on
+feature/converter-simulations from Phase 1 61f4769. Conda knill_system remains
+Python 3.12.15/Stim 1.16.0/PyMatching 2.4.0; converter 457dc519 and stimflow
+ffe0d043 pins are unchanged. Dependency sources and existing Hex runners are
+read-only. A pre-change snapshot of 17 non-Knill configs records canonical
+hashes, physical point IDs and point seeds in /tmp/knill-phase2-identities.json.
+
+- Baseline:
+  `bash scripts/python.sh -m pytest -q tests/test_converter_se_memory.py tests/test_converter_memory_execution.py tests/test_converter_config.py tests/test_converter_infrastructure.py tests/test_converter_provenance.py --disable-warnings`
+  — 200 passed in 24.24 s; /tmp/knill-converter-phase2-baseline.log.
+- Config and independent local-model gate:
+  `bash scripts/python.sh -m pytest -q tests/test_converter_knill_config.py tests/test_converter_local_matching.py tests/test_converter_config.py --disable-warnings --tb=short`
+  — 151 passed in .62 s; /tmp/knill-converter-phase2-config.log. Named regimes,
+  d-resource depths, multiplier limits, kind isolation and physical identity
+  changes are checked. Small independent PyMatching references, exhaustive
+  parallel-component cost hypotheses, separator/invisible handling and residual
+  hyperedge rejection verify the explicit approximation.
+- Physical gate:
+  `bash scripts/python.sh -m pytest -q tests/test_converter_knill_physics.py --disable-warnings --tb=short`
+  — 28 passed in 47.86 s; /tmp/knill-converter-phase2-physics.log. Both-regime
+  p0 T=1/2/3/4 samples include random Bell branches and zero failures. Recycling,
+  unique epochs, relocation/stage order, typed noise targets/probabilities,
+  optional post-rounds, finite-p d5 T=1/2 and d3 fixtures pass. Controlled
+  preparation/resource/readout/teleportation Pauli faults, logical X/Z transport,
+  exact GF(2) sector equations, record-map deltas and stale-event checks pass.
+  Invalid ordering/epochs/basis, omitted/swapped correction and double application
+  are rejected. New physical batches are at most seven shots. A manual initial
+  probe exposed integer promotion in bool parity XOR integer expected-value;
+  explicitly converting the deterministic expected bit to bool fixes the output
+  contract, which is covered by the gates.
+- Execution gate:
+  `bash scripts/python.sh -m pytest -q tests/test_converter_knill_execution.py --disable-warnings --tb=short`
+  — 13 passed in 42.03 s; /tmp/knill-converter-phase2-execution.log. Both regimes
+  run with two workers in fixed/auto mode. IDs/counts/row groups, exact exported
+  circuit reconstruction, same-batch replay, static caching, serial/spawn fixed
+  equality, failed-point seeded restart, completed-byte preservation and metadata
+  tampering guards pass. Completed resume neither compiles nor samples.
+- Full required gate:
+  `bash scripts/python.sh -m pytest -q --disable-warnings`
+  — **850 passed, 1356 inherited warnings, 239.42 s**;
+  /tmp/knill-converter-phase2-full.log. No exclusions or warning-policy changes.
+  Existing Hex/v1 and Phase 1 converter memory scientific/execution tests pass.
+- `bash scripts/python.sh /tmp/knill_converter_phase2_smoke.py`
+  — actual installed knill-bench-v2 validate-config/prepare/run/resume pass
+  for d3, p=.001, both regimes, T_tel=1/2, three shots and two workers. T=1
+  uses fixed chunks and prepared resume; T=2 uses auto/direct run. Every
+  completed resume preserves all bytes, IDs/counts/seeds validate, and all 17
+  non-Knill identity snapshots match. Each tiny case happened to have zero
+  failures; this is no LER estimate. The first diagnostic script queried the
+  nonexistent execution_mode key after its first successful run/resume; fixed
+  it to the actual chunk_seed_stream key and reran all four cases successfully.
+  /tmp/knill-converter-phase2-cli.log and ignored results/converter_phase2_smoke.
+- `bash scripts/python.sh scripts/build_cluster_bundle.py --with-converter --output results/converter_phase2_smoke/bundle`
+  and
+  `bash scripts/python.sh -m pip install --no-deps --no-compile --target results/converter_phase2_smoke/installed results/converter_phase2_smoke/bundle/wheels/*.whl`
+  — six project wheels build/install with all 72 Hex matrix resources and
+  converter grammar, unchanged exact backend pins. Staging artifacts only;
+  /tmp/knill-converter-phase2-bundle.log and wheel-install.log.
+- `bash scripts/python.sh /tmp/knill_converter_phase2_wheel_smoke.py`
+  — both regimes pass prepared and completed resume at d3, p=.001, three shots,
+  two workers, T=1 auto/T=2 fixed. PATH is empty; bench/converter/stimflow imports
+  are asserted under the installed wheel target. Actual pinned source/resource
+  provenance and completed-byte preservation pass without Git. Existing Conda
+  numerical packages are used, with no new offline Python environment.
+  /tmp/knill-converter-phase2-wheel.log and ignored wheel_smoke.json.
+- `bash scripts/python.sh -m pip check`,
+  `bash scripts/python.sh -m compileall -q src tests/test_converter_knill_config.py tests/test_converter_knill_physics.py tests/test_converter_knill_execution.py tests/test_converter_local_matching.py`,
+  strict loading of all three new/updated Knill examples and `git diff --check`
+  pass. Hex, converter, lomatching and surface-sim checkouts are clean.
+
+No production sweep, deep-Clifford scientific implementation, correlated/ML
+inference claim, statistical threshold or performance claim is included. All
+simulation tables retain their schema/layout; unrelated user files, branches,
+existing Hex/SE physical identities and dependency sources are preserved. See
+docs/converter_knill_memory.md and docs/converter_knill_memory_report.md.

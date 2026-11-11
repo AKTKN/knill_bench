@@ -78,6 +78,10 @@ def test_depth_resolution(rule, expected):
     memory = parse_config(raw("converter_se_memory", rounds=rule))
     assert [p.rounds for p in memory.points() if p.p == 0.] == expected
     for kind in CONVERTER_KINDS - {"converter_se_memory"}:
+        if kind == "converter_knill_memory" and rule != "d":
+            with pytest.raises(ValueError, match="require r_0=r_plus=d"):
+                parse_config(raw(kind, r_0=rule, r_plus=rule))
+            continue
         config = parse_config(raw(kind, r_0=rule, r_plus=rule))
         assert [p.r_0 for p in config.points() if p.p == 0.] == expected
         assert all(p.r_0 == p.r_plus for p in config.points())

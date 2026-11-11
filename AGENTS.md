@@ -569,3 +569,37 @@ the 100000-shot d3/5/7 config is parse-only. Installed fixed/auto CLI and no-Git
 wheel prepared/completed resume smokes pass. See TEST.md for initial fixture/
 serializer corrections. Stop after this Phase 1 commit/push; no converter
 Knill/deep scientific implementation or production sweep is authorized.
+
+## User-authorized converter Knill memory — Phase 2 (2026-11-12)
+
+The user supplied Phase 2 and authorized implementation/commit/push on
+feature/converter-simulations after 61f4769. This supersedes the Phase 1 stop.
+Read docs/converter_knill_memory.md and docs/converter_knill_memory_report.md.
+Use Conda knill_system. All dependency sources/pins and existing Hex runners
+remain unchanged; no production sweep or deep-Clifford phase is authorized.
+
+converter_knill_memory uses exactly three recycled patches, persistent D,
+unique resource handles/composite IDs and T_tel native KNILL_EC(d) cycles.
+post_rounds is explicit/default zero. Named regimes are noisy_d_rounds and
+ideal_post_se_depolarizing, with lifecycle-resolved public input post-noise
+and disjoint M9 resource uses. Both resource depths must resolve to d; legacy
+Phase 0 Knill preparation names are rejected. Final Z readout stays noisy.
+
+Public stage/frame APIs drive local temporal/CSS matching and causal replay.
+Every stage refreshes interpreted events; native sector maps transport prior
+net sectors. Correlations are disabled. Native separator components are an
+explicit independent approximation, preserving parallel alternatives and
+declaring detector-free prior hypotheses; residual hyperedges raise. Capacity
+costs are unit Hamming per patch. Do not claim correlated or exact ML inference.
+Final interpreted parity supplies labels without probe/fault truth inputs.
+
+Cache static models per point/process, use fresh chunk-seeded samplers and
+retain shared bounded parent publication/resume. Sidecars bind native exports,
+policies, preparation probabilities and stage-model hashes. Preserve existing
+SE/deep/Hex hashes/seeds/layouts. New physical fixtures stay d3/5 and <=7 shots.
+
+Phase 2 gate: 850 passed, 1356 inherited warnings, 239.42 s. Both-regime tiny
+fixed/auto installed CLI and no-Git six-wheel prepared/completed resume pass;
+17 non-Knill config/point/seed snapshots are unchanged. See TEST.md for exact
+commands and the diagnostic-script key correction. Stop after this scoped
+commit/push; a later phase requires a later request.

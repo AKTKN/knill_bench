@@ -113,6 +113,9 @@ def validate_artifacts(run, point, registry, *, execution=None):
     if point.kind == "converter_se_memory":
         from .metadata import validate_memory_artifacts
         validate_memory_artifacts(point, registry, meta.get("model"), execution)
+    elif point.kind == "converter_knill_memory":
+        from .metadata import validate_knill_artifacts
+        validate_knill_artifacts(point, registry, meta.get("model"), execution)
 
 
 def validate_counts(run, point, shots, errors):

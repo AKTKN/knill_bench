@@ -1,0 +1,23 @@
+# Phase 2: ideal input/resources with independent post-preparation channels.
+schema_version: 2
+kind: converter_knill_memory
+name: converter_knill_ideal_post_small
+code: rotated_surface
+noise: converter_uniform
+decoder: mwpm
+sweep:
+  d: [3]
+  p: [0.001]
+T_tel: 2
+r_0: d
+r_plus: d
+resource_preparation: ideal_post_se_depolarizing
+input_preparation: ideal
+p_st_multiplier: 1.0
+post_rounds: 0
+shots: 3
+batch_size: auto
+buffer_shot: 2
+workers: 2
+master_seed: 12345
+output_root: results

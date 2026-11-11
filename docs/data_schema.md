@@ -8,7 +8,11 @@ saved ID/count checks and whole-point recovery are in
 [the converter contract](converter_integration.md). Prepare reserves empty
 directories; Phase 1 SE run/resume write real labels plus exact sampled Stim/
 LSTIM and public converter export. Execution/source/artifact linkage validates
-before publication/resume. Knill/deep scientific kinds remain reserved. Existing
+before publication/resume. Phase 2 Knill uses the same table/artifact paths and
+adds preparation probabilities, local-decoder limits/component counts and
+per-stage model hashes to the sidecar/execution descriptor. Its labels are
+corrected interpreted terminal Z parity XOR the deterministic expected bit.
+Deep Clifford remains reserved. Existing
 Hex output schemas/layouts and v1 are unchanged.
 
 B1 retains this v1 layout and the B0 v2 table types below. Its independent

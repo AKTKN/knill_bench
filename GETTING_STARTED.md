@@ -6,7 +6,12 @@ install with `bash scripts/bootstrap.sh --with-converter`, then use
 `knill-bench-v2 resume results/<saved-run>`. The example is seven shots at
 d3/5, with exact total rounds and noisy boundaries. See
 [the memory guide](docs/converter_se_memory.md) for physical/decoder contracts,
-fixed/adaptive execution and artifacts. Existing Hex workflows below are unchanged.
+fixed/adaptive execution and artifacts. Phase 2 also supports
+`knill-bench-v2 run configs/converter_knill_memory_v2_example.yaml` and the same
+resume command. [Converter Knill memory](docs/converter_knill_memory.md) has
+three recycled patches and explicit noisy-d-round/ideal-post-channel regimes;
+its local independent-component decoder has documented approximation limits.
+Existing Hex workflows below are unchanged.
 
 This branch supplies two schema-v2 experiments and saved-data analysis:
 

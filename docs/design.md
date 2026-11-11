@@ -7,7 +7,11 @@ backend provenance are specified in [the integration guide](converter_integratio
 Phase 1 now implements [converter SE memory](converter_se_memory.md): exactly
 R total rounds, full physical X/Z extraction, semantic Z-sector undecomposed
 DEM/MWPM, noisy boundaries and raw-batch logical-flip XOR prediction labels.
-The other two converter scientific kinds remain unimplemented.
+Phase 2 adds [converter Knill EC memory](converter_knill_memory.md): three
+recycled patches, public preparation policies, local temporal-component/CSS
+MWPM and causal native frame/sector replay. Final corrected interpreted Z
+parity supplies labels. Correlations are ignored explicitly; unsupported
+hyperedges raise. Deep Clifford remains unimplemented.
 
 The original schema-v1 design below remains unchanged. B1 adds an independent
 [eight-cycle Fig.4(d) experiment](fig4d.md) using actual Hex full Knill modules,

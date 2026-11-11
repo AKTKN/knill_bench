@@ -1,4 +1,4 @@
-# Phase 0: validate-config/prepare only; scientific run/resume are not implemented.
+# Phase 2: runnable three-patch Knill memory, noisy input/resources with d rounds.
 schema_version: 2
 kind: converter_knill_memory
 name: converter_knill_memory_small
@@ -11,8 +11,9 @@ sweep:
 T_tel: 2
 r_0: d
 r_plus: d
-resource_preparation: noisy
-input_preparation: ideal
+resource_preparation: noisy_d_rounds
+input_preparation: noisy
+post_rounds: 0
 shots: 7
 batch_size: 3
 workers: 1

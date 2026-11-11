@@ -9,7 +9,7 @@ from .config_v2 import CONVERTER_KINDS, KINDS, load_config, load_saved_config
 def experiment_runner(kind):
     if kind not in KINDS:
         raise ValueError("unknown v2 experiment kind")
-    if kind in CONVERTER_KINDS - {"converter_se_memory"}:
+    if kind == "converter_deep_clifford":
         from knill_bench.converter.models import require_scientific_runner
         require_scientific_runner(kind)
     module_name = f"knill_bench.experiments.{kind}"

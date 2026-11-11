@@ -888,3 +888,36 @@ were corrected without dependency edits. All pins, Hex/v1 sources/tests,
 .gitignore, existing configs/notebooks and dependency checkouts are unchanged.
 No production sweep or later converter scientific phase ran. See
 docs/converter_se_memory.md, docs/converter_se_memory_report.md and TEST.md.
+
+## 2026-11-12 — Converter Knill EC memory Phase 2
+
+Implemented converter_knill_memory after 61f4769 on feature/converter-simulations.
+The converter owns physical construction and lifecycle metadata for exactly
+three recycled patches, persistent D and T_tel KNILL_EC(d) cycles. Both named
+regimes use public typed noise policies; ideal-post input noise binds to the
+actual compiled use and never overlaps M9 resources. Optional post_rounds
+defaults to zero; final Z readout stays noisy.
+
+Consumer-owned local temporal-component/CSS PyMatching adapters process native
+stage order, prepared logical constraints, readout syndrome differences and
+deterministic transported net sectors. Each correction refreshes subsequent
+interpreted records/events. Final corrected native parity yields boolean labels
+without truth/probe inputs. Independent decomposition components, invisible
+prior hypotheses and unit-Hamming capacity limits are explicit in metadata;
+parallel alternatives are preserved and residual hyperedges raise.
+
+Run/resume reuse bounded fixed/auto parent-owned output, fresh chunk seeds and
+static per-point/process caching. Exact circuit artifacts, native export,
+per-stage model digest, regime probabilities and streamed IDs/counts validate
+before completion/resume. Examples and package/architecture/storage/cluster
+guides are updated. Deep Clifford remains guarded; Hex and SE physics remain
+unchanged, as do all 17 snapshotted non-Knill config/point/seed identities.
+
+Validation: 850 full bench tests passed with 1356 inherited warnings in
+239.42 s. Controlled single/logical faults, T=1..4 noiseless random branches,
+GF(2) equations, frame negatives, independent small-model references, finite-p
+d3/5 fixtures and actual fixed/auto spawn/restart paths pass. Three-shot
+installed CLI checks and six-wheel/no-Git prepared/completed resumes pass in
+both regimes; pip check and source/dependency integrity checks pass. No
+production sweep or later scientific phase ran. See
+docs/converter_knill_memory.md, docs/converter_knill_memory_report.md and TEST.md.

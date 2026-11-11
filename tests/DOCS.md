@@ -1,5 +1,15 @@
 # Bench regression tests
 
+Phase 2 `test_converter_knill_config.py`, `test_converter_knill_physics.py`,
+`test_converter_knill_execution.py` and `test_converter_local_matching.py`
+cover named regimes/depths, typed noise targets, T=1/2/3/4 noiseless random
+branches, recycling/use epochs, finite-p d3/5 batches, controlled Pauli/readout
+faults, logical transport, GF(2) sector equations, exact frame-record deltas,
+stale-event/invalid-correction guards and independent small PyMatching/cost
+references. Actual fixed/auto two-worker output, caching, deterministic fixed
+replay, failed-point restart and metadata tampering are checked. New physical
+batches remain <=7 shots. Existing Hex/SE tests stay in the full gate.
+
 Phase 1 `test_converter_se_memory.py` and `test_converter_memory_execution.py`
 test noiseless X/Z variants, exact total SE rounds, semantic views versus three
 Stim/public projection paths and independent MWPM, all physical single-X faults
@@ -8,7 +18,7 @@ classes using pure-X q=.1 (not depolarizing p). Physical batches stay <=7 shots;
 the 512-pattern enumeration is classical. Fixed/adaptive serial/spawn runs,
 caching, exact exported artifacts, repeatability, failed-point recovery and
 metadata guards are checked. Existing Hex tests are unchanged. Phase 0's
-unimplemented-runner test now applies only to the remaining two reserved kinds.
+unimplemented-runner test now applies only to deep Clifford.
 
 `test_converter_config.py`, `test_converter_infrastructure.py` and
 `test_converter_provenance.py` cover Phase 0 strict YAML, all three reserved
@@ -16,7 +26,7 @@ kinds, public installed APIs/pins, source/grammar integrity, lazy Hex execution,
 portable paths, parent sidecar publication/recovery and seven-row numeric spawn
 workers. `fixtures/hex_v2_identities.json` freezes all 14 pre-integration v2
 configs' hashes/point IDs/seeds. New public compiler smoke checks a d3 DEM and
-metadata without sampling. No converter LER or production sweep is tested.
+metadata without sampling. No statistical LER estimate or production sweep is tested.
 
 `test_notebook_plotting.py` uses only six-row synthetic v2 tables (no physical
 sampling). It checks lazy keyed registration, scalar/membership/alias filters,

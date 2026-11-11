@@ -1,13 +1,15 @@
 # V2 adaptive parallel execution and buffered output
 
-Converter Phase 1 SE memory uses the same bounded adaptive pool/chunk/buffer
+Converter SE and Phase 2 Knill memory use the same bounded adaptive pool/chunk/buffer
 policy described here, with parent-owned point-relative artifacts in both
 modes. Its integer batch_size path uses fixed independently seeded chunks
 (`converter_fixed_chunks_v1`), allowing multiple workers within a point;
 it does not use the historical Hex whole-point continuing sampler described
 below. One static converter model is cached per point/process, including the
 parent's artifact model; only bool labels and compact hashes/counts cross IPC.
-See [the converter memory contract](converter_se_memory.md). Existing Hex fixed
+Knill builds all local matching graphs once and replays current native frames
+within each chunk; static model caching never shares sampler RNG state.
+See [SE memory](converter_se_memory.md) and [Knill memory](converter_knill_memory.md). Existing Hex fixed
 and auto behavior remains unchanged.
 
 Both schema-v2 experiments use time-adaptive chunks by default. Schema-v1

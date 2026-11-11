@@ -1,5 +1,11 @@
 # Scripts and entry points
 
+Phase 2 converter Knill memory uses the same installed CLI/PBS wrapper and
+optional six-wheel packaging. The small example is
+configs/converter_knill_memory_v2_example.yaml, with both regime templates in
+configs/templates. No new launcher or production submission is introduced.
+See [the Knill guide](../docs/converter_knill_memory.md).
+
 Phase 1 converter SE memory uses the installed knill-bench-v2 run/resume CLI
 and the existing generic PBS launcher. The small example is
 configs/converter_se_memory_v2_example.yaml; no new shell/worker override or

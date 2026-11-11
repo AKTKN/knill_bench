@@ -1,5 +1,13 @@
 # Independent schema-v2 experiment infrastructure (B0)
 
+Phase 2 `converter_knill_memory.py` uses the same parent-owned fixed/adaptive
+execution as SE, with lazy per-point/worker static compilation and fresh
+chunk-seeded samplers. RunStore checks Knill regimes/probabilities, local
+decoder policies/limits and stage-model digest before completion/resume.
+Completed resume does no compilation/sampling; unfinished points restart at
+zero after compatibility validation. See
+[the Knill guide](../../../docs/converter_knill_memory.md).
+
 Phase 1 `converter_se_memory.py` now supplies runnable fixed/adaptive memory.
 It verifies caller/saved config before cleanup, uses the parent-owned converter
 execution helper and shared run_chunk, and clears its bounded native cache at

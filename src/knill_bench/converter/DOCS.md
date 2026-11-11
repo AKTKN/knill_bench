@@ -1,4 +1,15 @@
-# Optional converter consumer package — Phases 0/1
+# Optional converter consumer package — Phases 0–2
+
+Phase 2 adds `knill_program.py` (three-patch LSTIM, actual-use discovery and
+public typed M9/post-initialization noise), `knill_memory.py` (cached static
+model/artifacts), `knill_decoding.py` (public boundary/readout requests and
+causal frame replay) and `local_matching.py` (explicit component-independent
+temporal matching plus unit-Hamming CSS capacity). Every parallel alternative
+has a separate graph path; invisible components have a declared prior rule;
+residual hyperedges raise. Prepared logical constraints and native sector maps
+are retained. Final corrected interpreted parity supplies labels, with no
+oracle/probe inputs. Metadata binds policies, limits and stage hashes. See
+[the Knill guide](../../../docs/converter_knill_memory.md).
 
 Phase 1 implements `se_memory.py`: authored INIT_Z(1), optional SE(R-1),
 noisy MZ through the converter, exact Stim serialization and one cached model
@@ -30,5 +41,5 @@ public API availability and unchanged Stim/PyMatching pins. It is loaded only
 for converter infrastructure operations. No private converter module imports.
 
 See [configuration, policies, artifact format and limits](../../../docs/converter_integration.md).
-Future Knill/deep generators, decoder adapters and scientific models belong
-here; those two scientific kinds remain unsupported. SE run/resume is available.
+The future deep generator/decoder/model belongs here; its scientific kind
+remains unsupported. SE and Knill run/resume are available.

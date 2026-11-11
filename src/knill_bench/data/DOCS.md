@@ -1,5 +1,11 @@
 # Versioned storage and provenance
 
+Phase 2 Knill uses the same point-relative Parquet/error schema, contiguous
+IDs and parent publication. Its sidecar includes native exports and compact
+stage-model hashes/counts; the execution descriptor declares independent
+temporal components, per-patch unit-Hamming capacity and causal sector replay.
+Physical regime/noise/model changes are rejected on resume before cleanup.
+
 Converter Phase 1 writes real memory labels in the unchanged error schema.
 Sidecars retain round-trip-equal sampled Stim, original LSTIM and native exact
 exported instructions. The memory execution descriptor must match those

@@ -1,0 +1,22 @@
+# Small runnable Phase 2 example, not a production sweep.
+schema_version: 2
+kind: converter_knill_memory
+name: converter_knill_memory
+code: rotated_surface
+noise: converter_uniform
+decoder: mwpm
+sweep:
+  d: [3, 5]
+  p: [0.001]
+T_tel: 2
+r_0: d
+r_plus: d
+resource_preparation: noisy_d_rounds
+input_preparation: noisy
+post_rounds: 0
+shots: 7
+batch_size: 3
+buffer_shot: 3
+workers: 2
+master_seed: 12345
+output_root: results

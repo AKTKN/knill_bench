@@ -4,7 +4,8 @@
 frozen config/point types, simulation-model protocol, parent sidecar registry,
 resource provenance and bounded numeric-worker execution contracts are
 documented in [converter/DOCS.md](converter/DOCS.md). Phase 1 implements converter
-SE run/resume; Knill/deep scientific kinds remain reserved. Existing Hex/v1 paths
+SE run/resume; Phase 2 adds three-patch Knill EC memory with public typed noise
+and causal local MWPM/frame replay. Deep Clifford remains reserved. Existing Hex/v1 paths
 are unchanged.
 
 `analysis.RunRegistry`, `NotebookPlots` and `FigureStyle` provide saved-only
