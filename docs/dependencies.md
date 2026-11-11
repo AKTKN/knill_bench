@@ -1,5 +1,11 @@
 # Dependencies and reproducible installation
 
+Converter Phase 1 keeps both exact VCS pins and all numerical dependencies
+unchanged. Its public make_decoder_view/DetectorSelector, native ordinary
+memory compilation and independent PyMatching are exercised at d3/5. No
+private converter API or dependency source patch is used. See
+[the runnable memory contract](converter_se_memory.md).
+
 Optional converter support uses exact VCS wheels from
 `requirements-converter.lock`: converter `457dc519adec6a11b38843a03e1c8fbbd6495f5a`
 and stimflow `ffe0d043598ed5df0851a3e6b4920359a23fafbd`. Install with

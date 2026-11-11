@@ -4,7 +4,10 @@ Converter Phase 0 introduces a separate consumer-owned package and three
 configuration kinds without modifying Hex circuit/decoder construction.
 Its frozen configs/points, model protocol, parent publication and optional
 backend provenance are specified in [the integration guide](converter_integration.md).
-No converter scientific simulation or LER is implemented in this phase.
+Phase 1 now implements [converter SE memory](converter_se_memory.md): exactly
+R total rounds, full physical X/Z extraction, semantic Z-sector undecomposed
+DEM/MWPM, noisy boundaries and raw-batch logical-flip XOR prediction labels.
+The other two converter scientific kinds remain unimplemented.
 
 The original schema-v1 design below remains unchanged. B1 adds an independent
 [eight-cycle Fig.4(d) experiment](fig4d.md) using actual Hex full Knill modules,

@@ -1,5 +1,14 @@
 # Independent schema-v2 experiment infrastructure (B0)
 
+Phase 1 `converter_se_memory.py` now supplies runnable fixed/adaptive memory.
+It verifies caller/saved config before cleanup, uses the parent-owned converter
+execution helper and shared run_chunk, and clears its bounded native cache at
+exit. Shared _compile_model/run_chunk now load the converter SE model lazily;
+all Hex branches remain unchanged. RunStore validates converter memory policy,
+physical/readout identities and artifact/export linkage before completion/resume.
+Legacy worker-owned execute_points explicitly refuses converter writers.
+See [the SE-memory guide](../../../docs/converter_se_memory.md).
+
 Phase 0 converter kinds route to separate frozen consumer config/point types
 through parse_config, without importing the optional scientific backend.
 RunStore selects converter/stimflow provenance for those kinds and supports

@@ -108,7 +108,10 @@ class ConverterConfig:
     # Shared RunStore interface; these are never converter YAML or identity fields.
     create_codecapacity_dem = False
     codecapacity_prior = "module_local"
-    prior_policy = "converter_decoder_pending"
+    @property
+    def prior_policy(self):
+        return ("converter_z_sector_undecomposed_dem_mwpm_v1" if self.kind == "converter_se_memory"
+                else "converter_decoder_pending")
     projected_approximation = None
     gap_units = None
 

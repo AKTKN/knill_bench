@@ -99,7 +99,7 @@ def test_fake_installed_wheel_checks_resources_and_grammar(tmp_path, monkeypatch
         provenance.installed_source("fake", "fake_converter", "a"*40, direct["url"])
 
 
-@pytest.mark.parametrize("kind", sorted(CONVERTER_KINDS))
+@pytest.mark.parametrize("kind", sorted(CONVERTER_KINDS - {"converter_se_memory"}))
 def test_dispatch_and_resume_refuse_unimplemented_runners_before_output(tmp_path, kind):
     source = tmp_path / "input.yaml"
     source.write_text(yaml.safe_dump(dict(schema_version=2, kind=kind, noise="converter_uniform",

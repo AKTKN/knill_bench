@@ -1,4 +1,4 @@
-"""Reserved parent-owned execution path, exercised with synthetic workers only."""
+"""Parent-owned converter execution using bounded numeric worker results."""
 
 from knill_bench.experiments.config_v2 import CONVERTER_KINDS
 
@@ -11,7 +11,7 @@ def execute_converter_points(store, *, worker, artifact_builder):
     artifact_builder runs exclusively in the parent, returning PointArtifacts.
     Neither circuits nor decoder/frame/native objects cross the worker boundary.
     Integer batch_size uses fixed chunk seeds; auto retains timing-dependent
-    partitions. This helper provides infrastructure, not a scientific runner.
+    partitions. Scientific runners supply the kind-specific worker/model path.
     """
     if store.document.config.kind not in CONVERTER_KINDS:
         raise ValueError("converter execution requires a converter experiment")

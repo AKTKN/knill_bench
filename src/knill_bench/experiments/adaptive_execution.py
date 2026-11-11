@@ -79,6 +79,12 @@ class ChunkSizer:
 
 
 def _compile_model(point, seed, options):
+    if point.kind == "converter_se_memory":
+        from knill_bench.converter.se_memory import memory_model
+        if options:
+            raise ValueError("converter SE memory has no extra worker policy options")
+        model = memory_model(point)
+        return model, model.circuit, model.metadata
     from .config_v2 import CONVERTER_KINDS
     if point.kind in CONVERTER_KINDS:
         from knill_bench.converter.models import require_scientific_runner
@@ -117,7 +123,7 @@ def run_chunk(task, **options):
     # independent of which worker receives it; no dependency globals are patched.
     sampler = circuit.compile_sampler(seed=task.seed)
     raw = sampler.sample(shots=task.shots)
-    if task.point.kind in {"knill_sim", "knill_ec_memory", "fig4d_reproduction", "se_memory"}:
+    if task.point.kind in {"knill_sim", "knill_ec_memory", "fig4d_reproduction", "se_memory", "converter_se_memory"}:
         decoded = model.decode_batch(raw)
         labels = decoded.logical_error
         gaps = getattr(decoded, "gaps", None)

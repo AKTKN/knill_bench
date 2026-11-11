@@ -540,3 +540,32 @@ and --with-converter. Preserve the ordinary Hex setup without this extra.
 Phase 0 gate: 742 bench tests passed (1356 inherited warnings, 132.90 s),
 including 161 new contracts; six-wheel/no-Git CLI/provenance/recovery smokes and
 pip check pass. See TEST.md for initial test fixes and exact commands.
+
+## User-authorized converter SE memory — Phase 1 (2026-11-12)
+
+The user requested Phase 1 implementation/commit/push on the existing
+feature/converter-simulations branch, superseding the historical Phase 0 stop.
+Read docs/converter_se_memory.md and docs/converter_se_memory_report.md.
+Converter/stimflow and all numerical pins stay unchanged; dependency sources
+and other branches remain read-only. Use Conda knill_system.
+
+converter_se_memory now runs/resumes through shared parent-owned fixed/adaptive
+chunk execution. Native INIT_Z(1) includes round one; append SE(R-1) only when
+R>1, then native noisy MZ. Default INIT is noisy; explicit ideal affects INIT
+only. Public semantic Z-sector views and complete undecomposed DEMs feed cached
+MWPM with enable_correlations=False. Unsupported graph/correlated structures
+raise without dropping information. Truth is evaluation-only and labels are
+physical observable flip XOR prediction from the same raw batch.
+
+Cache physical/view/DEM/graph/frame objects once per point/process, never sampler
+RNG across chunks. Exact Stim artifacts round-trip to the sampled circuit; native
+export/source/physical/policy hashes and saved IDs/counts validate before parent
+completion/resume. Preserve existing Hex APIs/tests/hashes/seeds/schemas.
+
+Phase 1 gate: 781 tests passed (1356 inherited warnings, 148.48 s), including
+exact mapping, all d3/5 single-X faults and exhaustive 512-pattern classical d3
+pure-X/CSS reference tests. New physical batches remain d3/5 and <=7 shots;
+the 100000-shot d3/5/7 config is parse-only. Installed fixed/auto CLI and no-Git
+wheel prepared/completed resume smokes pass. See TEST.md for initial fixture/
+serializer corrections. Stop after this Phase 1 commit/push; no converter
+Knill/deep scientific implementation or production sweep is authorized.

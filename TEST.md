@@ -1654,3 +1654,70 @@ simulation configs, user notebooks, .gitignore, v1 numerical APIs and output
 schemas are unchanged. Windows path/serialization contracts are tested on Linux;
 no Windows platform run is claimed. Implementation/design details are in
 docs/converter_integration.md and docs/converter_phase0_report.md.
+
+## 2026-11-12 — Converter SE memory Phase 1
+
+Implementation/commit/push is on feature/converter-simulations after Phase 0
+3cc1974, using Conda knill_system. Converter remains pinned at 457dc519,
+stimflow at ffe0d043; Stim 1.16.0/PyMatching 2.4.0 and locks are unchanged.
+
+- Phase 0 prerequisite:
+  `bash scripts/python.sh -m pytest -q tests/test_converter_config.py tests/test_converter_infrastructure.py tests/test_converter_provenance.py --disable-warnings`
+  — **161 passed, 5.53 s**, before implementation.
+- Initial scientific gate:
+  `bash scripts/python.sh -m pytest -q tests/test_converter_se_memory.py --disable-warnings --tb=short`
+  — 23 passed / 4 failed (6.56 s). The fault fixture incorrectly assumed a
+  selected view retained annotation instruction positions; the serializer
+  incorrectly used str(CircuitRepeatBlock), which is a Python representation.
+  The fixture now injects at the public native initialization cut, then projects
+  its pure-X DEM through the public view maps without dropping events. Repeat
+  headers now use a public one-block Stim circuit representation; every numeric
+  argument round-trips and full circuit equality is required. No dependency or
+  native physical construction was patched. Rerun: **27 passed, 6.19 s**.
+- Focused integration gate:
+  `bash scripts/python.sh -m pytest -q tests/test_converter_se_memory.py tests/test_converter_memory_execution.py tests/test_converter_config.py tests/test_converter_infrastructure.py tests/test_converter_provenance.py tests/test_se_memory.py --disable-warnings --tb=short`
+  — **257 passed, 156 existing-category warnings, 31.64 s**. Includes noiseless
+  X/Z at d3/5, R=1/2/3 exact counts, noisy/ideal INIT, full/selected Stim m2d
+  versus semantic mappings, same-raw-batch labels, separate MWPM predictions,
+  all single physical X wires/boundaries and exhaustive 512-pattern d3 pure-X
+  CSS minimum-weight class/reference matching. The test channel is independent
+  pure-X q=.1, not depolarizing p; the enumeration is classical, not 512 sampled
+  shots or a logical-coset MAP claim. New physical batches stay <=7 shots.
+  Also checks one-point native caching, fixed serial/spawn/repeat replay,
+  fixed/auto one/two-worker row groups/IDs/counts, exact native-export/circuit
+  reconstruction, failed-chunk restart, complete-point byte preservation,
+  metadata rejection before cleanup and external-document resume guards.
+  Existing Hex se_memory tests are unchanged. Phase 0's unimplemented-runner
+  test excludes only the now-implemented SE kind; Knill/deep guards remain.
+- **Full gate:** `bash scripts/python.sh -m pytest -q --disable-warnings`
+  — **781 passed, 1356 inherited-category warnings, 148.48 s**. This is the
+  742-test Phase 0 suite plus 40 new tests, minus the obsolete SE-refusal case.
+  All existing Hex/v1/config/storage/provenance/packaging tests pass. Log:
+  /tmp/knill-converter-phase1-full.log. No test exclusions.
+- `bash scripts/python.sh /tmp/knill_converter_phase1_smoke.py`
+  — actual installed knill-bench-v2 executable runs fixed/auto, workers=2,
+  d3/5, rounds=d, three shots per point. IDs [0,1,2], counts/artifacts and
+  completed resume byte preservation pass. Outputs stay ignored under
+  results/converter_phase1_smoke; no supplied production budget is run.
+- `bash scripts/python.sh scripts/build_cluster_bundle.py --with-converter --output results/converter_phase1_smoke/bundle`
+  and `bash scripts/python.sh -m pip install --no-deps --no-compile --target results/converter_phase1_smoke/installed results/converter_phase1_smoke/bundle/wheels/*.whl`
+  — six wheels build/install with 72 Hex matrix resources and converter grammar;
+  dependency source checkouts remain unchanged. The bench manifest records the
+  actual source snapshot/dirty state during build, without source-repo edits.
+- `bash scripts/python.sh /tmp/knill_converter_phase1_wheel_smoke.py`
+  — installed wheel CLI prepare -> resume executes a three-shot d3/R2 run with
+  workers=2, then completed resume preserves bytes. PYTHONPATH selects the wheel
+  target and PATH is empty, so provenance/compilation/spawn/run/resume work without
+  Git. Actual bench wheel and exact converter/stimflow bundle identities pass.
+  Existing Conda packages supply numerical dependencies; no new offline Python
+  environment is provisioned. Logs/JSON/configs/data stay ignored under results/.
+- `bash scripts/python.sh -m pip check`,
+  `bash scripts/python.sh -m compileall -q src tests/test_converter_se_memory.py tests/test_converter_memory_execution.py`,
+  `bash -n scripts/bootstrap.sh scripts/python.sh scripts/cluster_run_simualtion.sh`
+  and `git diff --check` pass. Hex/converter/other dependency status stays clean.
+
+The supplied 100000-shot/d3,5,7/two-p/eight-worker config is validated without
+constructing large circuits or sampling it. No production sweep, other converter
+scientific kind, statistical paper agreement or performance claim is included.
+Existing Hex numerical sources and memory tests, v1, .gitignore, notebooks,
+dependency sources/pins and existing physical config hashes/seeds are preserved.

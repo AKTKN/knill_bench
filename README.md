@@ -1,11 +1,12 @@
 # knill_bench
 
-The optional converter **Phase 0** integration adds configuration, provenance,
-point-artifact and execution contracts for `converter_se_memory`,
-`converter_knill_memory` and `converter_deep_clifford`. Scientific runners are
-reserved for later phases: validate/prepare work; run/resume fail explicitly.
+The optional converter integration implements **Phase 1 SE memory**, including
+fixed/adaptive multi-worker run/resume, semantic Z-sector MWPM and exact sampled
+circuit artifacts. `converter_knill_memory` and `converter_deep_clifford` retain
+Phase 0 validate/prepare support; their scientific run/resume remain unimplemented.
 Use Conda `knill_system` and [the converter guide](docs/converter_integration.md)
-for exact-commit installation and small templates. Existing Hex paths retain
+for exact-commit installation, or start with [SE memory](docs/converter_se_memory.md)
+and its [small example](configs/converter_se_memory_v2_example.yaml). Existing Hex paths retain
 their configuration hashes, seeds and output layout.
 
 Reproducible physical Stim memory experiments comparing repeated surface-code syndrome extraction with three Knill strategies. The package uses the requested Hex checkout and user-owned LOM/surface-sim forks. It keeps circuit identity, decoder choice, classical work, and live hardware resources separate.

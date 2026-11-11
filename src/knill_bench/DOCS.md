@@ -3,8 +3,9 @@
 `converter/` is a separate optional-backend consumer package. Its Phase 0
 frozen config/point types, simulation-model protocol, parent sidecar registry,
 resource provenance and bounded numeric-worker execution contracts are
-documented in [converter/DOCS.md](converter/DOCS.md). Public converter scientific
-run/resume explicitly fail until later phases. Existing Hex/v1 paths are unchanged.
+documented in [converter/DOCS.md](converter/DOCS.md). Phase 1 implements converter
+SE run/resume; Knill/deep scientific kinds remain reserved. Existing Hex/v1 paths
+are unchanged.
 
 `analysis.RunRegistry`, `NotebookPlots` and `FigureStyle` provide saved-only
 v2 notebook comparisons with deferred keyed loading, six editable Matplotlib

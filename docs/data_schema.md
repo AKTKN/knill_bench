@@ -6,7 +6,9 @@ Optional converter kinds retain schema-v2 table types but use
 `logical_stabilizers.json`. Registration hashes, portable relative paths,
 saved ID/count checks and whole-point recovery are in
 [the converter contract](converter_integration.md). Prepare reserves empty
-directories; converter scientific run/resume remain unimplemented. Existing
+directories; Phase 1 SE run/resume write real labels plus exact sampled Stim/
+LSTIM and public converter export. Execution/source/artifact linkage validates
+before publication/resume. Knill/deep scientific kinds remain reserved. Existing
 Hex output schemas/layouts and v1 are unchanged.
 
 B1 retains this v1 layout and the B0 v2 table types below. Its independent

@@ -859,3 +859,32 @@ recovery, pip check, compile and shell syntax checks pass. Tests use synthetic
 <=7-row workers plus one d3 public compilation/DEM without sampling. No converter
 scientific runners, physical LER results or production sweep are implemented.
 See docs/converter_integration.md, docs/converter_phase0_report.md and TEST.md.
+
+## 2026-11-12 — Converter syndrome-extraction memory Phase 1
+
+Implemented runnable converter_se_memory on feature/converter-simulations.
+The converter authors the entire circuit and detector metadata: INIT_Z(1),
+optional SE(R-1) and noisy final MZ give exactly R total rounds. Default noisy
+INIT and the existing explicit ideal-INIT policy are supported. Public semantic
+Z-sector views yield complete undecomposed graphlike DEMs; independent-event
+PyMatching is checked explicitly, with no hyperedge/correlated-component loss.
+Predictions use events only; labels XOR the physical flip from the same batch.
+
+One native circuit/view/DEM/graph/frame model is cached per point/process;
+fresh chunk samplers retain existing converter fixed/auto seeds. Parent-owned
+exact LSTIM/Stim/native-export sidecars and error Parquet use the shared bounded
+execution/publication/restart path. Resume verifies execution/physical/artifact
+linkage and IDs/counts before cleanup; completed resume builds no models.
+
+Phase 0 baseline: 161 tests passed. New science/execution tests use d3/5 and
+<=7 physical shots per batch, with all single-X sites including boundaries and
+all 512 d3 pure-X patterns enumerated classically against CSS minimum-weight
+classes. Focused incl. unchanged Hex memory: 257 passed, 156 warnings, 31.64 s.
+Full gate: 781 passed, 1356 inherited warnings, 148.48 s. Installed fixed/auto
+CLI and six-wheel no-Git prepared/completed resume smokes pass; numerical
+dependencies come from the existing Conda environment for that target smoke.
+Initial fixture annotation-order assumptions and repeat-block serialization
+were corrected without dependency edits. All pins, Hex/v1 sources/tests,
+.gitignore, existing configs/notebooks and dependency checkouts are unchanged.
+No production sweep or later converter scientific phase ran. See
+docs/converter_se_memory.md, docs/converter_se_memory_report.md and TEST.md.

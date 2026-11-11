@@ -1,5 +1,13 @@
 # Getting started: auxiliary-system experiments
 
+Converter SE memory is now available through the optional converter backend:
+install with `bash scripts/bootstrap.sh --with-converter`, then use
+`knill-bench-v2 run configs/converter_se_memory_v2_example.yaml` and
+`knill-bench-v2 resume results/<saved-run>`. The example is seven shots at
+d3/5, with exact total rounds and noisy boundaries. See
+[the memory guide](docs/converter_se_memory.md) for physical/decoder contracts,
+fixed/adaptive execution and artifacts. Existing Hex workflows below are unchanged.
+
 This branch supplies two schema-v2 experiments and saved-data analysis:
 
 | Experiment | Physical stages | Final readout | Saved point files |

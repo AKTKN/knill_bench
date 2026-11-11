@@ -5,7 +5,8 @@ builder. `requirements-converter.lock` pins exact converter/stimflow VCS
 commits and additional runtime packages without changing numerical pins. With
 `--download-deps`, the six-project-wheel bundle supports offline converter
 provenance/prepare without Git on the target. Existing four-wheel Hex bundles
-are unchanged. Converter scientific runners are not implemented in Phase 0.
+are unchanged. Phase 1 supports converter SE memory run/resume; the other
+converter scientific runners remain unimplemented.
 See [installation and cluster details](converter_integration.md).
 
 研究用環境は **knill_system**、Python は **3.12.15** です。数値・解析・

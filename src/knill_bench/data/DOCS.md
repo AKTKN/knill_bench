@@ -1,5 +1,11 @@
 # Versioned storage and provenance
 
+Converter Phase 1 writes real memory labels in the unchanged error schema.
+Sidecars retain round-trip-equal sampled Stim, original LSTIM and native exact
+exported instructions. The memory execution descriptor must match those
+artifacts, physical point and public export fingerprint before completion or
+saved resume; IDs/counts are streamed as before. No new tables or filenames.
+
 Phase 0 converter points reuse the v2 logical_error Arrow schema and PointWriter
 under `points/<case_id>/logical_error.parquet`. Temporary files are siblings
 of public paths, supporting both nested converter and legacy flat Hex layouts.

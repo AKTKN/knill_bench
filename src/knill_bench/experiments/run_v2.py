@@ -117,6 +117,10 @@ class RunStore:
             if (config.kind in {"knill_sim", "knill_ec_memory"}
                     and value.get("final_readout") != next(config.points()).final_readout):
                 raise ValueError("saved Knill final readout changed")
+            if config.kind == "converter_se_memory" and (
+                    value.get("kind") != config.kind or value.get("gap_units") is not None
+                    or value.get("final_readout") != next(config.points()).final_readout):
+                raise ValueError("saved converter memory kind/readout/score contract changed")
             if (value.get("prior_policy") != config.prior_policy
                     or (config.create_codecapacity_dem
                         and value.get("projected_approximation") != config.projected_approximation)):
@@ -146,7 +150,7 @@ class RunStore:
                                              create_codecapacity_dem=config.create_codecapacity_dem, codecapacity_prior=config.codecapacity_prior)
                     validate_point_files(path, point, config.shots)
                     if converter:
-                        validate_artifacts(path, point, info.get("artifacts"))
+                        validate_artifacts(path, point, info.get("artifacts"), execution=info.get("execution"))
                         validate_counts(path, point, config.shots, info["logical_errors"])
                     if (type(info["shots"]) is not int or info["shots"] != config.shots
                             or type(info["logical_errors"]) is not int
@@ -217,7 +221,7 @@ class RunStore:
         validate_point_files(self.path, point, config.shots)
         if config.kind in CONVERTER_KINDS:
             from knill_bench.converter.artifacts import validate_artifacts, validate_counts
-            validate_artifacts(self.path, point, self._metadata["points"][point.case_id].get("artifacts"))
+            validate_artifacts(self.path, point, self._metadata["points"][point.case_id].get("artifacts"), execution=execution)
             validate_counts(self.path, point, config.shots, result.logical_errors)
         validate_noise_execution(point, execution, create_codecapacity_dem=config.create_codecapacity_dem, codecapacity_prior=config.codecapacity_prior)
         if execution is not None:

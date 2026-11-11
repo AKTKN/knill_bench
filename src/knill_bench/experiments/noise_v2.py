@@ -119,6 +119,9 @@ def validate_noise_execution(point, execution, *, create_codecapacity_dem, codec
         # Converter source/noise identity is checked by its point sidecar. Hex
         # inference/noise fields do not apply to the separate backend.
         validate_noise(point.kind, point.noise, None)
+        if point.kind == "converter_se_memory":
+            from knill_bench.converter.metadata import validate_memory_execution
+            validate_memory_execution(point, execution)
         return
     if point.kind in {"knill_sim", "knill_ec_memory"}:
         from hex_qec.modularisation import KnillNoiseModel

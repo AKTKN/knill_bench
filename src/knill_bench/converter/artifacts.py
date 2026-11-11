@@ -96,7 +96,7 @@ def registered_files(point, registry=None):
     return [*point.files, *optional]
 
 
-def validate_artifacts(run, point, registry):
+def validate_artifacts(run, point, registry, *, execution=None):
     required = {f"{point.directory}/{n}" for n in point.artifact_names}
     allowed = required | {f"{point.directory}/{n}" for n in point.optional_artifact_names}
     if not isinstance(registry, dict) or not required <= registry.keys() or not registry.keys() <= allowed:
@@ -110,6 +110,9 @@ def validate_artifacts(run, point, registry):
     if (meta.get("artifact_schema") != "converter_point_v1" or meta.get("case_id") != point.case_id
             or meta.get("sampling_identity") != point.sampling_identity or meta.get("content_sha256") != expected):
         raise ValueError("converter point artifact identity changed")
+    if point.kind == "converter_se_memory":
+        from .metadata import validate_memory_artifacts
+        validate_memory_artifacts(point, registry, meta.get("model"), execution)
 
 
 def validate_counts(run, point, shots, errors):

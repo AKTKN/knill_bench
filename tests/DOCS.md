@@ -1,5 +1,15 @@
 # Bench regression tests
 
+Phase 1 `test_converter_se_memory.py` and `test_converter_memory_execution.py`
+test noiseless X/Z variants, exact total SE rounds, semantic views versus three
+Stim/public projection paths and independent MWPM, all physical single-X faults
+at d3/5 including boundaries, and exhaustive 512-pattern d3 CSS minimum-weight
+classes using pure-X q=.1 (not depolarizing p). Physical batches stay <=7 shots;
+the 512-pattern enumeration is classical. Fixed/adaptive serial/spawn runs,
+caching, exact exported artifacts, repeatability, failed-point recovery and
+metadata guards are checked. Existing Hex tests are unchanged. Phase 0's
+unimplemented-runner test now applies only to the remaining two reserved kinds.
+
 `test_converter_config.py`, `test_converter_infrastructure.py` and
 `test_converter_provenance.py` cover Phase 0 strict YAML, all three reserved
 kinds, public installed APIs/pins, source/grammar integrity, lazy Hex execution,

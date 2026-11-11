@@ -1,4 +1,4 @@
-# Phase 0: validate-config/prepare only; scientific run/resume are not implemented.
+# Phase 1: runnable converter Z-memory with exactly rounds total SE rounds.
 schema_version: 2
 kind: converter_se_memory
 name: converter_se_memory_small

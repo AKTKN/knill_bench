@@ -1,11 +1,13 @@
-# Converter integration — Phase 0
+# Converter integration — Phase 0 contracts and Phase 1 memory
 
 This phase adds infrastructure for `converter_se_memory`,
-`converter_knill_memory` and `converter_deep_clifford`. It supplies no physical
-scientific runner or logical error rate results. `validate-config` parses all
+`converter_knill_memory` and `converter_deep_clifford`. Phase 1 implements
+[ordinary converter SE memory](converter_se_memory.md); the other two scientific
+kinds remain reserved for later phases. `validate-config` parses all
 three without importing converter, stimflow or Hex. `prepare` verifies the
 installed converter and reserves pending point directories. `run` and `resume`
-explicitly raise `NotImplementedError` before creating a run or cleaning data.
+execute converter_se_memory. The other two kinds explicitly raise
+`NotImplementedError` before creating a run or cleaning data.
 Existing Hex configurations, hashes, seeds, filenames, directories and table
 schemas are unchanged. V1 numerical sources and dependency sources are unchanged.
 
@@ -65,7 +67,7 @@ All retain `schema_version: 2`, `sweep.d`, `sweep.p`, `shots`, `batch_size`,
 Distances are odd integers >=3; probabilities are finite in [0,.5].
 `noise: converter_uniform` is required and reserves exactly the public
 `NoiseModel.uniform_depolarizing(p)` policy. Hex noise profiles are rejected.
-No new physical noise schedule is implemented here.
+The SE runner delegates its entire physical schedule to the converter.
 
 | Kind | Additional fields and defaults |
 | --- | --- |
@@ -81,8 +83,9 @@ public typed preparation policies/primitive overrides. These names do not
 idealize subsequent gates or erase residual errors. `n_r` reserves the number
 of parallel Knill EC rounds per Clifford layer; `circuit_seed` identifies the
 generated logical gate schedule separately from `master_seed` sampling.
-No gate schedule, decoding strategy or terminal-probe construction is implemented
-in this phase. Memory readout reserves noisy Z; deep Clifford reserves ideal
+Knill/deep scientific schedules, decoding and probes remain later phases.
+SE memory now uses exactly R total rounds and Z-sector MWPM, with noisy Z
+readout. Deep Clifford reserves ideal
 terminal stabilizer probes exclusively for evaluation.
 
 Depth rules share existing exact rational flooring: positive integer, `d`,
@@ -107,12 +110,12 @@ the stable `SimulationModel` protocol: exact sampled `circuit`, original
 `lstim_source`, worker-local static `decoder` and `frame_plan`, compact
 `metadata`, and `decode_batch(measurements) -> DecodedBatch` containing a
 one-dimensional bool logical-error array. Truth/probe columns must never
-enter decoder inputs. Program generators/decoder adapters/models will live
-in this package in later phases; no private converter import or copied
-converter implementation is permitted.
+enter decoder inputs. Phase 1 adds se_memory.py, decoding.py and metadata.py
+for ordinary memory. The other scientific models remain later phases; no
+private converter import or copied converter implementation is permitted.
 
 `execution.execute_converter_points` requires explicit worker/artifact-builder
-callbacks; it has no scientific default. It reuses shared ChunkTask/ChunkResult,
+callbacks, supplied by the SE runner. It reuses shared ChunkTask/ChunkResult,
 spawn pools, bounded outstanding/reordered batches, ChunkSizer, PointBuffer,
 PointWriter, chunk seeds and RunStore. The artifact builder runs in the parent;
 workers return bool vectors, timing/caps and <=64 KiB JSON execution descriptors.
@@ -124,7 +127,7 @@ serial/spawn results match for identical tasks. Auto uses existing
 `time_adaptive_chunks_v1`: timing may change partitions/results across runs or
 worker counts. Existing Hex fixed mode retains its continuing point sampler.
 Only the parent opens converter point writers or publishes sidecars/metadata.
-Synthetic seven-row workers verify this path without exposing a scientific run.
+Synthetic seven-row workers and tiny real SE runs verify this path.
 
 ## Saved artifacts and recovery
 
@@ -142,10 +145,11 @@ points/<case_id>/
     logical_stabilizers.json          # optional, deep Clifford only
 ```
 
-`prepare` creates empty point directories and pending metadata only. Future
-scientific artifacts must retain public `compiled.export_metadata()` inside
-the model sidecar: Stim text can round floating arguments; the export's
-selected instruction arguments preserve exact reconstruction. The model's
+`prepare` creates empty point directories and pending metadata only. Scientific
+artifacts retain public `compiled.export_metadata()` inside the model sidecar.
+The SE serializer round-trips every numeric argument and verifies full equality
+to the sampled circuit. Exported selected instructions additionally preserve
+exact reconstruction. The model's
 sampled circuit must be the same circuit whose artifacts are published.
 `PointArtifacts` carries parent-owned source strings and JSON model metadata.
 
@@ -163,8 +167,9 @@ Only the owner updates metadata. Incomplete-point recovery removes all of that
 point's known table/sidecar/temp files and restarts at zero with the same seed;
 complete files stay intact. Config/source/version compatibility and all complete
 points are checked before cleanup. No unfinished scientific kind is marked as
-success by public CLI. Phase 0 resume contract tests invoke RunStore directly;
-public converter resume remains intentionally unsupported.
+success by public CLI. Converter SE resume is supported; the other two kinds
+remain intentionally unsupported. Phase 1 also cross-checks memory execution,
+artifact hashes/export and physical/readout identities before publication/resume.
 
 ## Provenance
 
@@ -177,5 +182,6 @@ checkouts/Git are unnecessary at wheel runtime. Resume compares both backend
 source identities and versions. Hex experiments continue to use their existing
 Hex-lineage API/source/matrix checks and never import this optional backend.
 
-See [the implementation report](converter_phase0_report.md) and
+See [the Phase 0 report](converter_phase0_report.md),
+[the SE-memory guide](converter_se_memory.md), [Phase 1 report](converter_se_memory_report.md) and
 [TEST.md](../TEST.md) for verification and remaining phase boundaries.

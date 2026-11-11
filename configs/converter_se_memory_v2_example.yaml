@@ -1,0 +1,18 @@
+# Small runnable example; no production budget is launched by tests/bootstrap.
+schema_version: 2
+kind: converter_se_memory
+name: converter_memory_small
+code: rotated_surface
+noise: converter_uniform
+decoder: mwpm
+sweep:
+  d: [3, 5]
+  p: [0.001]
+rounds: d
+input_preparation: noisy
+shots: 7
+batch_size: auto
+buffer_shot: 3
+workers: 2
+master_seed: 12345
+output_root: results

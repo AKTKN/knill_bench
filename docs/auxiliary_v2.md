@@ -3,7 +3,9 @@
 Converter Phase 0 adds optional `converter_se_memory`, `converter_knill_memory`
 and `converter_deep_clifford` configuration/prepare support with separate
 point-relative artifacts. Existing Hex identities and layout are preserved.
-Converter run/resume explicitly refuse unfinished scientific runners. See
+Phase 1 supports converter SE run/resume with exactly R total extraction rounds
+and semantic Z-sector MWPM; Knill/deep converter kinds still refuse scientific
+execution. See [memory](converter_se_memory.md) and
 [the converter contract](converter_integration.md) for YAML, dependency,
 model, execution, provenance and recovery details.
 

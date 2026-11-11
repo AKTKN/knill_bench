@@ -1,4 +1,4 @@
-"""Public consumer-side contracts; no Phase 0 scientific implementations."""
+"""Public consumer-side simulation contracts and reserved-kind guard."""
 
 from dataclasses import dataclass
 from typing import TYPE_CHECKING, Protocol
@@ -38,4 +38,4 @@ class DecodedBatch:
 
 
 def require_scientific_runner(kind):
-    raise NotImplementedError(f"{kind}: Phase 0 infrastructure only; scientific runner is not implemented yet")
+    raise NotImplementedError(f"{kind}: scientific runner is not implemented yet")

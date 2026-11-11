@@ -1,5 +1,12 @@
 # Scripts and entry points
 
+Phase 1 converter SE memory uses the installed knill-bench-v2 run/resume CLI
+and the existing generic PBS launcher. The small example is
+configs/converter_se_memory_v2_example.yaml; no new shell/worker override or
+production job is introduced. Optional cluster wheels package the memory model
+and strict decoder with the same converter/stimflow pins. See
+[the memory guide](../docs/converter_se_memory.md).
+
 `bootstrap.sh --with-converter` installs the exact optional converter/stimflow
 VCS wheels and locked transitive dependencies into knill_system, without
 changing the user's clone or numerical pins. Default bootstrap remains Hex-only.
