@@ -263,3 +263,10 @@ VM**, including at p0. The regular 52-point matrix and all three kinds' smaller
 multiworker numerical executions are complete. Use a machine with sufficient
 native static-model memory for the depth32 numerical check; no successful
 larger-memory execution is claimed here.
+
+Actual platform result: [CI run 43162041380](https://github.com/AKTKN/knill_bench/actions/runs/43162041380)
+on f69f645 passes **301 selected converter/scientific/spawn/subprocess/storage
+tests on Linux and 301 on Windows**, plus dependency/syntax checks and six-wheel
+builds. This includes real Windows multiworker run/resume and interrupted-run
+recovery after the writable-descriptor fsync correction. See the evidence report
+for the initial failed run and unchanged scientific scope.

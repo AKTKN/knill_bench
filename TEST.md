@@ -2148,3 +2148,44 @@ after both portability corrections — **76 passed, 6.50 s**;
 /tmp/knill-converter-phase5-ci-storage-fix.log. The complete bench/platform
 reruns use the committed correction below, without rerunning resource-failing
 depth32 numerical attempts or changing any scientific implementation.
+
+Final-code wheel checks after f69f645's writable-fsync correction:
+- `bash scripts/python.sh scripts/build_cluster_bundle.py --with-converter --output results/converter_phase5_cluster_final/bundle`
+- `bash scripts/python.sh -m pip install --no-deps --no-compile --target results/converter_phase5_cluster_final/installed results/converter_phase5_cluster_final/bundle/wheels/*.whl`
+- `bash scripts/python.sh /tmp/knill_converter_phase5_final_wheel_smoke.py`
+
+All six wheels rebuild/install, and all three actual no-Git numerical
+prepare/run/resume/summary paths pass with verified installed imports, three
+shots/two workers, checksummed artifacts and byte-preserving completed resume.
+Logs: /tmp/knill-converter-phase5-final-bundle.log, final-wheel-install.log and
+final-wheel.log; ignored results/converter_phase5_cluster_final. All 52 saved
+matrix points additionally pass the final saved-only validator, without
+resampling or pretending their original recorded code revision changed.
+
+Corrected cross-platform Actions run:
+https://github.com/AKTKN/knill_bench/actions/runs/43162041380
+on f69f645ec2e683bffc8fe45c96fad9dac0e4f85b completed **successfully on Linux
+and Windows**. Both install the same pinned Conda/VCS environment, execute the
+workflow's 301 converter/scientific/subprocess/spawn/storage/provenance tests,
+run pip check/compileall, and build all six resource-complete project/backend
+wheels. Linux: **301 passed, 186.11 s**. Windows: **301 passed, 390.27 s**.
+This is actual native Windows execution, including all three multiworker CLI
+and hard-exit recovery paths; it supersedes the earlier pending-platform note.
+The original failed run and fixes remain recorded above. No dependency source
+or scientific policy changed to obtain these passes.
+
+Final complete bench rerun on f69f645 after the real Windows corrections:
+`bash scripts/python.sh -m pytest -q --disable-warnings`
+— **975 passed, 1356 inherited warnings, 845.08 s (14:05)**;
+/tmp/knill-converter-phase5-final-full.log. No exclusions or warning-policy
+changes. Both corrected file flush modes and actual-branch assertion are
+included; all existing Hex/v1 adapters, converter reference/fault/numerical,
+storage, serialization and multiprocessing cases pass. Final source/wheel,
+identity, public-import, syntax/whitespace and clean dependency checks pass.
+
+The final report-only update records these outcomes without changing validated
+Python/scientific code; its commit skips a redundant CI run. Implementation
+revision f69f645 is verified by the full local gate, Linux/Windows Actions
+43162041380, and final installed-wheel smoke. The disclosed external Hex
+historical failure and sampled depth32 workstation memory limitation remain
+unresolved within the authorized read-only dependency scope.

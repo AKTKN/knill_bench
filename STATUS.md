@@ -1036,3 +1036,16 @@ descriptor. Branch provenance now checks actual Git; both Parquet writers use
 r+b solely for fsync. Local storage/runtime/provenance gate: 76 passed, 6.50 s.
 The first failed CI counts and subsequent reruns are retained in TEST.md/report;
 no initial platform failure is misreported as validated.
+
+Corrected Actions run 43162041380 on f69f645 is green on both platforms:
+301 tests on Linux (186.11 s), 301 on Windows (390.27 s), dependency/compile
+checks and all six wheel builds. This verifies actual Windows multiworker CLI,
+physical/reference, serialization, storage and interrupted-run recovery rather
+than relying only on mocked platform branches. Initial failures stay disclosed.
+
+Final local gate after the Windows fixes: **975 passed**, 1356 inherited
+warnings, **845.08 s**. Actual Linux/Windows CI and final no-Git wheels are green.
+Implementation f69f645 is complete and validated for the stated scopes; final
+report-only changes preserve the tested Python source. The inherited external
+Hex confidence failure and sampled depth32 RAM limit remain disclosed. No
+production sweep, dependency scientific modification or further phase ran.

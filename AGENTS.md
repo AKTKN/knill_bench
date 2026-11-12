@@ -734,3 +734,15 @@ branch, and Windows fsync rejected read-only staged Parquet descriptors.
 Keep exact-ref/clean/API checks and independently verify branch; reopen staged
 tables/ledgers r+b solely for fsync. Both are integration/storage changes, not
 Hex scientific changes. Initial CI failures and corrected reruns stay recorded.
+
+Corrected CI run 43162041380 on f69f645 passed on Linux and Windows: 301 selected
+converter/scientific/subprocess/spawn/storage tests per platform, plus pip check,
+compileall and all six wheel builds. This is actual Windows runner evidence.
+Keep its tested scope separate from full local bench/Hex gates and the failed
+sampled depth32 memory checks; no large-memory numerical pass is implied.
+
+Final local gate after real Windows fixes: 975 passed, 1356 inherited warnings,
+845.08 s. Implementation f69f645 plus the report-only delivery commit is the
+Phase 5 handoff. Linux/Windows CI and final installed wheels pass; external Hex's
+one historical failure and sampled depth32 VM-memory limit remain disclosed.
+No additional phase/dependency optimization or production sweep is authorized.

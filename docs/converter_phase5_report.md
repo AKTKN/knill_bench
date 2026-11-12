@@ -189,8 +189,7 @@ mutation is used to turn an incomplete check into a pass.
 Remaining limits directly affecting execution are the large native static
 stage/view memory for deep circuits, strict source/version resume compatibility,
 timing-dependent auto partitions, the documented local/non-correlated decoder
-approximations, and the distinction between verified Linux checks and pending
-remote Windows CI. All requested independent references/fault checks in the
+approximations, and the platform/test scopes specified below. All requested independent references/fault checks in the
 bench pass; the existing Hex dependency suite still has its disclosed fixed-
 seed adaptive-confidence failure. No published numerical reproduction is claimed.
 
@@ -207,3 +206,29 @@ Parquet and the ledger now reopen closed staged files r+b for durable flushing.
 This fixes storage portability without modifying file bytes, scientific code,
 noise, inference or physical identities. Initial failures remain disclosed;
 final rerun outcomes follow below.
+
+Implementation revision **f69f645ec2e683bffc8fe45c96fad9dac0e4f85b** adds the
+two writable-fsync opens and the portable Git-branch assertion to 589f95b's
+integration. Final-code six-wheel rebuilding and verified installed/no-Git
+prepare/run/resume/summary pass for all three kinds (three shots/two workers).
+All 52 earlier saved numerical points also pass the final saved-only validator
+without resampling; their original source provenance is retained.
+
+The corrected run on **f69f645** is
+[Actions run 43162041380](https://github.com/AKTKN/knill_bench/actions/runs/43162041380):
+**Linux and Windows both pass**. Each executes all **301 selected tests**
+covering converter physics/references, raw/terminal decoding, subprocess CLI,
+spawn, serialization, ledger/storage and provenance. Linux completes tests in
+**186.11 s**; Windows in **390.27 s**. Both also pass dependency/syntax checks
+and build all six resource-complete wheels with pinned VCS sources. Windows
+support is therefore backed by an actual runner, beyond the local handle mocks.
+The full local bench count and the larger depth32 memory limitation remain
+separate evidence scopes.
+
+Final full local rerun on **f69f645**: **975 passed, 1356 inherited warnings,
+845.08 s (14:05)**, with no exclusions. This includes the Windows flush and
+portable-branch corrections. Both remote 301-test platform jobs and all final
+installed-wheel checks pass. The delivery's final report-only commit retains
+this validated Python code unchanged and skips redundant CI; its SHA is given
+in the delivery message. The external Hex failure and sampled depth32 memory
+boundary remain explicitly unresolved within the read-only dependency scope.
