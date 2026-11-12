@@ -1,4 +1,16 @@
-# Optional converter consumer package — Phases 0–2
+# Optional converter consumer package — Phases 0–3
+
+Phase 3 adds `deep_program.py`: frozen abstract gate layers, a private seeded
+HXYZ/shuffle/orientation RNG and explicit barrier-separated parallel LSTIM.
+`deep_clifford.py` compiles through public typed noise policies, checks patch/
+relocation/overlap allocation and validates native logical stabilizers before
+requesting a native terminal probe. Its circuit is probe.circuit; no physical
+lifting, MPP construction or signed frame correction is implemented here.
+The model has a lazy public frame plan and deliberately has no decode_batch.
+`generation.py` owns artifact-only fresh output; `deep_artifacts.py` verifies
+full logical sequence, signed state, probe-prefix/count/support metadata and
+hashes. No scientific run marker, samples or error tables are produced.
+See [the deep guide](../../../docs/converter_deep_clifford.md).
 
 Phase 2 adds `knill_program.py` (three-patch LSTIM, actual-use discovery and
 public typed M9/post-initialization noise), `knill_memory.py` (cached static
@@ -41,5 +53,5 @@ public API availability and unchanged Stim/PyMatching pins. It is loaded only
 for converter infrastructure operations. No private converter module imports.
 
 See [configuration, policies, artifact format and limits](../../../docs/converter_integration.md).
-The future deep generator/decoder/model belongs here; its scientific kind
-remains unsupported. SE and Knill run/resume are available.
+The future noisy deep decoder belongs here; deep scientific run/resume remains
+unsupported. SE and Knill run/resume and deep artifact-only compile are available.

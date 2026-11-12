@@ -1,12 +1,15 @@
 # Dependencies and reproducible installation
 
-Converter Phases 1/2 keep both exact VCS pins and all numerical dependencies
+Converter Phases 1–3 keep both exact VCS pins and all numerical dependencies
 unchanged. Its public make_decoder_view/DetectorSelector, native ordinary
 memory compilation and independent PyMatching are exercised at d3/5. No
 private converter API or dependency source patch is used. See
 [the SE memory contract](converter_se_memory.md) and
 [Knill stage/frame contract](converter_knill_memory.md). Knill consumes the
 public typed noise/stage/frame APIs and constructs its own local MWPM graphs.
+Deep generation uses native parallel compilation, logical_output_stabilizers
+and make_terminal_observable_probe at the same revision; no dependency edit or
+new runtime package is needed. See [the deep guide](converter_deep_clifford.md).
 
 Optional converter support uses exact VCS wheels from
 `requirements-converter.lock`: converter `457dc519adec6a11b38843a03e1c8fbbd6495f5a`

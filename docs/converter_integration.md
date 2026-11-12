@@ -1,14 +1,17 @@
-# Converter integration — Phases 0–2
+# Converter integration — Phases 0–3
 
 This phase adds infrastructure for `converter_se_memory`,
 `converter_knill_memory` and `converter_deep_clifford`. Phase 1 implements
 [ordinary converter SE memory](converter_se_memory.md); Phase 2 adds
-[three-patch Knill EC memory](converter_knill_memory.md). Deep Clifford remains
-reserved for a later phase. `validate-config` parses all
+[three-patch Knill EC memory](converter_knill_memory.md). Phase 3 adds
+[deep Clifford circuit generation](converter_deep_clifford.md), through the
+artifact-only `compile` command. Its noisy decoder remains Phase 4. `validate-config` parses all
 three without importing converter, stimflow or Hex. `prepare` verifies the
 installed converter and reserves pending point directories. `run` and `resume`
 execute converter_se_memory and converter_knill_memory. Deep Clifford raises
 `NotImplementedError` before creating a run or cleaning data.
+Its `compile` output is a separate generated-artifact manifest, with no sampled
+labels/Parquet table or scientific completion marker.
 Existing Hex configurations, hashes, seeds, filenames, directories and table
 schemas are unchanged. V1 numerical sources and dependency sources are unchanged.
 
@@ -60,6 +63,7 @@ Use the [SE](../configs/templates/converter_se_memory.yaml),
 ```bash
 knill-bench-v2 validate-config configs/templates/converter_knill_memory.yaml
 knill-bench-v2 prepare configs/templates/converter_knill_memory.yaml
+knill-bench-v2 compile configs/converter_deep_clifford_v2_example.yaml
 ```
 
 All retain `schema_version: 2`, `sweep.d`, `sweep.p`, `shots`, `batch_size`,
@@ -75,7 +79,7 @@ The SE runner delegates its entire physical schedule to the converter.
 | All converter kinds | `input_preparation: noisy` or `ideal` (must agree with Knill regime) |
 | SE memory | `rounds: d` |
 | Knill memory | `T_tel: 1`, `r_0: d`, `r_plus: d`, `post_rounds: 0`, `resource_preparation: noisy_d_rounds` or `ideal_post_se_depolarizing`; ideal-post `p_st_multiplier: 1` |
-| Deep Clifford | `logical_qubits: 4`, `depth: 1`, `circuit_seed: 0`, `n_r: 1`, `r_0: d`, `r_plus: d`, same `resource_preparation` |
+| Deep Clifford | `logical_qubits: 4`, `depth: 32`, `circuit_seed: 0`, `n_r: 1`, `r_0: d`, `r_plus: d`, `resource_preparation: noisy` or `ideal`; ideal resources allow `p_st_multiplier: 0` |
 
 SE/deep policy names are consumer-owned contracts: `noisy` retains uniform preparation
 noise; `ideal` requests ideal input initialization or ideal Bell-owned resource
@@ -88,16 +92,20 @@ Knill uses the two explicit Phase 2 regimes: noisy d-round input/resources,
 or ideal input/resources plus public post-initialization/M9 data channels.
 The ideal-post multiplier sets p_st=p*multiplier; ordinary CNOT/readout noise
 remains active. Conflicting input settings and legacy placeholder Knill names
-are rejected. Deep scientific schedules, decoding and probes remain a later phase.
+are rejected. Deep requires ideal plus-state input; noisy resources use d rounds,
+and ideal resources use typed M9 with optional p_st=p*multiplier (default zero).
+Its seeded single-qubit/CNOT sequence is independent of d/p/n_r/workers. Native
+parallel Knill groups and terminal probes are generated in Phase 3; decoding
+remains a later phase.
 SE memory now uses exactly R total rounds and Z-sector MWPM, with noisy Z
 readout. Deep Clifford reserves ideal
 terminal stabilizer probes exclusively for evaluation.
 
 Depth rules share existing exact rational flooring: positive integer, `d`,
 `2*d`, `2/3*d`, `.6*d`, etc. Every resolved result must fit positive int64.
-Deep requires **resolved r_0 == r_plus at every swept d** because public
-`KNILL_EC(rounds)` has one shared depth. Phase 2 Knill requires both depths to
-resolve to **d**, and post_rounds must be a nonnegative integer. Unknown/duplicate keys, arbitrary
+Knill and deep require **resolved r_0 == r_plus == d at every swept d**.
+post_rounds is Knill-only and must be a nonnegative integer. Deep logical_qubits
+must be even and >=2 for disjoint perfect CNOT pairing. Unknown/duplicate keys, arbitrary
 expressions, unsafe YAML, irrelevant kind fields and new sweep axes fail before
 output. Hex-only priors/theta/gaps/validation switches are rejected.
 
@@ -122,7 +130,10 @@ for ordinary memory. Phase 2 adds knill_program.py, knill_memory.py,
 knill_decoding.py and local_matching.py for public native stage/frame replay
 with independent temporal-component/CSS matching. Correlation loss, invisible
 components and local-prior limits are explicit in metadata; residual hyperedges
-raise. Deep remains a later phase; no
+raise. Phase 3 adds deep_program.py/deep_clifford.py for seeded abstract gates,
+public parallel compilation and native signed probes, plus generation.py and
+deep_artifacts.py for artifact-only publication. It does not implement the
+SimulationModel decoding method yet. No
 private converter import or copied converter implementation is permitted.
 
 `execution.execute_converter_points` requires explicit worker/artifact-builder
@@ -163,6 +174,12 @@ to the sampled circuit. Exported selected instructions additionally preserve
 exact reconstruction. The model's
 sampled circuit must be the same circuit whose artifacts are published.
 `PointArtifacts` carries parent-owned source strings and JSON model metadata.
+For deep `compile`, circuit.stim is the **extended probe.circuit**. The original
+native circuit export remains the canonical prefix; terminal probe metadata
+retains its original measurement count, indices, signed supports and fingerprint.
+Signed logical definitions are mandatory for generated deep artifacts.
+The root `converter_generation_v1` manifest has generated/failed status and
+does not use the simulation table or completion contract shown above.
 
 Run point `files` lists the required table/sidecars and any optional stabilizer
 file; `artifacts` maps sidecar paths to SHA256. All sidecars fsync before the
@@ -178,8 +195,9 @@ Only the owner updates metadata. Incomplete-point recovery removes all of that
 point's known table/sidecar/temp files and restarts at zero with the same seed;
 complete files stay intact. Config/source/version compatibility and all complete
 points are checked before cleanup. No unfinished scientific kind is marked as
-success by public CLI. Converter SE/Knill resume is supported; deep Clifford
-remains intentionally unsupported. Memory checks cross-check execution,
+success by public CLI. Converter SE/Knill resume is supported; deep noisy
+run/resume remains intentionally unsupported, including for generated bundles.
+Memory checks cross-check execution,
 artifact hashes/export and physical/readout identities before publication/resume.
 Knill additionally binds preparation probabilities, decoder approximation and
 per-stage model digest to its saved sidecar.
@@ -197,5 +215,6 @@ Hex-lineage API/source/matrix checks and never import this optional backend.
 
 See [the Phase 0 report](converter_phase0_report.md),
 [the SE-memory guide](converter_se_memory.md), [Phase 1 report](converter_se_memory_report.md),
-[the Knill guide](converter_knill_memory.md), [Phase 2 report](converter_knill_memory_report.md) and
+[the Knill guide](converter_knill_memory.md), [Phase 2 report](converter_knill_memory_report.md),
+[the deep guide](converter_deep_clifford.md), [Phase 3 report](converter_deep_clifford_report.md) and
 [TEST.md](../TEST.md) for verification and remaining phase boundaries.

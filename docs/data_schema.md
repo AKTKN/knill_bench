@@ -12,7 +12,11 @@ before publication/resume. Phase 2 Knill uses the same table/artifact paths and
 adds preparation probabilities, local-decoder limits/component counts and
 per-stage model hashes to the sidecar/execution descriptor. Its labels are
 corrected interpreted terminal Z parity XOR the deterministic expected bit.
-Deep Clifford remains reserved. Existing
+Deep Phase 3 uses an artifact-only converter_generation_v1 manifest with no
+simulation complete marker or Parquet table. Its circuit.stim is the extended
+native terminal probe; original measurement count/indices, signed logical
+definitions and physical support metadata are retained. Deep noisy execution
+remains reserved. See [the generation guide](converter_deep_clifford.md). Existing
 Hex output schemas/layouts and v1 are unchanged.
 
 B1 retains this v1 layout and the B0 v2 table types below. Its independent

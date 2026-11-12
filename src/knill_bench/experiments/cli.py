@@ -13,6 +13,7 @@ def main(argv=None):
     for name, help_text in (
         ("validate-config", "Validate a simulation config without sampling."),
         ("prepare", "Create a new run directory without sampling."),
+        ("compile", "Generate deep-Clifford physical/probe artifacts without sampling or decoding."),
         ("run", "Create a new run directory and simulate the supplied config."),
     ):
         command = sub.add_parser(name, help=help_text, description=help_text)
@@ -41,6 +42,9 @@ def main(argv=None):
             print(json.dumps(dict(config=config.as_dict(), config_hash=config.config_hash,
                                   points=[dict(p.sampling_identity, case_id=p.case_id) for p in config.points()]),
                              sort_keys=True, indent=2, allow_nan=False))
+        elif args.command == "compile":
+            from knill_bench.converter.generation import compile_config
+            print(compile_config(load_config(args.config, workers=args.workers)))
         elif args.command == "prepare":
             from .run_v2 import RunStore
             with RunStore.create(load_config(args.config, workers=args.workers)) as run:

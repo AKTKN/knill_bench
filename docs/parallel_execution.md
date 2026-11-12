@@ -12,6 +12,13 @@ within each chunk; static model caching never shares sampler RNG state.
 See [SE memory](converter_se_memory.md) and [Knill memory](converter_knill_memory.md). Existing Hex fixed
 and auto behavior remains unchanged.
 
+Deep Clifford Phase 3 compiles artifact-only bundles in the parent, without
+sampling or a worker pool. Its LSTIM PARALLEL groups express physical overlap:
+all logical blocks prepare resources/teleport concurrently within each cycle,
+with full barriers between gate/CNOT/QEC groups. Saved workers does not change
+the seeded gate instance or physical schedule. See
+[the deep generation guide](converter_deep_clifford.md).
+
 Both schema-v2 experiments use time-adaptive chunks by default. Schema-v1
 execution and the Hex H5 sources are unchanged. The physical circuits, native
 matching decisions, factory oracle isolation and full fixed-T trajectories

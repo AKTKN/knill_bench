@@ -14,7 +14,7 @@ SPECIFIC = {
     "converter_se_memory": {"rounds"},
     "converter_knill_memory": {"T_tel", "r_0", "r_plus", "resource_preparation", "post_rounds", "p_st_multiplier"},
     "converter_deep_clifford": {"logical_qubits", "depth", "circuit_seed", "n_r", "r_0", "r_plus",
-                                "resource_preparation"},
+                                "resource_preparation", "p_st_multiplier"},
 }
 KNILL_PREPARATIONS = {"ideal_post_se_depolarizing", "noisy_d_rounds"}
 
@@ -43,8 +43,10 @@ class ConverterPoint:
     def sampling_identity(self):
         fields = COMMON | SPECIFIC[self.kind]
         result = {k: v for k, v in asdict(self).items() if k in fields or k in {"d", "p"}}
-        return dict(result, program_contract=("converter_knill_program_v1" if self.kind == "converter_knill_memory"
-                                             else "converter_program_v1"), final_readout=self.final_readout)
+        contract = {"converter_knill_memory": "converter_knill_program_v1",
+                    "converter_deep_clifford": "converter_deep_clifford_program_v1"}
+        return dict(result, program_contract=contract.get(self.kind, "converter_program_v1"),
+                    final_readout=self.final_readout)
 
     @property
     def final_readout(self):
@@ -105,7 +107,7 @@ class ConverterConfig:
     r_plus: int | str = "d"
     resource_preparation: str = "noisy"
     logical_qubits: int = 4
-    depth: int = 1
+    depth: int = 32
     circuit_seed: int = 0
     n_r: int = 1
     post_rounds: int = 0
@@ -130,7 +132,7 @@ class ConverterConfig:
     def as_dict(self):
         fields = COMMON | SPECIFIC[self.kind] | {"distances", "probabilities"}
         result = {k: v for k, v in asdict(self).items() if k in fields}
-        if self.kind == "converter_knill_memory" and self.p_st_multiplier is None:
+        if self.kind in {"converter_knill_memory", "converter_deep_clifford"} and self.p_st_multiplier is None:
             result.pop("p_st_multiplier")
         if self.buffer_shot is None:
             result.pop("buffer_shot")
@@ -178,7 +180,7 @@ def parse_converter_config(raw):
         raise ValueError("sweep axes must be unique")
     regime = (_choice(raw.get("resource_preparation", "noisy_d_rounds"), KNILL_PREPARATIONS,
                       "resource_preparation") if kind == "converter_knill_memory" else None)
-    default_input = "ideal" if regime == "ideal_post_se_depolarizing" else "noisy"
+    default_input = "ideal" if regime == "ideal_post_se_depolarizing" or kind == "converter_deep_clifford" else "noisy"
     options = dict(kind=kind, name=name, distances=ds, probabilities=ps, output_root=output,
                    code=_choice(raw.get("code", "rotated_surface"), {"rotated_surface"}, "code"),
                    noise=_choice(raw.get("noise"), {"converter_uniform"}, "noise"),
@@ -186,7 +188,7 @@ def parse_converter_config(raw):
                    input_preparation=_choice(raw.get("input_preparation", default_input), {"noisy", "ideal"},
                                              "input_preparation"))
     for key, default in (("shots", 64), ("workers", 1), ("T_tel", 1), ("logical_qubits", 4),
-                         ("depth", 1), ("n_r", 1)):
+                         ("depth", 32), ("n_r", 1)):
         if key in COMMON | SPECIFIC[kind]:
             options[key] = _integer(raw.get(key, default), key)
     for key, default in (("master_seed", 12345), ("circuit_seed", 0)):
@@ -214,6 +216,21 @@ def parse_converter_config(raw):
                 raise ValueError("p_st_multiplier requires ideal_post_se_depolarizing")
         else:
             multiplier = _number(raw.get("p_st_multiplier", 1.), "p_st_multiplier")
+            if multiplier < 0 or any(not 0 <= p*multiplier <= .75 for p in ps):
+                raise ValueError("p_st_multiplier must be nonnegative with p_st in [0,0.75] at every p")
+            options["p_st_multiplier"] = multiplier
+    if kind == "converter_deep_clifford":
+        if options["input_preparation"] != "ideal":
+            raise ValueError("deep Clifford circuits require input_preparation: ideal")
+        if options["logical_qubits"] < 2 or options["logical_qubits"] % 2:
+            raise ValueError("logical_qubits must be even and >=2 for disjoint CNOT pairing")
+        if any(_resolve_rounds(options["r_0"], d, "r_0") != d for d in ds):
+            raise ValueError("deep Clifford resources require r_0=r_plus=d at every distance")
+        if options["resource_preparation"] == "noisy":
+            if "p_st_multiplier" in raw:
+                raise ValueError("deep p_st_multiplier requires resource_preparation: ideal")
+        else:
+            multiplier = _number(raw.get("p_st_multiplier", 0.), "p_st_multiplier")
             if multiplier < 0 or any(not 0 <= p*multiplier <= .75 for p in ps):
                 raise ValueError("p_st_multiplier must be nonnegative with p_st in [0,0.75] at every p")
             options["p_st_multiplier"] = multiplier

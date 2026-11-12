@@ -603,3 +603,42 @@ fixed/auto installed CLI and no-Git six-wheel prepared/completed resume pass;
 17 non-Knill config/point/seed snapshots are unchanged. See TEST.md for exact
 commands and the diagnostic-script key correction. Stop after this scoped
 commit/push; a later phase requires a later request.
+
+## User-authorized deep Clifford generation — Phase 3 (2026-11-12)
+
+The user explicitly requested Phase 3 implementation/commit/push after b1332b8,
+superseding the Phase 2 stop on feature/converter-simulations. Read
+docs/converter_deep_clifford.md and docs/converter_deep_clifford_report.md.
+Use Conda knill_system. Existing Hex/SE/Knill runners, dependency sources and
+all pins remain unchanged. Do not start Phase 4/noisy deep decoding or production
+sweeps without a later request.
+
+Deep defaults are four logical qubits, ideal plus-state input, depth 32 and
+n_r=1. Seeded HXYZ draws precede random perfect CNOT pairings/orientations;
+only qubit count/depth/circuit_seed enter the private logical RNG. Preserve
+the full recorded sequence/convention and its d/p/n_r/worker independence.
+Resources require r_0=r_plus=d. noisy resources use native d noisy rounds;
+ideal uses public M9 with optional p_st_multiplier (default zero). Only d/p
+sweep. Initial input stays ideal; final SE/probes stay noiseless.
+
+Use three recycled patches per Q and public parallel KNILL_EC groups, full
+gate/CNOT/QEC barriers, unique handles/labels and native use epochs. Native
+time layers must certify physical resource overlap. Production gets signed
+logical stabilizers and the terminal probe from public converter APIs. Never
+reimplement physical Pauli lifting, MPP targets, relocations or signed frames.
+The exported circuit is probe.circuit; frame inputs exclude terminal columns.
+
+The compile command publishes converter_generation_v1 artifacts only, with
+no scientific complete marker, samples, error counts or Parquet. Deep run/
+resume remains guarded before output/cleanup. Regeneration creates a new
+directory. Keep generation manifests distinct from RunStore science datasets.
+Noiseless checks use test-only perfect recorded-sector representatives, not
+a production noisy decoder. d3/depth-32 compile validation is explicitly
+authorized; all new sampled fixtures remain noiseless d3 and <=7 shots.
+
+Phase 3 gate: 902 passed, 1356 inherited warnings, 661.25 s. All 17 deep
+physical checks and existing Hex/v1/SE/Knill tests pass. Installed/no-Git wheel
+compile and run/resume-guard checks pass for both resource policies; all 19
+non-deep config/point/seed snapshots match. TEST.md records exact commands and
+the two corrected test-only API/index assumptions. Stop after this scoped
+commit/push.

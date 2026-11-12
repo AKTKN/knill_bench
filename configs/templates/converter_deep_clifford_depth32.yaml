@@ -1,0 +1,21 @@
+# Explicit Phase 3 compile/validation envelope. Never samples a production run.
+schema_version: 2
+kind: converter_deep_clifford
+name: converter_deep_clifford_depth32
+code: rotated_surface
+noise: converter_uniform
+decoder: mwpm
+sweep:
+  d: [3]
+  p: [0.001]
+logical_qubits: 4
+depth: 32
+circuit_seed: 19
+n_r: 1
+r_0: d
+r_plus: d
+input_preparation: ideal
+resource_preparation: noisy
+workers: 1
+master_seed: 12345
+output_root: results

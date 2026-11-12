@@ -78,7 +78,7 @@ def test_depth_resolution(rule, expected):
     memory = parse_config(raw("converter_se_memory", rounds=rule))
     assert [p.rounds for p in memory.points() if p.p == 0.] == expected
     for kind in CONVERTER_KINDS - {"converter_se_memory"}:
-        if kind == "converter_knill_memory" and rule != "d":
+        if rule != "d":
             with pytest.raises(ValueError, match="require r_0=r_plus=d"):
                 parse_config(raw(kind, r_0=rule, r_plus=rule))
             continue
@@ -112,7 +112,7 @@ def test_physical_identity_and_seeds_exclude_execution_controls():
     assert a == next(changed.points())
     assert point_seed(c.master_seed, a) == point_seed(changed.master_seed, a)
     for key, value in (("logical_qubits", 2), ("depth", 2), ("n_r", 2), ("circuit_seed", 9),
-                       ("input_preparation", "ideal"), ("resource_preparation", "ideal")):
+                       ("resource_preparation", "ideal")):
         b = next(replace(c, **{key: value}).points())
         assert a.case_id != b.case_id and point_seed(123, a) != point_seed(123, b)
     for b in (replace(a, d=5), replace(a, p=.002), replace(a, r_0=2, r_plus=2)):

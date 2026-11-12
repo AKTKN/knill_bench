@@ -1,5 +1,12 @@
 # Scripts and entry points
 
+Phase 3 uses `knill-bench-v2 compile CONFIG` for deep Clifford artifact generation,
+including the extended native terminal-probe circuit and signed stabilizers.
+The small example is configs/converter_deep_clifford_v2_example.yaml; the
+depth-32 template compiles d3 without sampling. No PBS simulation or noisy
+deep LER path is added. Existing optional wheel packaging includes these
+consumer modules. See [the deep guide](../docs/converter_deep_clifford.md).
+
 Phase 2 converter Knill memory uses the same installed CLI/PBS wrapper and
 optional six-wheel packaging. The small example is
 configs/converter_knill_memory_v2_example.yaml, with both regime templates in

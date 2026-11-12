@@ -1,0 +1,22 @@
+# Generation only: knill-bench-v2 compile THIS_FILE (no sampling or LER).
+schema_version: 2
+kind: converter_deep_clifford
+name: converter_deep_clifford
+code: rotated_surface
+noise: converter_uniform
+decoder: mwpm
+sweep:
+  d: [3]
+  p: [0.001]
+logical_qubits: 4
+depth: 2
+circuit_seed: 19
+n_r: 1
+r_0: d
+r_plus: d
+input_preparation: ideal
+resource_preparation: ideal
+p_st_multiplier: 1.0
+workers: 1
+master_seed: 12345
+output_root: results

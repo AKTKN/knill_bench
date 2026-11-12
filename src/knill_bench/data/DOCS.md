@@ -1,5 +1,11 @@
 # Versioned storage and provenance
 
+Deep Phase 3 uses the same hashed/fsynced PointArtifacts publisher for its
+exact LSTIM, extended sampled/probe Stim, signed logical definitions and model
+metadata. It has a distinct artifact-only root manifest, not a RunStore
+scientific completion marker. No Parquet schema, writer or existing recovery
+contract changes; noisy deep decoding and resume remain Phase 4.
+
 Phase 2 Knill uses the same point-relative Parquet/error schema, contiguous
 IDs and parent publication. Its sidecar includes native exports and compact
 stage-model hashes/counts; the execution descriptor declares independent

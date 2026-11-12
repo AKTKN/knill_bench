@@ -921,3 +921,33 @@ installed CLI checks and six-wheel/no-Git prepared/completed resumes pass in
 both regimes; pip check and source/dependency integrity checks pass. No
 production sweep or later scientific phase ran. See
 docs/converter_knill_memory.md, docs/converter_knill_memory_report.md and TEST.md.
+
+## 2026-11-12 — Deep logical Clifford generation Phase 3
+
+Implemented seeded converter_deep_clifford generation after b1332b8 on
+feature/converter-simulations. The private recorded RNG emits one H/X/Y/Z per
+logical qubit then a random disjoint CNOT pairing/orientation per layer,
+independently of d/p/n_r/workers. Defaults are four qubits/depth 32/ideal input.
+Parallel native KNILL_EC(d) groups replace SE intervals. Three patches per
+persistent Q rotate with fresh resource names/labels and full group barriers;
+native metadata verifies physical overlap, epochs and exact relocation counts.
+
+The converter owns signed output stabilizers, physical support/orientation and
+terminal MPP construction. The exported circuit is the extended probe.circuit,
+with exact canonical measurement-prefix/source/probe metadata. Native noisy
+resources and typed ideal/M9 resources are configurable. One final noiseless SE
+round per output remains explicit. No dependency source or Hex/SE/Knill physics
+changes; all 19 non-deep identity/seed snapshots remain unchanged.
+
+The new compile command writes artifact-only converter_generation_v1 manifests,
+exact circuits, signed stabilizer definitions and native/full-logical/probe
+metadata. It never samples, builds matching graphs, writes error tables or
+publishes a science completion marker. Deep noisy run/resume remains Phase 4.
+Examples, package guides and scientific/installation/storage documentation are
+updated. Independent signed-group, parallel/reference, perfect-sector frame,
+probe-isolation, metadata-negative and installed/no-Git wheel checks pass.
+The explicit d3/depth-32 configuration compiles with twelve patches and 128
+teleportations. Final gate: **902 passed, 1356 inherited warnings, 661.25 s**;
+all 17 deep physical checks and existing Hex/v1/SE/Knill regressions pass.
+TEST.md records the two test-only API/index corrections and exact commands.
+No noisy deep LER, production sweep or Phase 4 decoding is included.

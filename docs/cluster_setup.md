@@ -6,7 +6,8 @@ commits and additional runtime packages without changing numerical pins. With
 `--download-deps`, the six-project-wheel bundle supports offline converter
 provenance/prepare without Git on the target. Existing four-wheel Hex bundles
 are unchanged. Converter SE and Phase 2 Knill memory support run/resume from
-the same optional wheel bundle; deep Clifford remains unimplemented.
+the same optional wheel bundle. Phase 3 deep `compile` exports native physical/
+terminal-probe artifacts from that bundle; noisy deep decoding remains Phase 4.
 See [installation and cluster details](converter_integration.md).
 
 研究用環境は **knill_system**、Python は **3.12.15** です。数値・解析・

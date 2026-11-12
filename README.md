@@ -4,8 +4,9 @@ The optional converter integration implements **SE memory and Knill EC memory**,
 including fixed/adaptive multi-worker run/resume and exact sampled circuit
 artifacts. [Knill memory](docs/converter_knill_memory.md) uses three recycled
 patches, two preparation regimes and causal local MWPM/frame replay.
-`converter_deep_clifford` retains validate/prepare support; its scientific runner
-remains unimplemented.
+[Deep Clifford Phase 3](docs/converter_deep_clifford.md) now supplies seeded
+logical circuits, parallel Knill compilation and native terminal probes through
+`knill-bench-v2 compile CONFIG`. Its noisy decoder/run remains Phase 4.
 Use Conda `knill_system` and [the converter guide](docs/converter_integration.md)
 for exact-commit installation, or start with [SE memory](docs/converter_se_memory.md)
 and its [small example](configs/converter_se_memory_v2_example.yaml), or the

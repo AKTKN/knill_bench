@@ -11,7 +11,10 @@ Phase 2 adds [converter Knill EC memory](converter_knill_memory.md): three
 recycled patches, public preparation policies, local temporal-component/CSS
 MWPM and causal native frame/sector replay. Final corrected interpreted Z
 parity supplies labels. Correlations are ignored explicitly; unsupported
-hyperedges raise. Deep Clifford remains unimplemented.
+hyperedges raise. Phase 3 adds [deep Clifford generation](converter_deep_clifford.md),
+with seeded H/X/Y/Z-then-CNOT layers, parallel Knill substitution and native
+signed terminal probes. Its artifact-only compile command does not decode or
+report noisy LER; deep scientific execution remains Phase 4.
 
 The original schema-v1 design below remains unchanged. B1 adds an independent
 [eight-cycle Fig.4(d) experiment](fig4d.md) using actual Hex full Knill modules,

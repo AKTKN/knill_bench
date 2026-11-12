@@ -13,6 +13,13 @@ three recycled patches and explicit noisy-d-round/ideal-post-channel regimes;
 its local independent-component decoder has documented approximation limits.
 Existing Hex workflows below are unchanged.
 
+Phase 3 deep-Clifford artifacts can be generated with
+`knill-bench-v2 compile configs/converter_deep_clifford_v2_example.yaml`.
+This compiles the native terminal-probe circuit and signed stabilizers without
+sampling or creating error tables. See [the generation guide](docs/converter_deep_clifford.md)
+for seeded instances, parallel resources and the tested d3/depth-32 template.
+Deep noisy run/resume remains reserved for Phase 4.
+
 This branch supplies two schema-v2 experiments and saved-data analysis:
 
 | Experiment | Physical stages | Final readout | Saved point files |

@@ -65,6 +65,8 @@ def test_all_new_physical_settings_enter_identity_but_execution_controls_do_not(
 def test_se_and_deep_do_not_accept_knill_only_extensions():
     for kind in ("converter_se_memory", "converter_deep_clifford"):
         for field in ("post_rounds", "p_st_multiplier"):
+            if kind == "converter_deep_clifford" and field == "p_st_multiplier":
+                continue  # Phase 3 exposes the existing typed M9 policy for deep ideal resources.
             with pytest.raises(ValueError, match="unknown keys"):
                 parse_config(dict(schema_version=2, kind=kind, noise="converter_uniform",
                                   sweep=dict(d=[3],p=[.001]), **{field:1}))

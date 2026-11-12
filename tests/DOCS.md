@@ -1,5 +1,18 @@
 # Bench regression tests
 
+Phase 3 `test_converter_deep_config.py` checks deterministic logical draws,
+pairings/orientations, depth prefixes, seed isolation and spawn equality.
+`test_converter_deep_physics.py` compares complete signed groups against an
+independent four-qubit Stim circuit, certifies native resource overlap/barriers,
+epochs/bindings/orientation, ideal terminal SE and the probe measurement split.
+Noiseless d3 batches (<=7 shots) use exact classical 512-pattern recorded-sector
+representatives only for test frame validation; no noisy deep decoder is tested.
+Finite-p d3/5 and the explicit d3/depth-32 template compile without sampling.
+Pinned public-example LSTIM fixtures are new data-only references with hashes;
+Hex golden fixtures are unchanged. `test_converter_deep_artifacts.py` verifies
+compile CLI, exact native prefix/probe export, no sampling/matching, signed
+state/source/count linkage, failure state and continued noisy run/resume guard.
+
 Phase 2 `test_converter_knill_config.py`, `test_converter_knill_physics.py`,
 `test_converter_knill_execution.py` and `test_converter_local_matching.py`
 cover named regimes/depths, typed noise targets, T=1/2/3/4 noiseless random

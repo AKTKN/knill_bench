@@ -1,0 +1,18 @@
+{
+  "converter_deep_reference_d3_depth2.lstim": {
+    "depth": 2,
+    "n_r": 1,
+    "source_sha256": "88aa9632473b9b0ba35ca207f1e68d6f8a40cd25755184a7535b1a76117f7388"
+  },
+  "converter_deep_reference_d3_depth3.lstim": {
+    "depth": 3,
+    "n_r": 1,
+    "source_sha256": "836caf1224a14e724ee0073c079058f8c03f01f9934687a30d1b8939e6f0621c"
+  },
+  "provenance": {
+    "converter_commit": "457dc519adec6a11b38843a03e1c8fbbd6495f5a",
+    "generator": "examples/deep_clifford.py",
+    "lstim_example": "examples/lstim/deep_clifford_d3.lstim",
+    "python_example_sha256": "7c4ec85cff9946f51e6562f06da3797d5be2c7eb471a99393b24eff15ff41b7e"
+  }
+}

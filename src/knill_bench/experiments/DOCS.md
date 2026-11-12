@@ -1,5 +1,13 @@
 # Independent schema-v2 experiment infrastructure (B0)
 
+Phase 3 CLI `compile CONFIG` routes to converter.generation.compile_config for
+deep artifact generation. Its distinct converter_generation_v1 manifest does
+not publish science tables or completion markers. Config defaults become
+four logical qubits/depth 32/ideal input with d-round resources; fixed n_r
+does not affect the seeded logical gate instance. Existing dispatch guards
+retain deep noisy run/resume refusal before output/cleanup. See
+[the deep guide](../../../docs/converter_deep_clifford.md).
+
 Phase 2 `converter_knill_memory.py` uses the same parent-owned fixed/adaptive
 execution as SE, with lazy per-point/worker static compilation and fresh
 chunk-seeded samplers. RunStore checks Knill regimes/probabilities, local

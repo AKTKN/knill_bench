@@ -1,0 +1,80 @@
+FORMAT(1)
+CODE sc ROTATED_SURFACE(3)
+PATCH P0_0 sc index=0
+PATCH P0_1 sc index=1
+PATCH P0_2 sc index=2
+PATCH P1_0 sc index=3
+PATCH P1_1 sc index=4
+PATCH P1_2 sc index=5
+PATCH P2_0 sc index=6
+PATCH P2_1 sc index=7
+PATCH P2_2 sc index=8
+PATCH P3_0 sc index=9
+PATCH P3_1 sc index=10
+PATCH P3_2 sc index=11
+BIND Q0 P0_0
+INIT_X[initial_q0](1) Q0 noise=ideal
+BIND Q1 P1_0
+INIT_X[initial_q1](1) Q1 noise=ideal
+BIND Q2 P2_0
+INIT_X[initial_q2](1) Q2 noise=ideal
+BIND Q3 P3_0
+INIT_X[initial_q3](1) Q3 noise=ideal
+PARALLEL {
+H Q1
+H Q3
+}
+PARALLEL {
+CX Q0 Q1
+CX Q2 Q3
+}
+X Q0 mode=transversal
+Y Q1 mode=transversal
+Z Q2 mode=transversal
+Y Q3 mode=transversal
+BIND A0_0 P0_1
+BIND B0_0 P0_2
+BIND A0_1 P1_1
+BIND B0_1 P1_2
+BIND A0_2 P2_1
+BIND B0_2 P2_2
+BIND A0_3 P3_1
+BIND B0_3 P3_2
+PARALLEL {
+KNILL_EC[ec0_q0](3) Q0 A0_0 B0_0
+KNILL_EC[ec0_q1](3) Q1 A0_1 B0_1
+KNILL_EC[ec0_q2](3) Q2 A0_2 B0_2
+KNILL_EC[ec0_q3](3) Q3 A0_3 B0_3
+}
+PARALLEL {
+H Q0
+H Q2
+}
+PARALLEL {
+CX Q1 Q2
+CX Q3 Q0
+}
+X Q0 mode=transversal
+Y Q1 mode=transversal
+Z Q2 mode=transversal
+Y Q3 mode=transversal
+BIND A1_0 P0_0
+BIND B1_0 P0_1
+BIND A1_1 P1_0
+BIND B1_1 P1_1
+BIND A1_2 P2_0
+BIND B1_2 P2_1
+BIND A1_3 P3_0
+BIND B1_3 P3_1
+PARALLEL {
+KNILL_EC[ec1_q0](3) Q0 A1_0 B1_0
+KNILL_EC[ec1_q1](3) Q1 A1_1 B1_1
+KNILL_EC[ec1_q2](3) Q2 A1_2 B1_2
+KNILL_EC[ec1_q3](3) Q3 A1_3 B1_3
+}
+PARALLEL {
+SE[final_se_q0](1) Q0 noise=ideal
+SE[final_se_q1](1) Q1 noise=ideal
+SE[final_se_q2](1) Q2 noise=ideal
+SE[final_se_q3](1) Q3 noise=ideal
+}
