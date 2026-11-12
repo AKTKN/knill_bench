@@ -6,6 +6,7 @@ import json
 import os
 from pathlib import Path
 import socket
+import subprocess
 
 import numpy as np
 import pyarrow as pa
@@ -332,7 +333,9 @@ def test_real_imported_hex_n2_api_provenance_without_sampler_or_decoder(monkeypa
     monkeypatch.setattr(pymatching.Matching, "from_check_matrix", forbidden)
     env = provenance.collect_environment()
     assert env["hex"]["commit"] == provenance.HEX_REVISION
-    assert env["hex"]["branch"] == "auxiliary-system" and not env["hex"]["dirty"]
+    branch = subprocess.check_output(["git", "-C", env["hex"]["checkout"],
+                                      "branch", "--show-current"], text=True).strip()
+    assert env["hex"]["branch"] == branch and not env["hex"]["dirty"]
     assert env["dependencies"]["hex-qec"] == "0.1.0"
     assert env["cpu"]["count"] > 0
     actual = env["hex"]

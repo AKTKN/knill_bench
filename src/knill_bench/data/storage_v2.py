@@ -195,7 +195,7 @@ class PointWriter:
                 raise ValueError("incomplete point: shot count does not match expected_shots")
             self._close()
             for name in self.point.tables:
-                with self._temp(name).open("rb") as source:
+                with self._temp(name).open("r+b") as source:
                     os.fsync(source.fileno())
                 info = pq.ParquetFile(self._temp(name))
                 try:

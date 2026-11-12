@@ -124,3 +124,9 @@ existing probe. Both storage paths are covered by real subprocess recovery
 and mocked/native-platform lock checks.
 
 See [final converter integration](../../../docs/converter_phase5.md).
+
+Actual Windows CI found that fsync requires a writable descriptor. Closed
+staged tables reopen r+b solely for fsync, then close validation readers before
+rename. The ledger uses the same durable flush rule. Scientific bytes/schemas
+and publication order are unchanged; this also fixes the pre-existing Windows
+v2 storage failure. See the Phase 5 evidence report for actual CI outcomes.

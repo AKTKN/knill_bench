@@ -293,3 +293,9 @@ including a separate one-shot depth-32 case. Unit physical batches remain <=7
 shots. CI config includes Linux/Windows; only executed results count as verified.
 
 See [final converter integration](../docs/converter_phase5.md).
+
+Actual CI corrected test_v2_storage's local Hex branch-name assumption: its
+independent Git query now verifies reported branch provenance while retaining
+exact pinned revision, clean source and API/no-sampling requirements. Initial
+Linux/Windows CI failures and the writable-fsync correction are recorded in
+TEST.md, rather than hidden by changing a scientific test or excluding cases.

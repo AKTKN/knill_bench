@@ -2120,3 +2120,31 @@ historical failure. Neither limitation is reported as successful validation,
 and no dependency/private/physical/decoder workaround is introduced. Exact
 commands, supported configurations, metadata schema and limitations are in
 sufficient detail in docs/converter_phase5.md and docs/converter_phase5_report.md.
+
+### Executed Linux/Windows CI and portability fixes
+
+GitHub Actions run 43160540687 on implementation 589f95b executed both
+platforms using the pinned Conda environment and VCS dependencies.
+Linux reached **300 passed / 1 failed, 256.63 s**: the existing bench storage
+provenance test assumed the local Hex branch auxiliary-system, while bootstrap
+correctly created knill-bench-integration at the exact pinned clean revision.
+The test now independently asks Git for the actual branch, retaining exact
+commit/clean/API checks. Local portability subset (tests/test_v2_storage.py and
+tests/test_cluster_packaging.py) passes **29 tests in 2.72 s**;
+/tmp/knill-converter-phase5-ci-portability.log.
+
+Windows reached **253 passed, 47 failed, 1 error, 327.30 s**. Besides the same
+branch-name assumption, failures shared one actual storage portability cause:
+os.fsync on a read-only closed-Parquet descriptor raises Bad file descriptor
+on Windows. Both the scientific table and new ledger now reopen their closed
+staged file with r+b for fsync, preserving bytes/publication order. Native
+circuit, decoding, noise, hashes and label schema are unchanged. Initial job
+logs are retained by GitHub at
+https://github.com/AKTKN/knill_bench/actions/runs/43160540687 .
+No initial CI failure is called a pass; rerun outcomes are recorded separately.
+
+`bash scripts/python.sh -m pytest -q tests/test_converter_runtime.py tests/test_converter_infrastructure.py tests/test_v2_storage.py tests/test_cluster_packaging.py --disable-warnings --tb=short`
+after both portability corrections — **76 passed, 6.50 s**;
+/tmp/knill-converter-phase5-ci-storage-fix.log. The complete bench/platform
+reruns use the committed correction below, without rerunning resource-failing
+depth32 numerical attempts or changing any scientific implementation.

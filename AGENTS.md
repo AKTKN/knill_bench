@@ -727,3 +727,10 @@ p0/ideal-resource depth32 is stopped at 6,835,408 KiB (10:40.78) before sampling
 Depth32 compilation passes, but sampled depth32 validation is incomplete on
 this VM. Preserve this disclosure and the local-versus-Windows-CI distinction.
 Do not change dependency internals or scientific policies to hide the limits.
+
+Actual cross-platform CI exposed two portability issues: a bench test assumed
+auxiliary-system instead of verifying the bootstrap checkout's actual Git
+branch, and Windows fsync rejected read-only staged Parquet descriptors.
+Keep exact-ref/clean/API checks and independently verify branch; reopen staged
+tables/ledgers r+b solely for fsync. Both are integration/storage changes, not
+Hex scientific changes. Initial CI failures and corrected reruns stay recorded.

@@ -1029,3 +1029,10 @@ with zero labels and stale locks cleared through normal recovery. Final
 numerical evidence is **52 points**, with **depth32 compile/signed-group checks
 passing and sampled depth32 validation incomplete on this VM**. No native or
 physics bypass was used. These limitations remain part of the Phase 5 report.
+
+Actual first CI ran Linux and Windows. It exposed the bootstrap-vs-local Hex
+branch-name test assumption and Windows fsync's need for a writable staged-file
+descriptor. Branch provenance now checks actual Git; both Parquet writers use
+r+b solely for fsync. Local storage/runtime/provenance gate: 76 passed, 6.50 s.
+The first failed CI counts and subsequent reruns are retained in TEST.md/report;
+no initial platform failure is misreported as validated.

@@ -193,3 +193,17 @@ approximations, and the distinction between verified Linux checks and pending
 remote Windows CI. All requested independent references/fault checks in the
 bench pass; the existing Hex dependency suite still has its disclosed fixed-
 seed adaptive-confidence failure. No published numerical reproduction is claimed.
+
+## Executed cross-platform CI
+
+The first actual Linux/Windows run on implementation 589f95b is
+[Actions run 43160540687](https://github.com/AKTKN/knill_bench/actions/runs/43160540687).
+Linux has 300 passes and one legacy bench-test branch-name assumption failure;
+fresh bootstrap uses knill-bench-integration at the same exact clean Hex commit.
+The test now compares provenance to Git's actual branch rather than a local
+worktree name. Windows has 253 passes, 47 failures and one error, with the same
+branch assertion plus fsync rejecting read-only file descriptors. Scientific
+Parquet and the ledger now reopen closed staged files r+b for durable flushing.
+This fixes storage portability without modifying file bytes, scientific code,
+noise, inference or physical identities. Initial failures remain disclosed;
+final rerun outcomes follow below.

@@ -74,7 +74,7 @@ class SamplingLedger:
     def publish(self):
         import pyarrow.parquet as pq
         self.flush();self.writer.close();self.closed = True
-        with self.temp.open("rb") as source:os.fsync(source.fileno())
+        with self.temp.open("r+b") as source:os.fsync(source.fileno())
         file=pq.ParquetFile(self.temp)
         if file.metadata.num_rows != self.count or not file.schema_arrow.equals(self.schema,check_metadata=True):
             file.close()
