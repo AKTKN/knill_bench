@@ -111,3 +111,16 @@ publication and completed resume additionally reject inconsistent custom noise
 provenance/scope. No table column, mandatory artifact, row-ID, buffering or
 pair-publication boundary changes. See
 [custom noise](../../../docs/factory_custom_noise.md).
+
+## Phase 5 integration
+
+The converter runtime adds an auxiliary sampling_chunks.parquet artifact,
+without changing scientific error/gap table schemas. Parent-only publication
+closes/fsyncs/validates the ledger and hashes label bytes before completion.
+Resume cleans every unfinished ledger/temp artifact and preserves complete
+files. Parquet validation readers close before rename. On Windows, PID liveness
+uses OpenProcess/WaitForSingleObject, never os.kill(pid,0); Linux keeps its
+existing probe. Both storage paths are covered by real subprocess recovery
+and mocked/native-platform lock checks.
+
+See [final converter integration](../../../docs/converter_phase5.md).

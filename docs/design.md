@@ -1,5 +1,12 @@
 # Design and scientific conventions
 
+Phase 5 completes the shared workstation/cluster execution contract: all three
+converter kinds record actual chunk partitions/seeds in a bounded parent-owned
+ledger, save label checksums and E/N/Wilson/timing statistics, and support the
+saved-only summarize-converter command. Scientific policies and identities stay
+unchanged. See [the final integration guide](converter_phase5.md) and
+[validation evidence](converter_phase5_report.md).
+
 Converter Phase 0 introduces a separate consumer-owned package and three
 configuration kinds without modifying Hex circuit/decoder construction.
 Its frozen configs/points, model protocol, parent publication and optional

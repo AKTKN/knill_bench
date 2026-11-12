@@ -54,7 +54,7 @@ def publish_artifacts(run, point, artifacts):
             or not artifacts.stim_source.strip() or not isinstance(artifacts.metadata, dict)):
         raise ValueError("converter artifacts require source strings and JSON metadata")
     if artifacts.logical_stabilizers is not None and (
-            not point.optional_artifact_names or not isinstance(artifacts.logical_stabilizers, list)):
+            point.kind != "converter_deep_clifford" or not isinstance(artifacts.logical_stabilizers, list)):
         raise ValueError("logical stabilizers are optional only for deep Clifford")
     contents = {"circuit.lstim": artifacts.lstim_source.encode("utf-8"),
                 "circuit.stim": artifacts.stim_source.encode("utf-8")}
@@ -106,10 +106,18 @@ def validate_artifacts(run, point, registry, *, execution=None):
         if not path.is_file() or file_digest(path) != sha:
             raise ValueError("converter artifact content hash changed or is missing")
     meta = json.loads(relative_path(run, f"{point.directory}/metadata.json").read_text("utf-8"))
-    expected = {PurePosixPath(name).name: sha for name, sha in registry.items() if not name.endswith("/metadata.json")}
+    expected = {PurePosixPath(name).name: sha for name, sha in registry.items()
+                if PurePosixPath(name).name not in ("metadata.json", *point.runtime_artifact_names)}
     if (meta.get("artifact_schema") != "converter_point_v1" or meta.get("case_id") != point.case_id
             or meta.get("sampling_identity") != point.sampling_identity or meta.get("content_sha256") != expected):
         raise ValueError("converter point artifact identity changed")
+    counts = meta.get("model", {}).get("execution", {}).get("circuit_counts")
+    if counts is not None:
+        import stim
+        from .runtime import circuit_counts
+        circuit = stim.Circuit(relative_path(run,f"{point.directory}/circuit.stim").read_text())
+        if counts != circuit_counts(circuit, point.logical_qubits if point.kind == "converter_deep_clifford" else 1):
+            raise ValueError("converter sampled circuit counts changed")
     if point.kind == "converter_se_memory":
         from .metadata import validate_memory_artifacts
         validate_memory_artifacts(point, registry, meta.get("model"), execution)

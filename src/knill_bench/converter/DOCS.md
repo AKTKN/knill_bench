@@ -1,4 +1,4 @@
-# Optional converter consumer package — Phases 0–4
+# Optional converter consumer package — Phases 0–5
 
 Phase 3 adds `deep_program.py`: frozen abstract gate layers, a private seeded
 HXYZ/shuffle/orientation RNG and explicit barrier-separated parallel LSTIM.
@@ -60,3 +60,16 @@ adapters and enforces stage order, source/use/input IDs and applied readout
 syndromes. deep_artifacts.py validates both scientific sidecars and historical
 generation bundles. All three kinds support run/resume; compile stays artifact-only.
 See [deep decoding](../../../docs/converter_deep_decoding.md).
+
+## Phase 5 integration
+
+runtime.py owns a <=512-row parent sampling ledger with exact chunk IDs,
+shot ranges, uint64 seeds and split timings. Public iter_sampling_chunks streams
+recorded replay tasks. validate_runtime binds chunk streams/digests, Parquet
+checksums, E/N/Wilson summaries and timing aggregates without sampling. New runs
+use converter_execution_v2; historical artifacts retain their old contract.
+All models expose native circuit_counts without changing physical identities.
+Static model sidecars exclude runtime ledgers from their static content map;
+root registration hashes the entire publication group.
+
+See [final converter integration](../../../docs/converter_phase5.md).

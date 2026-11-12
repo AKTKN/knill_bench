@@ -49,7 +49,7 @@ def test_run_artifacts_counts_metadata_and_completed_resume(tmp_path, batch, wor
     for point in doc.config.points():
         info = metadata["points"][point.case_id]
         assert info["status"] == "complete" and info["shots"] == 7
-        assert len(info["files"]) == 4 and all(n.startswith(f"points/{point.case_id}/") for n in info["files"])
+        assert len(info["files"]) == 5 and all(n.startswith(f"points/{point.case_id}/") for n in info["files"])
         error_path = path / point.filename("logical_error")
         parquet = pq.ParquetFile(error_path)
         table = parquet.read()

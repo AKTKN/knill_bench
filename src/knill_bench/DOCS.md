@@ -190,3 +190,13 @@ module-local Stim or native full-prefix inference through adapters.knill_priors.
 Existing kinds/default hashes remain supported. See
 [Knill simulation](../../docs/knill_sim.md) for syntax, physical independence,
 scopes, metadata, cache lifetime and unsupported models.
+
+## Phase 5 integration
+
+All converter kinds now have a common runtime ledger/integrity/rate/timing
+contract and saved-only summarize-converter API. Static model/decoder construction
+remains once per point/process; chunk IDs/seeds survive out-of-order execution.
+New fields/files are converter-only; Hex/v1 physical code and identities remain
+unchanged.
+
+See [final converter integration](../../docs/converter_phase5.md).

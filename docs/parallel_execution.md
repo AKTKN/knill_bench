@@ -1,5 +1,12 @@
 # V2 adaptive parallel execution and buffered output
 
+Phase 5 completes the shared workstation/cluster execution contract: all three
+converter kinds record actual chunk partitions/seeds in a bounded parent-owned
+ledger, save label checksums and E/N/Wilson/timing statistics, and support the
+saved-only summarize-converter command. Scientific policies and identities stay
+unchanged. See [the final integration guide](converter_phase5.md) and
+[validation evidence](converter_phase5_report.md).
+
 Converter SE, Knill memory and Phase 4 deep Clifford use the same bounded adaptive pool/chunk/buffer
 policy described here, with parent-owned point-relative artifacts in both
 modes. Its integer batch_size path uses fixed independently seeded chunks

@@ -200,3 +200,14 @@ pointwise 95% WilsonInterval bounds. CLI summarize-deep prints JSON or writes an
 explicit requested JSON path. It never constructs/samples/decodes a circuit or
 requires current runtime source compatibility. See
 [deep decoding](../../../docs/converter_deep_decoding.md).
+
+## Phase 5 integration
+
+converter.summarize_saved is the common saved-only validator/summary for all
+three converter kinds. It verifies model/artifact/label/ledger identities,
+contiguous IDs and counts, chunk seeds and rate/CI/timing consistency. Rates
+use errors/shots with pointwise 95% Wilson score intervals; no physical backend
+is constructed. converter_deep delegates validation here and preserves its
+existing deep summary keys/whole-circuit units.
+
+See [final converter integration](../../../docs/converter_phase5.md).

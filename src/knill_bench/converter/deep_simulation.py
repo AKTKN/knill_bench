@@ -44,6 +44,9 @@ class ConverterDeepClifford(CompiledDeepClifford):
             temporal_prior_only_components=sum(a.temporal.summary["prior_only_components"] for a in self.decoder.boundary_decoders.values()),
             temporal_separators=sum(a.temporal.summary["separators"] for a in self.decoder.boundary_decoders.values()))
 
+        from .runtime import circuit_counts
+        self.metadata["circuit_counts"] = circuit_counts(self.circuit, point.logical_qubits)
+
     def decode_batch(self, measurements):
         return DecodedBatch(self.decoder.replay(measurements).logical_error)
 

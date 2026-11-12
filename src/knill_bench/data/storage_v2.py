@@ -5,6 +5,7 @@ import json
 import os
 from pathlib import Path
 import socket
+import sys
 import time
 
 import numpy as np
@@ -49,14 +50,39 @@ def clear_stale_lock(path: Path):
         info = json.loads(path.read_text())
         if info["host"] != socket.gethostname() or type(info["pid"]) is not int or info["pid"] <= 0:
             raise ValueError("foreign host or invalid PID")
-        try:
-            os.kill(info["pid"], 0)
-        except ProcessLookupError:
+        if not _pid_alive(info["pid"]):
             path.unlink()
             return
     except (ValueError, KeyError, PermissionError) as error:
         raise RuntimeError(f"cannot establish stale lock ownership: {path}") from error
     raise RuntimeError(f"another live process owns {path}")
+
+
+def _pid_alive(pid):
+    # os.kill(pid, 0) on Windows can terminate the process instead of probing it.
+    if sys.platform == "win32":
+        import ctypes
+        from ctypes import wintypes
+        kernel = ctypes.WinDLL("kernel32", use_last_error=True)
+        kernel.OpenProcess.argtypes = (wintypes.DWORD, wintypes.BOOL, wintypes.DWORD)
+        kernel.OpenProcess.restype = wintypes.HANDLE
+        kernel.WaitForSingleObject.argtypes = (wintypes.HANDLE, wintypes.DWORD)
+        kernel.WaitForSingleObject.restype = wintypes.DWORD
+        kernel.CloseHandle.argtypes = (wintypes.HANDLE,)
+        handle = kernel.OpenProcess(0x00100000, False, pid)  # SYNCHRONIZE only.
+        if not handle:
+            code = ctypes.get_last_error()
+            if code == 87:return False  # ERROR_INVALID_PARAMETER: no such PID.
+            raise PermissionError(f"cannot query Windows PID {pid}: error {code}")
+        try:
+            status = kernel.WaitForSingleObject(handle, 0)
+            if status == 0:return False
+            if status == 258:return True
+            raise PermissionError(f"cannot query Windows PID {pid}: wait status {status}")
+        finally:kernel.CloseHandle(handle)
+    try:os.kill(pid, 0)
+    except ProcessLookupError:return False
+    return True
 
 
 @dataclass(frozen=True)
@@ -172,9 +198,11 @@ class PointWriter:
                 with self._temp(name).open("rb") as source:
                     os.fsync(source.fileno())
                 info = pq.ParquetFile(self._temp(name))
-                if (info.metadata.num_rows != self.rows
-                        or not info.schema_arrow.equals(self._schemas[name], check_metadata=True)):
-                    raise ValueError("staged Parquet schema/count mismatch")
+                try:
+                    if (info.metadata.num_rows != self.rows
+                            or not info.schema_arrow.equals(self._schemas[name], check_metadata=True)):
+                        raise ValueError("staged Parquet schema/count mismatch")
+                finally:info.close()
             # Every footer is closed and checked before the first promotion.
             for name in self.point.tables:
                 if self._public(name).exists():

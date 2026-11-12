@@ -1,5 +1,12 @@
 # Converter Knill EC memory — Phase 2
 
+Phase 5 completes the shared workstation/cluster execution contract: all three
+converter kinds record actual chunk partitions/seeds in a bounded parent-owned
+ledger, save label checksums and E/N/Wilson/timing statistics, and support the
+saved-only summarize-converter command. Scientific policies and identities stay
+unchanged. See [the final integration guide](converter_phase5.md) and
+[validation evidence](converter_phase5_report.md).
+
 `kind: converter_knill_memory` runs one logical Z memory through `T_tel >= 1`
 successive converter-native Knill EC teleportations. The converter owns all
 physical gates, geometry, detector metadata, patch lifetimes, relocations and

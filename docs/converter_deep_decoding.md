@@ -1,5 +1,12 @@
 # Noisy deep Clifford simulation — Phase 4
 
+Phase 5 completes the shared workstation/cluster execution contract: all three
+converter kinds record actual chunk partitions/seeds in a bounded parent-owned
+ledger, save label checksums and E/N/Wilson/timing statistics, and support the
+saved-only summarize-converter command. Scientific policies and identities stay
+unchanged. See [the final integration guide](converter_phase5.md) and
+[validation evidence](converter_phase5_report.md).
+
 `kind: converter_deep_clifford` supports `run`, `resume` and saved-label
 `summarize-deep`. Its seeded gate generator, twelve-patch parallel Knill
 schedule, ideal input, final ideal SE and converter terminal probes retain

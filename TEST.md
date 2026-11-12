@@ -1980,3 +1980,143 @@ depth-32 run was launched. Only intended bench source/tests/docs/examples are
 committed; no dependency source, pins, environment, user notebook, experiment
 output or other branch was changed. See docs/converter_deep_decoding.md and
 docs/converter_deep_decoding_report.md.
+
+## 2026-11-12 — final converter integration and numerical validation, Phase 5
+
+Branch feature/converter-simulations starts at Phase 4 68bb77d. Use Conda
+knill_system/Python 3.12.15; Stim 1.16.0, PyMatching 2.4.0 and all numerical/
+converter/stimflow/Hex pins remain unchanged. All dependency checkouts stay
+read-only. No production sweep runs. The requested sampled depth-32 smoke is
+an explicit new authorization, separate from historical compile-only checks.
+
+- `bash scripts/python.sh -m pytest -q external/Hex/tests --disable-warnings`
+  — **374 passed, 1 failed, 720 warnings, 40.95 s**;
+  /tmp/knill-converter-phase5-hex-full.log. The failure is the historical
+  test_real_cluster_llr_threshold_produces_mixed_short_long_batch in
+  test_phase5_confidence_adaptive.py: all eight fixed-seed samples select long,
+  violating its mixed short/long assertion. No tests are deselected or edited.
+- `bash scripts/python.sh -m pytest -q external/Hex/tests/test_phase5_confidence_adaptive.py::test_real_cluster_llr_threshold_produces_mixed_short_long_batch --disable-warnings`
+  — **1 failed, 4 warnings, .57 s** on the unchanged dependency;
+  /tmp/knill-converter-phase5-hex-known-failure.log. This independently
+  reproduces the already documented pre-converter failure.
+- First focused invocation included nonexistent tests/test_storage_v2.py;
+  no tests collected. /tmp/knill-converter-phase5-initial.log. Correct filename
+  is tests/test_v2_storage.py.
+- `bash scripts/python.sh -m pytest -q tests/test_converter_infrastructure.py tests/test_converter_memory_execution.py tests/test_converter_deep_execution.py tests/test_adaptive_execution.py --disable-warnings --tb=short`
+  — initial **18 failed, 76 passed, 28 warnings, 131.10 s**;
+  /tmp/knill-converter-phase5-initial-corrected.log. Failures were historical
+  output-count assertions (required new ledger adds one artifact) and manually
+  completed synthetic points without the new scientific runtime contract.
+  Output tests now expect the ledger. Storage-only numeric fixtures explicitly
+  mock runtime science validation, while dedicated runtime/native subprocess
+  tests exercise it without mocks. No physical/decoder test is weakened.
+  Focused -x reproduced the first old-count failure, 1 failed in 1.13 s;
+  /tmp/knill-converter-phase5-synthetic-first.log.
+- `bash scripts/python.sh -m pytest -q tests/test_converter_runtime.py tests/test_v2_storage.py tests/test_converter_infrastructure.py --disable-warnings --tb=short`
+  — **68 passed, 4.96 s**; /tmp/knill-converter-phase5-runtime.log. Synthetic
+  1025 one-shot ledger rows exercise bounded 512-row flushing without physical
+  sampling. New physical tests remain <=7 shots. Same recorded auto chunks
+  replay exactly in reverse task order; checksum/rate/CI/timing/seed/ID and
+  even-rehashed ledger corruption are rejected.
+- `bash scripts/python.sh -m pytest -q tests/test_converter_runtime.py tests/test_converter_config.py tests/test_converter_deep_artifacts.py --disable-warnings --tb=short`
+  — **152 passed, 9.67 s**; /tmp/knill-converter-phase5-contracts.log.
+  Includes additional mocked Windows handle liveness branches; real Linux
+  subprocess/spawn/native lock behavior is exercised separately.
+- `bash scripts/python.sh -m pytest -q tests/test_converter_cli.py --disable-warnings --tb=short`
+  — **15 passed, 65.49 s**; /tmp/knill-converter-phase5-cli-tests.log.
+  Actual external Python processes exercise all three validate/prepare/run/
+  prepared/completed-resume/summary paths, saved worker overrides, multiworker
+  fixed/auto output, invalid YAML, four d/p points, and source/artifact corruption.
+  A separate CLI child hard-exits with code 23 after one chunk. Resume clears
+  only that dead child's stale locks/temp files, restarts at shot zero with
+  the same seed, and matches a fresh fixed-partition label file byte for byte.
+- `bash scripts/python.sh -m pytest -q tests/test_converter_memory_execution.py tests/test_converter_knill_execution.py tests/test_converter_deep_execution.py tests/test_adaptive_execution.py --disable-warnings --tb=short`
+  — **80 passed, 28 inherited warnings, 171.71 s**;
+  /tmp/knill-converter-phase5-execution-fixed.log. Existing Hex adaptive behavior,
+  static caches, fixed serial/spawn equality, failed-point restart and complete
+  preservation pass. New counts and runtime contract validate on actual models.
+- `bash scripts/python.sh scripts/validate_converter_matrix.py --output results/converter_phase5_matrix`
+  — **52 completed validated points, 156 shots, 710.33 s**;
+  /tmp/knill-converter-phase5-matrix.log and ignored validation.json. SE: d3/5,
+  R=1/d/2d, p=0/.003. Knill: d3/5, T_tel=1/2/3, both preparation regimes,
+  p=0/.003. Deep: four logical qubits, depths2/3, n_r1/2, both resource policies,
+  p=0/.003 and seeds19/41. Every point saves exact source/sample artifacts,
+  contiguous bool Parquet, a hashed partition/seed ledger and correct E/N/
+  Wilson metadata; completed resume validates it. Each kind has nontrivial
+  two-worker cases. All 26 p0 points have zero errors (0/78 shots). Tiny finite-p
+  memory counts are 0/54; deep counts vary by fixed case (15/24 total), without
+  pooling conditions into a scientific rate or paper/threshold comparison.
+- `bash scripts/python.sh scripts/validate_converter_matrix.py --only-depth32 --output results/converter_phase5_depth32`
+  — the initial depth32/d3/noisy/n_r1/seed19/p=.003 one-shot attempt was killed
+  during static model construction, before artifact publication or sampling,
+  while the matrix/full test gate also ran. Host memory.events records an OOM
+  kill; the Linux VM has 7851 MiB RAM (~7.67 GiB) and 2 GiB swap. No successful depth-32
+  numerical validation is claimed from this attempt.
+  /tmp/knill-converter-phase5-depth32.log. An isolated retry is recorded below.
+- `bash scripts/python.sh scripts/build_cluster_bundle.py --with-converter --output results/converter_phase5_cluster/bundle`
+  and
+  `bash scripts/python.sh -m pip install --no-deps --no-compile --target results/converter_phase5_cluster/installed results/converter_phase5_cluster/bundle/wheels/*.whl`
+  — six project/backend wheels build/install with pinned VCS identities,
+  converter grammar and all 72 Hex matrices; no source checkout is modified.
+  /tmp/knill-converter-phase5-bundle.log and wheel-install.log.
+- `bash scripts/python.sh /tmp/knill_converter_phase5_wheel_smoke.py`
+  — verified installed bench/converter/stimflow imports with PATH empty and Git
+  unavailable. All three kinds validate/prepare/execute/resume/summarize,
+  three shots/two workers, including ideal-post Knill and depth2 ideal/M9 deep.
+  Saved counts/checksums/rates and completed byte preservation pass.
+  Existing Conda numerical dependencies are used; no separate offline Python
+  or dependency environment is provisioned. /tmp/knill-converter-phase5-wheel.log
+  and ignored results/converter_phase5_cluster/wheel_smoke.json.
+- `bash scripts/python.sh -m pip check` — no broken requirements.
+  `bash scripts/python.sh -m compileall -q src scripts tests/test_converter_runtime.py tests/test_converter_cli.py`
+  and `git diff --check` pass. Public-import AST audit passes, final guide/report
+  relative links resolve, and all 22 pre-phase config/physical-identity/point-seed
+  snapshots match exactly. POSIX resource-name ordering gives the same existing
+  Linux Hex source/matrix SHA e16c17466d43d42369c8e53b2f45e5500e5dc5874c0d64484759f52b363e8f9e.
+  No existing Hex circuit/decoder/noise source is edited.
+
+Linux/Windows CI is configured in .github/workflows/converter.yml. Windows
+handle behavior is mocked in Linux unit tests, not misreported as a Windows
+native execution. Any remote runner outcome is recorded separately.
+- Final complete bench gate:
+  `bash scripts/python.sh -m pytest -q --disable-warnings`
+  — **975 passed, 1356 inherited warnings, 914.45 s (15:14)**;
+  /tmp/knill-converter-phase5-full.log. No exclusions or warning-policy changes.
+  Includes all 35 new runtime/subprocess cases, original Hex/v1/converter
+  scientific/fault/reference/serialization tests and depth32 compilation.
+  The separately invoked complete dependency suite's one historical failure
+  remains disclosed above; it is not included in this bench pass count.
+
+- Isolated finite-p depth32 retry, after other gates completed:
+  `/usr/bin/time -v bash scripts/python.sh -m knill_bench.experiments.cli resume results/converter_phase5_depth32/runs/20261112134046_7acf16ff_deep_32_smoke`
+  — **exit 137 / host OOM kill**, 8:02.20 elapsed, peak RSS **7,111,924 KiB**
+  (~6.78 GiB), no sampled labels or complete point marker. The host OOM counter
+  increments again. A planned TERM at the resource boundary found the child
+  already gone, so no stop signal was delivered. No published data was altered.
+  /tmp/knill-converter-phase5-depth32-isolated.log. This is a demonstrated
+  finite-p depth32 memory limitation of this VM with the pinned native stage/
+  view construction, independent of shot batching; no private/native bypass
+  or graph approximation was introduced. A distinct declared p0/ideal-resource
+  one-shot depth32 case is attempted separately, not substituted into this result.
+- Separate declared p0/ideal-resource depth32 attempt:
+  `/usr/bin/time -v bash scripts/python.sh -m knill_bench.experiments.cli run /tmp/knill_phase5_depth32_p0.yaml`
+  — **bounded stop, exit143**, 10:40.78 elapsed, **6,835,408 KiB peak RSS**
+  (~6.52 GiB). d3, depth32, n_r1, circuit_seed19, ideal/M9 resources with
+  p_st=0, one shot/one worker. This static construction also reached the
+  workstation resource boundary before sampling. TERM was delivered only to
+  this validation child; the OOM counter remains 2. No successful depth32
+  numerical smoke or labels are claimed. /tmp/knill-converter-phase5-depth32-p0.log.
+- Both unfinished depth32 diagnostics are reopened through RunStore.resume
+  without compilation, then explicitly marked failed with the observed memory
+  reason. This clears their dead-child locks and incomplete files safely,
+  preserves point identities/seeds and confirms zero Parquet labels. They stay
+  ignored diagnostic results; no complete scientific data is deleted.
+
+Phase 5 integration code and all three workstation/wheel paths are implemented.
+Numerical validation completes 52 requested small points; depth32 compilation
+passes, but its sampled numerical smoke remains unvalidated on this VM because
+of native static-model memory. The full Hex dependency suite retains one
+historical failure. Neither limitation is reported as successful validation,
+and no dependency/private/physical/decoder workaround is introduced. Exact
+commands, supported configurations, metadata schema and limitations are in
+sufficient detail in docs/converter_phase5.md and docs/converter_phase5_report.md.

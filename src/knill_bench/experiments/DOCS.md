@@ -247,3 +247,15 @@ both fixed/adaptive worker setup/cache keys. RunStore uses config's explicit
 prior_policy/projected_approximation and validates per-stage scope/model
 metadata before completion/resume. Legacy Fig.4(d), factory and SE contracts
 are unchanged. See [Knill simulator](../../../docs/knill_sim.md).
+
+## Phase 5 integration
+
+adaptive_execution adds converter-only split worker timings and ordered ledger
+publication; native caches, bounded windows, chunk seed streams and Hex inference
+remain unchanged. RunStore marks the new converter execution contract, registers
+runtime artifacts and validates complete data/ledger/rate identities before
+cleanup. CLI summarize-converter supports all three kinds; summarize-deep keeps
+its previous summary format. POSIX resource hashing also verifies Windows wheels
+without changing Linux dependency hashes.
+
+See [final converter integration](../../../docs/converter_phase5.md).

@@ -77,7 +77,11 @@ class ConverterPoint:
 
     @property
     def optional_artifact_names(self):
-        return ("logical_stabilizers.json",) if self.kind == "converter_deep_clifford" else ()
+        return (("logical_stabilizers.json",) if self.kind == "converter_deep_clifford" else ()) + self.runtime_artifact_names
+
+    @property
+    def runtime_artifact_names(self):
+        return ("sampling_chunks.parquet",)
 
     @property
     def files(self):

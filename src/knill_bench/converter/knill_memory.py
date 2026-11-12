@@ -64,6 +64,9 @@ class ConverterKnillMemory:
             temporal_separators=sum(a.temporal.summary["separators"] for a in self.decoder.boundary_decoders.values()),
         )
 
+        from .runtime import circuit_counts
+        self.metadata["circuit_counts"] = circuit_counts(self.circuit, 1)
+
     def decode_batch(self, measurements):
         return DecodedBatch(self.decoder.replay(measurements).logical_error)
 

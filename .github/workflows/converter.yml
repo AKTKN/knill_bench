@@ -1,0 +1,45 @@
+name: Converter simulations
+on:
+  push:
+    branches: [feature/converter-simulations]
+  pull_request:
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  converter:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 60
+    defaults:
+      run:
+        shell: bash -el {0}
+    steps:
+      - name: Preserve scientific source bytes on Windows
+        run: git config --global core.autocrlf false
+      - uses: actions/checkout@v4
+      - uses: conda-incubator/setup-miniconda@v3
+        with:
+          activate-environment: ""
+          auto-activate-base: true
+          auto-update-conda: false
+          miniforge-version: latest
+      - name: Install exact environment and VCS dependencies
+        run: bash scripts/bootstrap.sh --with-converter
+      - name: Converter, storage and subprocess/spawn checks
+        run: >-
+          bash scripts/python.sh -m pytest -q tests/test_converter_config.py
+          tests/test_converter_provenance.py tests/test_converter_infrastructure.py
+          tests/test_converter_se_memory.py tests/test_converter_knill_physics.py
+          tests/test_converter_local_matching.py tests/test_converter_deep_decoding.py
+          tests/test_converter_runtime.py tests/test_converter_cli.py
+          tests/test_v2_storage.py tests/test_cluster_packaging.py
+      - name: Dependency and syntax checks
+        run: |
+          bash scripts/python.sh -m pip check
+          bash scripts/python.sh -m compileall -q src scripts
+      - name: Build portable project/backend wheels
+        run: bash scripts/python.sh scripts/build_cluster_bundle.py --with-converter --output results/ci_bundle

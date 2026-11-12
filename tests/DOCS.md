@@ -277,3 +277,19 @@ actual fixed/auto/spawn output, cache/RNG isolation, restart, artifact tampering
 and saved-only count/rate/Wilson reports. New batches remain d3 and <=7 shots;
 Phase 3 depth-32 remains compilation-only. Infrastructure synthetic worker tests
 mock physical model validation explicitly while retaining storage/hash checks.
+
+## Phase 5 integration
+
+test_converter_runtime.py checks bounded ledger flushing, exact recorded-auto
+replay, even-rehashed semantic corruption, checksums/rates/Wilson/timings and
+non-destructive Windows/POSIX lock probes. test_converter_cli.py uses real
+subprocesses/spawn for validate/prepare/run/resume/worker overrides, multi-point
+data, invalid YAML, hard-exit interruption/restart and corrupt artifacts.
+Existing output tests now expect the additional sampling ledger; synthetic
+storage-only fixtures explicitly mock scientific runtime validation, which
+separate runtime and actual CLI tests exercise without mocks.
+The opt-in numerical script is outside pytest and parses to 53 total points,
+including a separate one-shot depth-32 case. Unit physical batches remain <=7
+shots. CI config includes Linux/Windows; only executed results count as verified.
+
+See [final converter integration](../docs/converter_phase5.md).

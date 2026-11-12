@@ -1,5 +1,12 @@
 # Output and schema version 1
 
+Phase 5 completes the shared workstation/cluster execution contract: all three
+converter kinds record actual chunk partitions/seeds in a bounded parent-owned
+ledger, save label checksums and E/N/Wilson/timing statistics, and support the
+saved-only summarize-converter command. Scientific policies and identities stay
+unchanged. See [the final integration guide](converter_phase5.md) and
+[validation evidence](converter_phase5_report.md).
+
 Optional converter kinds retain schema-v2 table types but use
 `points/<case_id>/logical_error.parquet` with parent-published `circuit.lstim`,
 `circuit.stim`, `metadata.json` and optional deep-Clifford

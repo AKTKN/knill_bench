@@ -7,7 +7,7 @@ import csv
 import hashlib
 import io
 import json
-from pathlib import Path
+from pathlib import Path, PurePosixPath
 import shutil
 import subprocess
 import sys
@@ -26,7 +26,7 @@ def git(root, *args):
 def source_hash(files):
     digest = hashlib.sha256()
     # Match runtime pathlib ordering, including a.py versus a/... siblings.
-    for name, data in sorted(files, key=lambda item: Path(item[0])):
+    for name, data in sorted(files, key=lambda item: PurePosixPath(item[0])):
         relative = name.encode()
         digest.update(len(relative).to_bytes(8, "little") + relative)
         digest.update(len(data).to_bytes(8, "little") + data)
@@ -101,7 +101,7 @@ def build_project(spec, output):
         for name in ("pyproject.toml", "README.md", "LICENSE", "LICENCE", "LICENSE.txt"):
             if (root / name).is_file():
                 shutil.copy2(root / name, stage / name)
-        scientific = [(str(p.relative_to(package)), p.read_bytes()) for p in package.rglob("*")
+        scientific = [(p.relative_to(package).as_posix(), p.read_bytes()) for p in package.rglob("*")
                       if p.is_file() and p.suffix in {".py", ".mtx"}]
         info = dict(format_version=1, module=module, commit=commit,
                     branch=git(root, "branch", "--show-current"), dirty=dirty,

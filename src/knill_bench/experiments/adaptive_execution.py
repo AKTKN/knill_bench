@@ -47,6 +47,7 @@ class ChunkResult:
     max_shots: int
     pid: int
     execution: dict | None
+    timings: dict | None = None
 
 
 @dataclass
@@ -134,7 +135,9 @@ def run_chunk(task, **options):
     # Model/graphs/maps remain cached. A new sampler gives each chunk a stream
     # independent of which worker receives it; no dependency globals are patched.
     sampler = circuit.compile_sampler(seed=task.seed)
+    sampler_ready = time.monotonic()
     raw = sampler.sample(shots=task.shots)
+    samples_ready = time.monotonic()
     if task.point.kind in {"knill_sim", "knill_ec_memory", "fig4d_reproduction", "se_memory", "converter_se_memory", "converter_knill_memory", "converter_deep_clifford"}:
         decoded = model.decode_batch(raw)
         labels = decoded.logical_error
@@ -144,12 +147,17 @@ def run_chunk(task, **options):
         decoded = _decode_chunk(model, raw, task.start, task.point, execution["score_units"])
         labels, gaps = decoded.logical_error, decoded.gaps
     elapsed = time.monotonic() - started
+    from .config_v2 import CONVERTER_KINDS
+    timings = (dict(sampler_compile_seconds=sampler_ready-started,
+                    sampling_seconds=samples_ready-sampler_ready,
+                    decoding_seconds=elapsed-(samples_ready-started))
+               if task.point.kind in CONVERTER_KINDS else None)
     # Raw bool records, repaired copies, detector/frame/matching arrays. Large
     # native graphs remain model-dependent and outside this heuristic budget.
     width = max(1, circuit.num_measurements + 4 * circuit.num_qubits + 8 * task.point.T_tel)
     cap = max(1, min(MAX_CHUNK_SHOTS, WORKING_BYTES // (8 * width)))
     return ChunkResult(task.chunk_id, task.start, task.shots, labels, gaps, elapsed,
-                       setup_seconds, cap, os.getpid(), execution if fresh else None)
+                       setup_seconds, cap, os.getpid(), execution if fresh else None, timings)
 
 
 def _validate_result(task, result):
@@ -179,10 +187,23 @@ def _validate_result(task, result):
 
 def _execute_point(store, point, pool, worker, options, prepare_point=None):
     config = store.document.config
+    from .config_v2 import CONVERTER_KINDS
+    converter = config.kind in CONVERTER_KINDS
     store.start_point(point)
+    compile_started = time.monotonic()
     if prepare_point is not None:
-        store.publish_point_artifacts(point, prepare_point(point))
+        artifacts = prepare_point(point)
+        parent_compile_seconds = time.monotonic()-compile_started
+        io_started = time.monotonic()
+        store.publish_point_artifacts(point, artifacts)
+        parent_io_seconds = time.monotonic()-io_started
+        del artifacts
+    else:
+        parent_compile_seconds = parent_io_seconds = 0.
     policy = POLICY if config.batch_size == "auto" else "converter_fixed_chunks_v1"
+    if converter:
+        from knill_bench.converter.runtime import SamplingLedger
+        ledger = SamplingLedger(store.path, point, config.master_seed, policy)
     sizer = ChunkSizer(config.target_chunk_seconds, min(config.output_buffer_shots, MAX_CHUNK_SHOTS))
     next_start = next_chunk = write_chunk = 0
     pending, ready = {}, {}
@@ -238,15 +259,25 @@ def _execute_point(store, point, pool, worker, options, prepare_point=None):
                     min_seconds, max_seconds = min(min_seconds, result.seconds), max(max_seconds, result.seconds)
                 while write_chunk in ready:
                     result = ready.pop(write_chunk)
+                    io_started = time.monotonic()
                     output.write_batch(np.arange(result.start, result.start + result.shots, dtype=np.uint64),
                                        result.labels, result.gaps)
+                    if converter:
+                        ledger.append(result)
+                        parent_io_seconds += time.monotonic()-io_started
                     write_chunk += 1
             if execution is None:
                 raise ValueError("worker omitted model metadata")
+            io_started = time.monotonic()
             result = output.commit()
+            if converter:
+                ledger_hash = ledger.publish()
+                store.register_execution_artifact(point, ledger.path.name, ledger_hash)
+                parent_io_seconds += time.monotonic()-io_started
         except BaseException:
             for future in pending:
                 future.cancel()
+            if converter:ledger.close()
             raise
     execution = dict(execution)
     execution.update(sampling="independently_chunk_seeded_stim_samplers", parallel_execution=policy,
@@ -257,6 +288,14 @@ def _execute_point(store, point, pool, worker, options, prepare_point=None):
                      sampling_decode_seconds=total_seconds, worker_setup_seconds=setup_seconds,
                      workers_used=len(pids), automatic_chunk_shot_cap=sizer.cap,
                      timing_excludes="model_setup_ipc_and_output", bitwise_replay_requires_fixed_partition=True)
+    if converter:
+        from knill_bench.converter.artifacts import file_digest, relative_path
+        from knill_bench.converter.runtime import CONTRACT, binomial_result
+        execution.update(execution_contract=CONTRACT, **binomial_result(result.logical_errors,result.shots),
+            logical_error_sha256=file_digest(relative_path(store.path,point.filename("logical_error"))),
+            timing_statistics=dict(ledger.totals, parent_compile_seconds=parent_compile_seconds,
+                parent_io_seconds=parent_io_seconds),
+            timing_units="seconds; worker durations summed across chunks, not elapsed wall time")
     store.record_complete(result, execution=execution)
 
 

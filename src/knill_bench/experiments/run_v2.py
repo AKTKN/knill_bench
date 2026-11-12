@@ -85,6 +85,9 @@ class RunStore:
                                                              else [p.filename(t) for t in p.tables]))
                         for p in config.points()},
             )
+            if config.kind in CONVERTER_KINDS:
+                from knill_bench.converter.runtime import CONTRACT
+                store._metadata["converter_execution_contract"] = CONTRACT
             store._save()
             return store
         except BaseException:
@@ -111,6 +114,10 @@ class RunStore:
         try:
             value = json.loads((path / "metadata.json").read_text())
             config = document.config
+            if config.kind in CONVERTER_KINDS:
+                from knill_bench.converter.runtime import CONTRACT
+                if value.get("converter_execution_contract", CONTRACT) != CONTRACT:
+                    raise ValueError("saved converter execution contract changed")
             if (value.get("schema_version") != 2 or value.get("config_hash") != config.config_hash
                     or value.get("input_sha256") != document.input_hash or value.get("config") != config.as_dict()):
                 raise ValueError("saved v2 config changed; resume rejected")
@@ -152,6 +159,9 @@ class RunStore:
                     if converter:
                         validate_artifacts(path, point, info.get("artifacts"), execution=info.get("execution"))
                         validate_counts(path, point, config.shots, info["logical_errors"])
+                        from knill_bench.converter.runtime import validate_runtime
+                        validate_runtime(path,config,point,info,
+                            required="converter_execution_contract" in value)
                     if (type(info["shots"]) is not int or info["shots"] != config.shots
                             or type(info["logical_errors"]) is not int
                             or not 0 <= info["logical_errors"] <= info["shots"]):
@@ -231,6 +241,11 @@ class RunStore:
             # details nested so they cannot overwrite identities/counts/status.
             execution = json.loads(json.dumps(execution, allow_nan=False))
         value = self._metadata["points"][point.case_id]
+        if config.kind in CONVERTER_KINDS:
+            from knill_bench.converter.runtime import validate_runtime
+            validate_runtime(self.path,config,point,dict(value,execution=execution,
+                shots=result.shots,logical_errors=result.logical_errors),
+                required="converter_execution_contract" in self._metadata)
         if execution is not None:
             value["execution"] = execution
         value.update(status="complete", shots=result.shots, logical_errors=result.logical_errors,
@@ -250,6 +265,21 @@ class RunStore:
         from knill_bench.converter.artifacts import publish_artifacts, registered_files
         registry = publish_artifacts(self.path, point, artifacts)
         info.update(artifacts=registry, files=registered_files(point, registry))
+        self._save()
+
+    def register_execution_artifact(self, point, name, checksum):
+        """Register an already closed/fsynced runtime ledger in the parent."""
+        self._check_owner()
+        if point.kind not in CONVERTER_KINDS or name not in point.runtime_artifact_names:
+            raise ValueError("unknown converter runtime artifact")
+        info = self._metadata["points"][point.case_id]
+        relative = f"{point.directory}/{name}"
+        from knill_bench.converter.artifacts import file_digest, relative_path, registered_files
+        if (info["status"] != "running" or relative in info["artifacts"]
+                or file_digest(relative_path(self.path,relative)) != checksum):
+            raise ValueError("runtime artifact must belong to a running point and match its checksum")
+        info["artifacts"][relative] = checksum
+        info["files"] = registered_files(point,info["artifacts"])
         self._save()
 
     def finish(self):

@@ -1,5 +1,11 @@
 # Getting started: auxiliary-system experiments
 
+The [final converter integration guide](docs/converter_phase5.md) covers all
+three run/resume pipelines, recorded sampling chunks, saved rate/Wilson summaries,
+and pinned cluster wheels. Use `summarize-converter RUN` to validate saved results.
+[Phase 5 evidence](docs/converter_phase5_report.md) records executed numerical and
+platform checks and the inherited Hex test failure.
+
 Converter SE memory is now available through the optional converter backend:
 install with `bash scripts/bootstrap.sh --with-converter`, then use
 `knill-bench-v2 run configs/converter_se_memory_v2_example.yaml` and

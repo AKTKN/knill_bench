@@ -684,3 +684,46 @@ fixed/auto two-worker CLI and verified no-Git wheel run/resume/summary pass for
 both resource policies. All 22 physical identity/seed snapshots are unchanged;
 the small deep example intentionally adds a seven-shot fixed execution budget.
 TEST.md records exact commands and the two corrected fault/artifact fixtures.
+
+## User-authorized final converter integration — Phase 5 (2026-11-12)
+
+The user explicitly requested Phase 5 implementation/validation/commit/push
+on feature/converter-simulations after 68bb77d. This supersedes the Phase 4
+stop and explicitly authorizes a small sampled d3/depth-32 smoke, plus the
+specified d3/5 memory and depth2/3 deep validation matrix. No production sweep
+or dependency source/Hex scientific change is authorized. Read
+[the final guide](docs/converter_phase5.md) and
+[evidence report](docs/converter_phase5_report.md). Use Conda knill_system.
+
+New converter_execution_v2 runs record exact ordered partitions/seeds and
+split timings in a bounded parent-owned sampling_chunks.parquet ledger.
+Scientific label schemas/physical identities/chunk seed streams remain fixed.
+Parent completion/resume validates model/source/policy/artifact/label checksums,
+contiguous IDs/counts, semantic ledger rows/seeds/digest, E/N/Wilson statistics
+and timing aggregates. Root results stay compact; native per-instruction export
+is saved only in the point model sidecar. Completed points never resample;
+unfinished files/ledger/temp files restart at zero. Keep historical/Hex metadata
+contracts distinct. summarize-converter is saved-only; summarize-deep retains
+its public format. Fixed partitions replay; auto timing may change records.
+
+All native models/graphs/requests/frames remain public converter-owned/cached
+per point/process; terminal outcomes never drive inference. Native static model
+memory grows with distance/depth and is outside the 64 MiB shot-array heuristic.
+Portable source hashing uses POSIX names/order, preserving Linux Hex hashes.
+Windows process-lock checks must never use os.kill(pid,0); close Parquet readers
+before rename. New subprocess/native and bounded synthetic ledger tests cover
+these paths. Linux/Windows CI is configured; do not call Windows tested without
+an executed runner result. Full unfiltered Hex suite has one reproducible,
+historically documented adaptive-confidence test failure on clean source;
+record it explicitly without editing the dependency or hiding it by exclusion.
+
+Phase 5 gates: 975 bench tests pass (1356 inherited warnings, 914.45 s).
+The unfiltered read-only Hex suite has 374 passes and the one historical
+adaptive-confidence failure (720 warnings, 40.95 s), reproduced in isolation.
+The regular numerical matrix completes 52 points/156 shots with p0=0/78 and
+actual two-worker nonzero-p cases for each kind. Six-wheel/no-Git checks pass.
+Finite-p depth32 OOMs in isolation (7,111,924 KiB peak RSS, 8:02.20); separate
+p0/ideal-resource depth32 is stopped at 6,835,408 KiB (10:40.78) before sampling.
+Depth32 compilation passes, but sampled depth32 validation is incomplete on
+this VM. Preserve this disclosure and the local-versus-Windows-CI distinction.
+Do not change dependency internals or scientific policies to hide the limits.

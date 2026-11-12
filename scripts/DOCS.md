@@ -195,3 +195,15 @@ Current Knill-noise dependency pin: Hex HEX-K1 `8fa2200315cc4feaccf341a461f91739
 HEX-N2 pin. Bootstrap/bundles require that clean exact checkout; runtime
 checks the new native policy and fixed Knill API, with strict source/resource
 hashes for installed wheels.
+
+## Phase 5 integration
+
+validate_converter_matrix.py --output NEW_DIR runs the small 52-point/156-shot
+SE/Knill/deep matrix, validates completed resume and saved E/N/Wilson intervals,
+and checks p0 labels. --only-depth32 samples one d3/noisy depth-32 shot;
+--include-depth32 appends it. This opt-in validation is not a production sweep.
+The optional wheel builder keeps exact converter/stimflow VCS identities and
+portable resource-name ordering, preserving existing Linux Hex matrix hashes.
+Linux/Windows CI is defined in .github/workflows/converter.yml.
+
+See [final integration](../docs/converter_phase5.md).

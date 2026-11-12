@@ -1,5 +1,12 @@
 # Conda 環境とクラスターマシンへの配布
 
+Phase 5 completes the shared workstation/cluster execution contract: all three
+converter kinds record actual chunk partitions/seeds in a bounded parent-owned
+ledger, save label checksums and E/N/Wilson/timing statistics, and support the
+saved-only summarize-converter command. Scientific policies and identities stay
+unchanged. See [the final integration guide](converter_phase5.md) and
+[validation evidence](converter_phase5_report.md).
+
 Optional converter backend: add `--with-converter` to bootstrap and the bundle
 builder. `requirements-converter.lock` pins exact converter/stimflow VCS
 commits and additional runtime packages without changing numerical pins. With

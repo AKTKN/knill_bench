@@ -983,3 +983,49 @@ Final Phase 4 gates: **940 bench tests passed**, 1356 inherited warnings,
 fixed/auto CLI and no-Git wheel run/resume/summary checks, pip check, public API
 import audit, compileall and diff/dependency integrity pass. Phase 4 is complete
 with validated finite-p per-shot labels; stop after its scoped commit/push.
+
+## 2026-11-12 — converter final integration and validation (Phase 5)
+
+All three converter runners retain the shared spawn/cache infrastructure and
+now record actual ordered sampling partitions/seeds plus split timings in a
+bounded parent-owned ledger. New converter_execution_v2 publication/resume
+checks label/ledger/model hashes, source/physical policies, contiguous IDs and
+counts, exact E/N/Wilson statistics and timing aggregates. Root results stay
+compact; the native instruction export remains only in each model sidecar.
+Saved-only summarize-converter supports all kinds; summarize-deep preserves
+its prior result format. Scientific label schemas, seed streams and all 22
+existing configuration/physical-point/seed snapshots remain unchanged.
+
+Portable wheel resource naming preserves the Linux Hex source/matrix hash.
+Windows lock liveness uses a handle query and validation readers close before
+rename. Linux/Windows CI is configured; native Windows execution is not claimed
+from local mocked checks. No dependency sources or Hex scientific policy,
+physical noise, v1 numerical code, user config or notebook is changed.
+
+Complete bench gate: **975 passed**, 1356 inherited warnings, **914.45 s**.
+The full unfiltered Hex suite was executed: **374 passed, 1 historical failure**,
+720 warnings, 40.95 s; isolated reproduction confirms the unchanged adaptive
+confidence mixed-short/long assertion. No failure is hidden by deselection.
+Real subprocess tests pass validate/prepare/run/resume, worker overrides,
+fixed/auto spawn, hard-exit recovery, multi-point data and corruption checks.
+Six-wheel/no-Git runtime checks pass all three pipelines, as do pip check,
+compileall, diff/public-import audits and exact source/identity checks.
+
+The regular scientific matrix completes **52 points / 156 shots**, with all
+26 p0 points error-free (0/78). Every point has validated complete Parquet,
+circuit, native model and chunk artifacts plus saved E/N/Wilson summaries.
+All kinds have actual two-worker nonzero-p cases. Exact/fault/reference tests
+remain the primary correctness evidence; small counts support no paper/threshold
+claim. The finite-p depth32 one-shot attempt fails for static native model
+memory even in isolation (exit137, 7,111,924 KiB peak RSS, 8:02.20) on the
+7851 MiB/2 GiB swap VM. It produces no labels/complete marker and is not counted
+as validated. A distinct p0/ideal-resource depth32 smoke is reported separately.
+See docs/converter_phase5.md, docs/converter_phase5_report.md and TEST.md.
+
+The separate p0/ideal-resource depth32 attempt is also unvalidated: it was
+stopped at the workstation static-memory boundary before sampling, peak
+6,835,408 KiB RSS, 10:40.78, exit143. Both diagnostics are explicitly failed
+with zero labels and stale locks cleared through normal recovery. Final
+numerical evidence is **52 points**, with **depth32 compile/signed-group checks
+passing and sampled depth32 validation incomplete on this VM**. No native or
+physics bypass was used. These limitations remain part of the Phase 5 report.

@@ -1,4 +1,11 @@
-# Converter integration — Phases 0–4
+# Converter integration — Phases 0–5
+
+Phase 5 completes the shared workstation/cluster execution contract: all three
+converter kinds record actual chunk partitions/seeds in a bounded parent-owned
+ledger, save label checksums and E/N/Wilson/timing statistics, and support the
+saved-only summarize-converter command. Scientific policies and identities stay
+unchanged. See [the final integration guide](converter_phase5.md) and
+[validation evidence](converter_phase5_report.md).
 
 This phase adds infrastructure for `converter_se_memory`,
 `converter_knill_memory` and `converter_deep_clifford`. Phase 1 implements

@@ -90,6 +90,8 @@ class ConverterSEMemory:
             detector_map_sha256=digest(view.detector_map.local_to_global),
             observable_map_sha256=digest(view.observable_map.local_to_global),
         )
+        from .runtime import circuit_counts
+        self.metadata["circuit_counts"] = circuit_counts(self.circuit, 1)
 
     def decode_batch(self, measurements):
         return self.decoder.decode_batch(measurements)

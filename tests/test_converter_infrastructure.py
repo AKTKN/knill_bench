@@ -53,6 +53,7 @@ def changed_document(document, **updates):
 @pytest.fixture
 def document(tmp_path, monkeypatch):
     # These tests isolate storage/publication with numeric fake workers, not physics.
+    monkeypatch.setattr("knill_bench.converter.runtime.validate_runtime", lambda *a, **kw: None)
     monkeypatch.setattr("knill_bench.converter.deep_metadata.validate_deep_execution", lambda *a, **kw: None)
     monkeypatch.setattr("knill_bench.converter.deep_artifacts.validate_deep_model", lambda *a, **kw: None)
     source = dict(commit="a"*40, source_sha256="b"*64, required_revision="a"*40,
@@ -90,7 +91,7 @@ def test_shared_execution_parent_publishes_point_relative_files(document, worker
         saved = store.metadata
     assert saved["status"] == "complete"
     info = saved["points"][point.case_id]
-    assert len(info["files"]) == 5 and all((path / n).is_file() for n in info["files"])
+    assert len(info["files"]) == 6 and all((path / n).is_file() for n in info["files"])
     assert all(not PureWindowsPath(n).is_absolute() for n in info["files"])
     table = pq.read_table(path / point.filename("logical_error"))
     assert table["shot_id"].to_pylist() == list(range(7))

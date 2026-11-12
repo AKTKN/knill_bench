@@ -23,6 +23,9 @@ def main(argv=None):
     deep_summary = sub.add_parser("summarize-deep", help="Validate saved deep labels and report full-circuit LER/95% Wilson intervals.")
     deep_summary.add_argument("run")
     deep_summary.add_argument("--output", help="Optional JSON report; default prints JSON.")
+    summary = sub.add_parser("summarize-converter", help="Validate saved converter labels, chunks and Wilson intervals.")
+    summary.add_argument("run")
+    summary.add_argument("--output", help="Optional JSON report; default prints JSON.")
     plot = sub.add_parser("plot-knill", aliases=["plot-fig4d"],
                           help="Plot saved Knill EC memory labels without simulation.")
     plot.add_argument("run")
@@ -58,9 +61,12 @@ def main(argv=None):
         elif args.command == "resume":
             from .dispatcher import resume
             print(resume(args.run))
-        elif args.command == "summarize-deep":
+        elif args.command in {"summarize-deep", "summarize-converter"}:
             from pathlib import Path
-            from knill_bench.analysis.converter_deep import summarize_saved
+            if args.command == "summarize-deep":
+                from knill_bench.analysis.converter_deep import summarize_saved
+            else:
+                from knill_bench.analysis.converter import summarize_saved
             report = json.dumps(summarize_saved(args.run), indent=2, allow_nan=False)
             if args.output:
                 Path(args.output).write_text(report + "\n")

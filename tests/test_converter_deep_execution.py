@@ -45,7 +45,7 @@ def test_two_worker_fixed_auto_parquet_artifacts_and_completed_resume(tmp_path,r
     assert table["shot_id"].to_pylist()==[0,1,2]
     assert info["logical_errors"]==sum(table["logical_error"].to_pylist())
     assert pq.ParquetFile(path/p.filename("logical_error")).metadata.num_row_groups==2
-    assert len(info["files"])==5 and all(n.startswith(p.directory+"/") for n in info["files"])
+    assert len(info["files"])==6 and all(n.startswith(p.directory+"/") for n in info["files"])
     for name,sha in info["artifacts"].items():assert hashlib.sha256((path/name).read_bytes()).hexdigest()==sha
     sidecar=json.loads((path/p.directory/"metadata.json").read_text())
     saved=stim.Circuit((path/p.directory/"circuit.stim").read_text())

@@ -6,7 +6,7 @@ from importlib import metadata
 import inspect
 import json
 import os
-from pathlib import Path
+from pathlib import Path, PurePosixPath
 import platform
 import re
 import subprocess
@@ -26,8 +26,8 @@ def source_info(module):
     path = Path(module.__file__).resolve()
     sha = hashlib.sha256()
     sources = (p for p in path.parent.rglob("*") if p.is_file() and p.suffix in {".py", ".mtx"})
-    for source in sorted(sources):
-        relative = str(source.relative_to(path.parent)).encode()
+    for source in sorted(sources,key=lambda p:PurePosixPath(p.relative_to(path.parent).as_posix())):
+        relative = source.relative_to(path.parent).as_posix().encode()
         data = source.read_bytes()
         sha.update(len(relative).to_bytes(8, "little") + relative)
         sha.update(len(data).to_bytes(8, "little") + data)
