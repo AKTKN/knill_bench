@@ -1,4 +1,4 @@
-# Phase 3: knill-bench-v2 compile CONFIG exports circuits; no noisy decoder yet.
+# Phase 4: run/resume local MWPM; summarize-deep reads saved labels only.
 schema_version: 2
 kind: converter_deep_clifford
 name: converter_deep_clifford_small

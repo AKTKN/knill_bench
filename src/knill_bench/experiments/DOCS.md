@@ -5,7 +5,10 @@ deep artifact generation. Its distinct converter_generation_v1 manifest does
 not publish science tables or completion markers. Config defaults become
 four logical qubits/depth 32/ideal input with d-round resources; fixed n_r
 does not affect the seeded logical gate instance. Existing dispatch guards
-retain deep noisy run/resume refusal before output/cleanup. See
+route deep run/resume to converter_deep_clifford.py and the shared bounded
+converter chunk scheduler. Generated bundles still fail before cleanup.
+CLI summarize-deep calls saved-only analysis with optional JSON output. See
+[deep decoding](../../../docs/converter_deep_decoding.md) and
 [the deep guide](../../../docs/converter_deep_clifford.md).
 
 Phase 2 `converter_knill_memory.py` uses the same parent-owned fixed/adaptive

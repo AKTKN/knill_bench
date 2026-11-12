@@ -1,15 +1,15 @@
-# Converter integration — Phases 0–3
+# Converter integration — Phases 0–4
 
 This phase adds infrastructure for `converter_se_memory`,
 `converter_knill_memory` and `converter_deep_clifford`. Phase 1 implements
 [ordinary converter SE memory](converter_se_memory.md); Phase 2 adds
 [three-patch Knill EC memory](converter_knill_memory.md). Phase 3 adds
 [deep Clifford circuit generation](converter_deep_clifford.md), through the
-artifact-only `compile` command. Its noisy decoder remains Phase 4. `validate-config` parses all
+artifact-only `compile` command. Phase 4 adds [noisy deep decoding](converter_deep_decoding.md). `validate-config` parses all
 three without importing converter, stimflow or Hex. `prepare` verifies the
 installed converter and reserves pending point directories. `run` and `resume`
-execute converter_se_memory and converter_knill_memory. Deep Clifford raises
-`NotImplementedError` before creating a run or cleaning data.
+execute all three converter kinds; `summarize-deep` validates saved deep labels
+and reports full-circuit LER with pointwise Wilson intervals.
 Its `compile` output is a separate generated-artifact manifest, with no sampled
 labels/Parquet table or scientific completion marker.
 Existing Hex configurations, hashes, seeds, filenames, directories and table
@@ -95,8 +95,8 @@ remains active. Conflicting input settings and legacy placeholder Knill names
 are rejected. Deep requires ideal plus-state input; noisy resources use d rounds,
 and ideal resources use typed M9 with optional p_st=p*multiplier (default zero).
 Its seeded single-qubit/CNOT sequence is independent of d/p/n_r/workers. Native
-parallel Knill groups and terminal probes are generated in Phase 3; decoding
-remains a later phase.
+parallel Knill groups and terminal probes retain the Phase 3 generator; Phase 4
+reuses the local temporal/CSS/readout adapters and native causal frame replay.
 SE memory now uses exactly R total rounds and Z-sector MWPM, with noisy Z
 readout. Deep Clifford reserves ideal
 terminal stabilizer probes exclusively for evaluation.
@@ -132,12 +132,13 @@ with independent temporal-component/CSS matching. Correlation loss, invisible
 components and local-prior limits are explicit in metadata; residual hyperedges
 raise. Phase 3 adds deep_program.py/deep_clifford.py for seeded abstract gates,
 public parallel compilation and native signed probes, plus generation.py and
-deep_artifacts.py for artifact-only publication. It does not implement the
-SimulationModel decoding method yet. No
+deep_artifacts.py for artifact-only publication. Phase 4 adds deep_decoding.py,
+deep_simulation.py and deep_metadata.py for local replay, native terminal
+evaluation and strict saved scientific identity. No
 private converter import or copied converter implementation is permitted.
 
 `execution.execute_converter_points` requires explicit worker/artifact-builder
-callbacks, supplied by the SE/Knill runners. It reuses shared ChunkTask/ChunkResult,
+callbacks, supplied by all three converter runners. It reuses shared ChunkTask/ChunkResult,
 spawn pools, bounded outstanding/reordered batches, ChunkSizer, PointBuffer,
 PointWriter, chunk seeds and RunStore. The artifact builder runs in the parent;
 workers return bool vectors, timing/caps and <=64 KiB JSON execution descriptors.
@@ -174,10 +175,10 @@ to the sampled circuit. Exported selected instructions additionally preserve
 exact reconstruction. The model's
 sampled circuit must be the same circuit whose artifacts are published.
 `PointArtifacts` carries parent-owned source strings and JSON model metadata.
-For deep `compile`, circuit.stim is the **extended probe.circuit**. The original
+For both deep `compile` and scientific runs, circuit.stim is the **extended probe.circuit**. The original
 native circuit export remains the canonical prefix; terminal probe metadata
 retains its original measurement count, indices, signed supports and fingerprint.
-Signed logical definitions are mandatory for generated deep artifacts.
+Signed logical definitions are mandatory for both generated and scientific deep artifacts.
 The root `converter_generation_v1` manifest has generated/failed status and
 does not use the simulation table or completion contract shown above.
 
@@ -195,8 +196,8 @@ Only the owner updates metadata. Incomplete-point recovery removes all of that
 point's known table/sidecar/temp files and restarts at zero with the same seed;
 complete files stay intact. Config/source/version compatibility and all complete
 points are checked before cleanup. No unfinished scientific kind is marked as
-success by public CLI. Converter SE/Knill resume is supported; deep noisy
-run/resume remains intentionally unsupported, including for generated bundles.
+success by public CLI. All converter scientific runs support resume. Generated
+bundles remain artifact-only and cannot be resumed as scientific datasets.
 Memory checks cross-check execution,
 artifact hashes/export and physical/readout identities before publication/resume.
 Knill additionally binds preparation probabilities, decoder approximation and
@@ -216,5 +217,6 @@ Hex-lineage API/source/matrix checks and never import this optional backend.
 See [the Phase 0 report](converter_phase0_report.md),
 [the SE-memory guide](converter_se_memory.md), [Phase 1 report](converter_se_memory_report.md),
 [the Knill guide](converter_knill_memory.md), [Phase 2 report](converter_knill_memory_report.md),
-[the deep guide](converter_deep_clifford.md), [Phase 3 report](converter_deep_clifford_report.md) and
+[the generation guide](converter_deep_clifford.md), [Phase 3 report](converter_deep_clifford_report.md),
+[deep decoding](converter_deep_decoding.md), [Phase 4 report](converter_deep_decoding_report.md) and
 [TEST.md](../TEST.md) for verification and remaining phase boundaries.

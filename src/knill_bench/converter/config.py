@@ -118,6 +118,8 @@ class ConverterConfig:
     codecapacity_prior = "module_local"
     @property
     def prior_policy(self):
+        if self.kind == "converter_deep_clifford":
+            return "converter_deep_local_component_mwpm_css_capacity_v1"
         if self.kind == "converter_knill_memory":
             return "converter_knill_local_component_mwpm_css_capacity_v1"
         return ("converter_z_sector_undecomposed_dem_mwpm_v1" if self.kind == "converter_se_memory"

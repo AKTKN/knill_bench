@@ -190,3 +190,13 @@ True runs, preserving their local/full-prefix labels and validating inference
 mode, scope, residual inclusion flags and per-stage sector hash structure.
 Saved analysis never compiles a prior or changes logical-error labels. See
 [metadata contract](../../../docs/knill_sim.md).
+
+## Converter deep saved labels
+
+converter_deep.summarize_saved validates complete scientific deep config/point
+identities, policy, artifacts/probe/stage hashes and streamed Parquet IDs/counts.
+It returns full-circuit any-corrected-stabilizer failure counts, rates and
+pointwise 95% WilsonInterval bounds. CLI summarize-deep prints JSON or writes an
+explicit requested JSON path. It never constructs/samples/decodes a circuit or
+requires current runtime source compatibility. See
+[deep decoding](../../../docs/converter_deep_decoding.md).

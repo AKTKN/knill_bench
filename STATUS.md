@@ -951,3 +951,35 @@ teleportations. Final gate: **902 passed, 1356 inherited warnings, 661.25 s**;
 all 17 deep physical checks and existing Hex/v1/SE/Knill regressions pass.
 TEST.md records the two test-only API/index corrections and exact commands.
 No noisy deep LER, production sweep or Phase 4 decoding is included.
+
+## 2026-11-12 — converter noisy deep Clifford decoding (Phase 4)
+
+Implemented scientific converter_deep_clifford run/resume using the unchanged
+Phase 3 physical generator and native terminal probe. Shared Phase 2 causal
+replay caches local temporal/CSS/readout MWPM and native frame/stage models,
+retains deterministic Clifford sector transport and explicitly rejects bad
+order/source/use/input/net-sector/readout corrections. Terminal probe columns
+remain evaluation-only. Each bool label is any corrected signed stabilizer
+flip, with full-circuit failure probability units and no correlated decoding.
+
+Bounded fixed/auto spawn execution publishes exact LSTIM/sampled Stim, full
+logical/probe/stage metadata, signed stabilizers and streamed error Parquet.
+Complete resume preserves files without constructing/sampling; unfinished
+points restart at zero. Generation-only compile bundles stay distinct.
+Saved-only summarize-deep validates records/artifacts/counts and returns rates
+plus pointwise 95% Wilson bounds. Guides, package interfaces and runnable small
+examples are updated. All 22 pre-change physical point/seed snapshots match;
+only the small deep example's explicit seven-shot execution config hash changes.
+Dependency sources/pins, Hex/v1 physics and other branches remain untouched.
+
+Small finite-p CLI and installed-wheel/no-Git runs produce validated labels for
+both resource policies; resume and summaries pass. Fault fixtures were corrected
+for Hadamard orientation and the actual signed-stabilizer artifact filename.
+Exact gates and limitations are recorded in TEST.md and the Phase 4 report.
+No production sweep, noisy depth-32 sampling or subsequent phase was run.
+
+Final Phase 4 gates: **940 bench tests passed**, 1356 inherited warnings,
+800.07 s; **41 read-only Hex tests passed**, 188 warnings, 15.60 s. Installed
+fixed/auto CLI and no-Git wheel run/resume/summary checks, pip check, public API
+import audit, compileall and diff/dependency integrity pass. Phase 4 is complete
+with validated finite-p per-shot labels; stop after its scoped commit/push.

@@ -11,7 +11,7 @@ Finite-p d3/5 and the explicit d3/depth-32 template compile without sampling.
 Pinned public-example LSTIM fixtures are new data-only references with hashes;
 Hex golden fixtures are unchanged. `test_converter_deep_artifacts.py` verifies
 compile CLI, exact native prefix/probe export, no sampling/matching, signed
-state/source/count linkage, failure state and continued noisy run/resume guard.
+state/source/count linkage, failure state and generation-only resume refusal.
 
 Phase 2 `test_converter_knill_config.py`, `test_converter_knill_physics.py`,
 `test_converter_knill_execution.py` and `test_converter_local_matching.py`
@@ -31,7 +31,7 @@ classes using pure-X q=.1 (not depolarizing p). Physical batches stay <=7 shots;
 the 512-pattern enumeration is classical. Fixed/adaptive serial/spawn runs,
 caching, exact exported artifacts, repeatability, failed-point recovery and
 metadata guards are checked. Existing Hex tests are unchanged. Phase 0's
-unimplemented-runner test now applies only to deep Clifford.
+reserved-runner test now verifies lazy deep scientific routing.
 
 `test_converter_config.py`, `test_converter_infrastructure.py` and
 `test_converter_provenance.py` cover Phase 0 strict YAML, all three reserved
@@ -265,3 +265,15 @@ exact local ideal-Bell/capacity sector DEM equality, p0/unsupported rejection
 before sampler setup, fixed/auto output, saved readers, tamper rejection and
 fixed serial/spawn equality. New physical batches are <=7 shots. The obsolete
 knill_ec_memory True-rejection expectation is removed; legacy tests remain.
+
+## Phase 4 deep decoding
+
+test_converter_deep_decoding.py exercises ideal branches, physical/logical faults
+around CNOT/teleport/resource/probe boundaries, independent sparse-matrix
+PyMatching graphs, explicit GF(2) sector maps, alternate projection replay and
+symplectic terminal evaluation. Negative cases cover order, omission, wrong
+source/use/XZ IDs and stale sectors. test_converter_deep_execution.py checks
+actual fixed/auto/spawn output, cache/RNG isolation, restart, artifact tampering
+and saved-only count/rate/Wilson reports. New batches remain d3 and <=7 shots;
+Phase 3 depth-32 remains compilation-only. Infrastructure synthetic worker tests
+mock physical model validation explicitly while retaining storage/hash checks.

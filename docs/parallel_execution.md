@@ -1,6 +1,6 @@
 # V2 adaptive parallel execution and buffered output
 
-Converter SE and Phase 2 Knill memory use the same bounded adaptive pool/chunk/buffer
+Converter SE, Knill memory and Phase 4 deep Clifford use the same bounded adaptive pool/chunk/buffer
 policy described here, with parent-owned point-relative artifacts in both
 modes. Its integer batch_size path uses fixed independently seeded chunks
 (`converter_fixed_chunks_v1`), allowing multiple workers within a point;
@@ -17,7 +17,10 @@ sampling or a worker pool. Its LSTIM PARALLEL groups express physical overlap:
 all logical blocks prepare resources/teleport concurrently within each cycle,
 with full barriers between gate/CNOT/QEC groups. Saved workers does not change
 the seeded gate instance or physical schedule. See
-[the deep generation guide](converter_deep_clifford.md).
+[the deep generation guide](converter_deep_clifford.md). Phase 4 run/resume uses
+the shared converter chunk scheduler above, sampling the native probe circuit
+and replaying all causal stages per batch. Both resource policies use the same
+worker/cache/output contracts. See [deep decoding](converter_deep_decoding.md).
 
 Both schema-v2 experiments use time-adaptive chunks by default. Schema-v1
 execution and the Hex H5 sources are unchanged. The physical circuits, native

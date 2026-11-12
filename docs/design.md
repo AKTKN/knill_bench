@@ -14,7 +14,10 @@ parity supplies labels. Correlations are ignored explicitly; unsupported
 hyperedges raise. Phase 3 adds [deep Clifford generation](converter_deep_clifford.md),
 with seeded H/X/Y/Z-then-CNOT layers, parallel Knill substitution and native
 signed terminal probes. Its artifact-only compile command does not decode or
-report noisy LER; deep scientific execution remains Phase 4.
+report noisy LER. Phase 4 adds [deep scientific execution](converter_deep_decoding.md),
+reusing local causal MWPM and native evaluation-only terminal probes. A shot
+fails when any corrected signed terminal stabilizer flips. No joint matching
+or correlated decoding is introduced.
 
 The original schema-v1 design below remains unchanged. B1 adds an independent
 [eight-cycle Fig.4(d) experiment](fig4d.md) using actual Hex full Knill modules,

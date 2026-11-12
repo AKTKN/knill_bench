@@ -4,7 +4,10 @@ Deep Phase 3 uses the same hashed/fsynced PointArtifacts publisher for its
 exact LSTIM, extended sampled/probe Stim, signed logical definitions and model
 metadata. It has a distinct artifact-only root manifest, not a RunStore
 scientific completion marker. No Parquet schema, writer or existing recovery
-contract changes; noisy deep decoding and resume remain Phase 4.
+contract changes. Phase 4 scientific deep runs use the existing bounded bool
+label writer and publish these four sidecars plus one error table. Any corrected
+terminal stabilizer flip defines the label. Generation bundles remain distinct.
+See [deep decoding](../../../docs/converter_deep_decoding.md).
 
 Phase 2 Knill uses the same point-relative Parquet/error schema, contiguous
 IDs and parent publication. Its sidecar includes native exports and compact

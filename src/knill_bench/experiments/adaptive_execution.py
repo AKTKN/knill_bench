@@ -79,6 +79,12 @@ class ChunkSizer:
 
 
 def _compile_model(point, seed, options):
+    if point.kind == "converter_deep_clifford":
+        from knill_bench.converter.deep_simulation import deep_model
+        if options:
+            raise ValueError("converter deep Clifford has no extra worker policy options")
+        model = deep_model(point)
+        return model, model.circuit, model.metadata
     if point.kind == "converter_knill_memory":
         from knill_bench.converter.knill_memory import knill_model
         if options:
@@ -129,7 +135,7 @@ def run_chunk(task, **options):
     # independent of which worker receives it; no dependency globals are patched.
     sampler = circuit.compile_sampler(seed=task.seed)
     raw = sampler.sample(shots=task.shots)
-    if task.point.kind in {"knill_sim", "knill_ec_memory", "fig4d_reproduction", "se_memory", "converter_se_memory", "converter_knill_memory"}:
+    if task.point.kind in {"knill_sim", "knill_ec_memory", "fig4d_reproduction", "se_memory", "converter_se_memory", "converter_knill_memory", "converter_deep_clifford"}:
         decoded = model.decode_batch(raw)
         labels = decoded.logical_error
         gaps = getattr(decoded, "gaps", None)

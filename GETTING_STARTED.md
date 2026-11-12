@@ -18,7 +18,11 @@ Phase 3 deep-Clifford artifacts can be generated with
 This compiles the native terminal-probe circuit and signed stabilizers without
 sampling or creating error tables. See [the generation guide](docs/converter_deep_clifford.md)
 for seeded instances, parallel resources and the tested d3/depth-32 template.
-Deep noisy run/resume remains reserved for Phase 4.
+Phase 4 also supports `knill-bench-v2 run configs/converter_deep_clifford_v2_example.yaml`,
+`resume results/<scientific-run>` and `summarize-deep results/<scientific-run>`.
+The [decoding guide](docs/converter_deep_decoding.md) defines causal local MWPM,
+evaluation-only probes and full-circuit failure probability. Generated bundles
+cannot resume as simulations; `run CONFIG` creates a fresh scientific run.
 
 This branch supplies two schema-v2 experiments and saved-data analysis:
 

@@ -74,7 +74,7 @@ def _allocation(compiled, point):
 
 
 class CompiledDeepClifford:
-    """No noisy decoder or per-shot error API is supplied in Phase 3.
+    """Generation model; deep_simulation supplies the scientific decoder.
 
     circuit is probe.circuit. Frame plans consume the native canonical prefix;
     terminal columns remain evaluation-only. Physical lifting/signs are native.
@@ -104,7 +104,7 @@ class CompiledDeepClifford:
             original_qubit_count=self.probe.original_qubit_count,
             measurement_indices=list(self.probe.measurement_indices),
             observables=[asdict(observable) for observable in self.probe.observables])
-        self.metadata = dict(physical_model=DEEP_MODEL, generation_only=True, decoder_status="not_implemented_phase4",
+        self.metadata = dict(physical_model=DEEP_MODEL, generation_only=True, decoder_status="not_constructed_generation_only",
             logical_qubits=point.logical_qubits, depth=point.depth, circuit_seed=point.circuit_seed,
             n_r=point.n_r, qec_intervals=point.depth, parallel_knill_groups=point.depth*point.n_r,
             teleportations=len(self.compiled.relocation_history), physical_patch_count=3*point.logical_qubits,

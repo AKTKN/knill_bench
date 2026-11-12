@@ -642,3 +642,45 @@ compile and run/resume-guard checks pass for both resource policies; all 19
 non-deep config/point/seed snapshots match. TEST.md records exact commands and
 the two corrected test-only API/index assumptions. Stop after this scoped
 commit/push.
+
+## User-authorized noisy deep Clifford decoding — Phase 4 (2026-11-12)
+
+The user explicitly requested Phase 4 implementation/commit/push after edee43a,
+superseding the Phase 3 stop on feature/converter-simulations. Read
+[the decoder guide](docs/converter_deep_decoding.md) and
+[validation report](docs/converter_deep_decoding_report.md). Continue using
+Conda knill_system and exact converter/stimflow pins. Dependency sources,
+logical generation, physical schedule, Hex/v1 and other branches stay unchanged.
+No production sweep or noisy depth-32 run is authorized by this implementation.
+
+converter_deep_clifford now runs/resumes through shared bounded converter
+execution. Cache static public circuit/probe/frame/stage/local MWPM objects per
+point/process; fresh chunk-seeded samplers and frames consume probe.circuit.
+Split the canonical prefix before all inference. Shared Phase 2 CausalDecoder
+uses current interpreted records/events and native sector maps in exact stage
+order. Validate source/module/use/input IDs, net-sector equations and applied
+readout syndromes. Retain deterministic CNOT/Clifford transport; no joint graph
+or correlated matching. Local component-independent DEM/CSS-capacity limits
+remain explicit; unsupported graphs raise without trimming or fallback.
+
+Only public probe.corrected_flips evaluates terminal signed generators after
+all corrections. One label is any corrected flip, with full-circuit failure
+probability units. Terminal outcomes never select corrections or sectors.
+Scientific artifacts retain the full logical instance, native export/probe,
+signed definitions, stage digest and bool Parquet labels. Generation-only
+compile manifests remain distinct and cannot resume as scientific datasets.
+Completed resume constructs/samples nothing; unfinished points restart at zero.
+
+summarize-deep validates saved identities/artifacts/IDs/counts and reports
+pointwise 95% Wilson score bounds without sampling/resuming. Fixed partitions
+replay across serial/spawn; auto timing can change records. New physical batches
+stay d3 and <=7 shots. Independent matching/projection, Pauli fault, symplectic,
+nonzero-sector, negative-correction and output/statistical checks are required.
+Append final gates to STATUS/TEST; stop after this scoped commit/push.
+
+Phase 4 final gates: 940 bench tests passed (1356 inherited warnings, 800.07 s)
+and 41 read-only Hex tests passed (188 warnings, 15.60 s). Tiny finite-p
+fixed/auto two-worker CLI and verified no-Git wheel run/resume/summary pass for
+both resource policies. All 22 physical identity/seed snapshots are unchanged;
+the small deep example intentionally adds a seven-shot fixed execution budget.
+TEST.md records exact commands and the two corrected fault/artifact fixtures.

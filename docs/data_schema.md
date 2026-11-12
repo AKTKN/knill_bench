@@ -15,8 +15,11 @@ corrected interpreted terminal Z parity XOR the deterministic expected bit.
 Deep Phase 3 uses an artifact-only converter_generation_v1 manifest with no
 simulation complete marker or Parquet table. Its circuit.stim is the extended
 native terminal probe; original measurement count/indices, signed logical
-definitions and physical support metadata are retained. Deep noisy execution
-remains reserved. See [the generation guide](converter_deep_clifford.md). Existing
+definitions and physical support metadata are retained. Phase 4 scientific
+deep runs publish these same four sidecars plus logical_error.parquet, with
+one bool label for any corrected terminal stabilizer flip. Decoder limits,
+source/stage digests and counts validate on publication/resume. Generation
+bundles remain non-resumable. See [deep decoding](converter_deep_decoding.md). Existing
 Hex output schemas/layouts and v1 are unchanged.
 
 B1 retains this v1 layout and the B0 v2 table types below. Its independent

@@ -5,9 +5,11 @@ and `converter_deep_clifford` configuration/prepare support with separate
 point-relative artifacts. Existing Hex identities and layout are preserved.
 Phase 1 supports converter SE run/resume with exactly R total extraction rounds
 and semantic Z-sector MWPM. Phase 2 supports three-patch Knill memory with
-public preparation policies and causal local MWPM. Deep Phase 3 supports
-artifact-only compilation with seeded Clifford layers and parallel Knill;
-it still refuses noisy scientific execution. See
+public preparation policies and causal local MWPM. Phase 4 adds noisy deep
+run/resume and saved-only summarize-deep with full-circuit any-stabilizer
+failure labels/pointwise Wilson intervals; see [deep decoding](converter_deep_decoding.md).
+Deep Phase 3's artifact-only compilation remains available alongside scientific
+execution, with seeded Clifford layers and parallel Knill. See
 [deep generation](converter_deep_clifford.md), [SE memory](converter_se_memory.md),
 [Knill memory](converter_knill_memory.md) and
 [the converter contract](converter_integration.md) for YAML, dependency,

@@ -9,7 +9,9 @@ private converter API or dependency source patch is used. See
 public typed noise/stage/frame APIs and constructs its own local MWPM graphs.
 Deep generation uses native parallel compilation, logical_output_stabilizers
 and make_terminal_observable_probe at the same revision; no dependency edit or
-new runtime package is needed. See [the deep guide](converter_deep_clifford.md).
+new runtime package is needed. Phase 4 reuses these public APIs and the same
+Phase 2 local PyMatching adapters without dependency changes. See
+[deep decoding](converter_deep_decoding.md).
 
 Optional converter support uses exact VCS wheels from
 `requirements-converter.lock`: converter `457dc519adec6a11b38843a03e1c8fbbd6495f5a`

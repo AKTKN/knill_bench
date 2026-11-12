@@ -16,10 +16,7 @@ def execute_points(store, worker, **worker_options):
     config = store.document.config
     from .config_v2 import CONVERTER_KINDS
     if config.kind in CONVERTER_KINDS:
-        if config.kind in {"converter_se_memory", "converter_knill_memory"}:
-            raise ValueError("converter memory requires parent-owned execute_converter_points, not a legacy point writer")
-        from knill_bench.converter.models import require_scientific_runner
-        require_scientific_runner(config.kind)
+        raise ValueError("converter simulations require parent-owned execute_converter_points, not a legacy point writer")
     if config.batch_size == "auto":
         from .adaptive_execution import execute_adaptive
         return execute_adaptive(store, **worker_options)

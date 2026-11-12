@@ -1,4 +1,4 @@
-# Optional converter consumer package — Phases 0–3
+# Optional converter consumer package — Phases 0–4
 
 Phase 3 adds `deep_program.py`: frozen abstract gate layers, a private seeded
 HXYZ/shuffle/orientation RNG and explicit barrier-separated parallel LSTIM.
@@ -53,5 +53,10 @@ public API availability and unchanged Stim/PyMatching pins. It is loaded only
 for converter infrastructure operations. No private converter module imports.
 
 See [configuration, policies, artifact format and limits](../../../docs/converter_integration.md).
-The future noisy deep decoder belongs here; deep scientific run/resume remains
-unsupported. SE and Knill run/resume and deep artifact-only compile are available.
+Phase 4 adds deep_simulation.py (static point cache), deep_decoding.py
+(prefix-only causal replay plus public terminal evaluation), and deep_metadata.py
+(strict scientific policy/source/stage identity). CausalDecoder shares Phase 2
+adapters and enforces stage order, source/use/input IDs and applied readout
+syndromes. deep_artifacts.py validates both scientific sidecars and historical
+generation bundles. All three kinds support run/resume; compile stays artifact-only.
+See [deep decoding](../../../docs/converter_deep_decoding.md).

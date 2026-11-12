@@ -125,6 +125,9 @@ def validate_noise_execution(point, execution, *, create_codecapacity_dem, codec
         elif point.kind == "converter_knill_memory":
             from knill_bench.converter.metadata import validate_knill_execution
             validate_knill_execution(point, execution)
+        elif point.kind == "converter_deep_clifford":
+            from knill_bench.converter.deep_metadata import validate_deep_execution
+            validate_deep_execution(point, execution)
         return
     if point.kind in {"knill_sim", "knill_ec_memory"}:
         from hex_qec.modularisation import KnillNoiseModel

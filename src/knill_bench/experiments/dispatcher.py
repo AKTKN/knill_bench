@@ -1,17 +1,15 @@
 """Lazy dispatch for independent v2 scientific runners."""
 
 from importlib import import_module
+import json
 from pathlib import Path
 
-from .config_v2 import CONVERTER_KINDS, KINDS, load_config, load_saved_config
+from .config_v2 import KINDS, load_config, load_saved_config
 
 
 def experiment_runner(kind):
     if kind not in KINDS:
         raise ValueError("unknown v2 experiment kind")
-    if kind == "converter_deep_clifford":
-        from knill_bench.converter.models import require_scientific_runner
-        require_scientific_runner(kind)
     module_name = f"knill_bench.experiments.{kind}"
     try:
         module = import_module(module_name)
@@ -31,5 +29,7 @@ def dispatch(config_path, *, workers=None):
 
 def resume(run_path):
     path = Path(run_path).resolve()
+    if json.loads((path / "metadata.json").read_text()).get("artifact_schema") == "converter_generation_v1":
+        raise ValueError("generation-only artifacts cannot resume as a scientific run; use run CONFIG")
     document = load_saved_config(path)
     return experiment_runner(document.config.kind)(document, resume_path=path)

@@ -20,6 +20,9 @@ def main(argv=None):
         command.add_argument("config")
         command.add_argument("--workers", type=int, help="Override process count; save the effective YAML in the run.")
     sub.add_parser("resume", help="Continue an existing run directory.").add_argument("run")
+    deep_summary = sub.add_parser("summarize-deep", help="Validate saved deep labels and report full-circuit LER/95% Wilson intervals.")
+    deep_summary.add_argument("run")
+    deep_summary.add_argument("--output", help="Optional JSON report; default prints JSON.")
     plot = sub.add_parser("plot-knill", aliases=["plot-fig4d"],
                           help="Plot saved Knill EC memory labels without simulation.")
     plot.add_argument("run")
@@ -55,6 +58,15 @@ def main(argv=None):
         elif args.command == "resume":
             from .dispatcher import resume
             print(resume(args.run))
+        elif args.command == "summarize-deep":
+            from pathlib import Path
+            from knill_bench.analysis.converter_deep import summarize_saved
+            report = json.dumps(summarize_saved(args.run), indent=2, allow_nan=False)
+            if args.output:
+                Path(args.output).write_text(report + "\n")
+                print(args.output)
+            else:
+                print(report)
         elif args.command in {"plot-knill", "plot-fig4d"}:
             from knill_bench.analysis.fig4d import plot_saved
             print(plot_saved(args.run, args.output))

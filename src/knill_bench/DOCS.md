@@ -6,8 +6,8 @@ resource provenance and bounded numeric-worker execution contracts are
 documented in [converter/DOCS.md](converter/DOCS.md). Phase 1 implements converter
 SE run/resume; Phase 2 adds three-patch Knill EC memory with public typed noise
 and causal local MWPM/frame replay. Phase 3 adds seeded deep Clifford generation,
-native parallel Knill/probe compilation and artifact-only export; noisy deep
-decoding remains Phase 4. Existing Hex/v1 paths
+native parallel Knill/probe compilation and artifact-only export. Phase 4 adds
+noisy deep local decoding/run/resume and saved-label summarize-deep. Existing Hex/v1 paths
 are unchanged.
 
 `analysis.RunRegistry`, `NotebookPlots` and `FigureStyle` provide saved-only

@@ -1,7 +1,7 @@
 """Public-only Clifford/group, allocation, parallelism and terminal checks.
 
-Only noiseless validation batches are sampled (<=7 shots). There is no noisy
-deep decoder or LER estimator. Depth 32 is compilation/validation only.
+Only noiseless validation batches are sampled here (<=7 shots). Noisy decoding
+has separate Phase 4 tests. Depth 32 is compilation/validation only.
 """
 
 from dataclasses import replace
@@ -231,7 +231,7 @@ def test_typed_resource_noise_and_ideal_initial_final_boundaries(m9):
             if instruction.tag == module:body.append(instruction)
         assert body == body.without_noise()
     assert any(i.name == "DEPOLARIZE2" and i.gate_args_copy() == [.001] for i in c.circuit)
-    assert m9.metadata["generation_only"] and m9.metadata["decoder_status"] == "not_implemented_phase4"
+    assert m9.metadata["generation_only"] and m9.metadata["decoder_status"] == "not_constructed_generation_only"
 
 
 def perfect_recorded_sector_frames(model,samples):

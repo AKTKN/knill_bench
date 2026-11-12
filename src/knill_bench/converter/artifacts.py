@@ -116,6 +116,9 @@ def validate_artifacts(run, point, registry, *, execution=None):
     elif point.kind == "converter_knill_memory":
         from .metadata import validate_knill_artifacts
         validate_knill_artifacts(point, registry, meta.get("model"), execution)
+    elif point.kind == "converter_deep_clifford" and execution is not None:
+        from .deep_artifacts import validate_deep_model
+        validate_deep_model(run, point, registry, scientific_execution=execution)
 
 
 def validate_counts(run, point, shots, errors):

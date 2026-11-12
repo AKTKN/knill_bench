@@ -10,6 +10,11 @@ from .deep_program import GENERATOR, generate_logical_circuit
 
 def validate_deep_artifacts(run, point, registry):
     validate_artifacts(run, point, registry)
+    return validate_deep_model(run, point, registry)
+
+
+def validate_deep_model(run, point, registry, *, scientific_execution=None):
+    """Shared native artifact linkage for generation and scientific publication."""
     if f"{point.directory}/logical_stabilizers.json" not in registry:
         raise ValueError("deep generation requires signed logical stabilizer registration")
     model = json.loads(relative_path(run, f"{point.directory}/metadata.json").read_text())["model"]
@@ -19,8 +24,11 @@ def validate_deep_artifacts(run, point, registry):
         depth=point.depth, circuit_seed=point.circuit_seed).as_dict()
     execution, probe, export = (model.get(k) for k in ("execution", "terminal_probe", "converter_export"))
     stabilizers = json.loads(relative_path(run, f"{point.directory}/logical_stabilizers.json").read_text())
-    expected = dict(physical_model="converter_deep_clifford_parallel_knill_v1", generation_only=True,
-        decoder_status="not_implemented_phase4", logical_qubits=point.logical_qubits,
+    scientific = scientific_execution is not None
+    expected = dict(physical_model="converter_deep_clifford_parallel_knill_v1", generation_only=not scientific,
+        decoder_status=("local_mwpm" if scientific else
+            "not_implemented_phase4" if isinstance(execution, dict) and execution.get("decoder_status") == "not_implemented_phase4"
+            else "not_constructed_generation_only"), logical_qubits=point.logical_qubits,
         depth=point.depth, circuit_seed=point.circuit_seed, n_r=point.n_r, qec_intervals=point.depth,
         parallel_knill_groups=point.depth*point.n_r, teleportations=point.logical_qubits*point.depth*point.n_r,
         physical_patch_count=3*point.logical_qubits, parallel_resource_overlap_min=point.logical_qubits,
@@ -34,7 +42,7 @@ def validate_deep_artifacts(run, point, registry):
         terminal_probe_sha256=digest(probe), lstim_sha256=registry[f"{point.directory}/circuit.lstim"],
         stim_sha256=registry[f"{point.directory}/circuit.stim"])
     if (not isinstance(execution, dict) or any(execution.get(k) != v for k, v in expected.items())
-            or execution.get("generation_only") is not True
+            or execution.get("generation_only") is not (not scientific)
             or execution.get("m9_enabled") is not (point.resource_preparation == "ideal")
             or model.get("logical_circuit") != logical or not isinstance(probe, dict) or not isinstance(export, dict)
             or export.get("schema") != "compiled-metadata-v1"
@@ -59,4 +67,13 @@ def validate_deep_artifacts(run, point, registry):
                 or any(type(q) is not int or not 0 <= q < execution["qubits"]
                        for axis in ("physical_x", "physical_z") for q in observable.get(axis, ()))):
             raise ValueError("terminal signed support metadata changed")
+    if scientific:
+        from .deep_metadata import validate_deep_execution
+        validate_deep_execution(point, execution)
+        validate_deep_execution(point, scientific_execution)
+        stages = model.get("decoder_stages")
+        if (any(scientific_execution.get(k) != v for k, v in execution.items())
+                or not isinstance(stages, list) or digest(stages) != execution["decoder_model_sha256"]
+                or len(stages) != execution["stage_count"]):
+            raise ValueError("deep Clifford stage-model/artifact/execution linkage changed")
     return model

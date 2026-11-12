@@ -52,6 +52,9 @@ def changed_document(document, **updates):
 
 @pytest.fixture
 def document(tmp_path, monkeypatch):
+    # These tests isolate storage/publication with numeric fake workers, not physics.
+    monkeypatch.setattr("knill_bench.converter.deep_metadata.validate_deep_execution", lambda *a, **kw: None)
+    monkeypatch.setattr("knill_bench.converter.deep_artifacts.validate_deep_model", lambda *a, **kw: None)
     source = dict(commit="a"*40, source_sha256="b"*64, required_revision="a"*40,
                   origin_url="https://example.invalid/source.git", subdirectory=None, version="0")
     env = dict(python="unit-test", os="test-os", cpu=dict(count=1), dependencies=dict(test="1"),

@@ -100,20 +100,25 @@ def test_fake_installed_wheel_checks_resources_and_grammar(tmp_path, monkeypatch
 
 
 @pytest.mark.parametrize("kind", ["converter_deep_clifford"])
-def test_dispatch_and_resume_refuse_unimplemented_runners_before_output(tmp_path, kind):
+def test_deep_dispatch_and_prepared_resume_route_without_compilation(tmp_path, kind, monkeypatch):
+    from knill_bench.experiments import converter_deep_clifford
+    calls = []
+    def routed(document, *, resume_path=None):
+        calls.append((document.config.kind, resume_path))
+        return resume_path or tmp_path/"routed"
+    monkeypatch.setattr(converter_deep_clifford, "run", routed)
     source = tmp_path / "input.yaml"
     source.write_text(yaml.safe_dump(dict(schema_version=2, kind=kind, noise="converter_uniform",
         sweep=dict(d=[3], p=[.001]), output_root=str(tmp_path / "outputs"), shots=3)))
-    with pytest.raises(NotImplementedError, match="scientific runner is not implemented"):
-        dispatcher.dispatch(source)
+    assert dispatcher.dispatch(source) == tmp_path/"routed"
     assert not (tmp_path / "outputs").exists()
     from knill_bench.experiments.run_v2 import RunStore
     with RunStore.create(load_config(source)) as store:
         run = store.path
         assert store.metadata["status"] == "running"
     before = (run / "metadata.json").read_bytes()
-    with pytest.raises(NotImplementedError, match="scientific runner is not implemented"):
-        dispatcher.resume(run)
+    assert dispatcher.resume(run) == run
+    assert calls == [(kind,None),(kind,run)]
     assert (run / "metadata.json").read_bytes() == before
 
 

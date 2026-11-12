@@ -61,7 +61,8 @@ by default. Final destructive Z readout is noisy and mandatory.
 The Phase 0 placeholder Knill values `resource_preparation: noisy` and `ideal`
 are replaced by the two explicit names below. Contradictory input settings,
 Knill-inapplicable fields, Hex priors/gaps and arbitrary expressions are
-rejected before creating a run. `converter_deep_clifford` remains reserved.
+rejected before creating a run. `converter_deep_clifford` has a separate [generator](converter_deep_clifford.md)
+and [local decoder](converter_deep_decoding.md).
 
 ## Three-patch physical program
 

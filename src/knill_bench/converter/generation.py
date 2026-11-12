@@ -29,7 +29,7 @@ def compile_config(document):
         except FileExistsError:
             instant += timedelta(seconds=1)
     metadata = dict(artifact_schema="converter_generation_v1", purpose="circuit_generation_only",
-        status="generating", decoder_status="not_implemented_phase4", started_at=utc_now().isoformat(), ended_at=None,
+        status="generating", decoder_status="not_constructed_generation_only", started_at=utc_now().isoformat(), ended_at=None,
         config_hash=config.config_hash, input_sha256=document.input_hash, config=config.as_dict(),
         environment=environment, points={})
     try:

@@ -100,10 +100,16 @@ class ReadoutDecoder:
             raise ValueError("readout decoder request/basis/source/sector changed")
         difference = parity(inputs.records, self.checks) ^ inputs.expected_sector
         correction = self.matching.decode(difference)
-        if not np.array_equal(parity(correction, self.checks), difference):
-            raise ValueError("readout capacity correction does not satisfy the syndrome equation")
-        return StageResult(CorrectionBatch(inputs.source_fingerprint, request.readout.module_id,
+        result = StageResult(CorrectionBatch(inputs.source_fingerprint, request.readout.module_id,
             correction, request.block_use_id, self.frame_boundary.input_ids))
+        self.validate_result(inputs, result)
+        return result
+
+    def validate_result(self, inputs, result):
+        if (result.correction.bits.shape != inputs.records.shape
+                or not np.array_equal(parity(result.correction.bits, self.checks),
+                                      parity(inputs.records, self.checks) ^ inputs.expected_sector)):
+            raise ValueError("readout capacity correction does not satisfy the current sector/syndrome equation")
 
 
 @dataclass(frozen=True)
@@ -124,12 +130,21 @@ class KnillReplay:
     stages: tuple[StageTrace, ...]
 
 
-class KnillDecoder:
-    def __init__(self, compiled):
+@dataclass(frozen=True)
+class CausalReplay:
+    frames: object
+    sectors: np.ndarray
+    stages: tuple[StageTrace, ...]
+
+
+class CausalDecoder:
+    """Shared Phase 2 adapters and native causal replay, with no terminal truth."""
+
+    def __init__(self, compiled, *, frame_plan=None):
         from logical_to_stim_converter.decoding import make_stage_requests
 
         self.compiled = compiled
-        self.frame_plan = compiled.make_frame_plan()
+        self.frame_plan = compiled.make_frame_plan() if frame_plan is None else frame_plan
         self.requests = make_stage_requests(compiled)
         self.boundaries = {r.module_id: r for r in self.requests.boundaries}
         self.readouts = {r.readout.module_id: r for r in self.requests.readouts}
@@ -152,36 +167,62 @@ class KnillDecoder:
                                  for module, r in self.boundaries.items()}
         self.readout_decoders = {module: ReadoutDecoder(r, self.frame_plan.boundary_by_id[module])
                                 for module, r in self.readouts.items()}
-        observable, = compiled.observables
-        if observable.basis != "Z" or observable.logical_id != "D":
-            raise ValueError("Knill memory needs one deterministic terminal D/Z observable")
-        self.observable = observable
+        self._order = tuple(self.requests.order)
 
-    def replay(self, raw, *, trace=False, boundary_decoders=None, readout_decoders=None):
-        from logical_to_stim_converter.decoding import StageInputs
+    def replay_prefix(self, raw, *, trace=False, boundary_decoders=None, readout_decoders=None):
+        from logical_to_stim_converter.decoding import CorrectionBatch, StageInputs, StageResult
 
+        if tuple(self.requests.order) != self._order:
+            raise ValueError("causal correction order changed or omitted a boundary/readout")
         frames = self.frame_plan.start(raw, source_fingerprint=self.frame_plan.source_fingerprint)
         sectors = np.zeros((len(raw), len(self.requests.sector_input_ids)), dtype=bool)
         traces = []
         boundary_decoders = self.boundary_decoders if boundary_decoders is None else boundary_decoders
         readout_decoders = self.readout_decoders if readout_decoders is None else readout_decoders
+        current = frames.interpreted_measurements
         for kind, module in self.requests.order:
             request = self.boundaries[module] if kind == "boundary" else self.readouts[module]
-            current = frames.interpreted_measurements
             expected = (request.sector_map.apply(sectors) ^ request.sector_constant) if kind == "readout" else None
             inputs = StageInputs(self.frame_plan.source_fingerprint, frames.events(request.view),
                                  request.view.project_raw_measurements(current), expected)
             adapter = boundary_decoders[module] if kind == "boundary" else readout_decoders[module]
             result = adapter.decode_batch(request, inputs)
+            if not isinstance(result, StageResult) or not isinstance(result.correction, CorrectionBatch):
+                raise ValueError("every causal stage must return its correction; readout omission is unsupported")
             if result.correction.boundary_id != module:
                 raise ValueError("decoder correction returned for a different causal stage")
+            boundary = self.frame_plan.boundary_by_id[module]
+            if (result.correction.source_fingerprint != self.frame_plan.source_fingerprint
+                    or result.correction.block_use_id != boundary.block_use_id
+                    or result.correction.input_ids != boundary.input_ids):
+                raise ValueError("causal correction source/use/input ordering changed")
             if kind == "boundary":
                 self.boundary_decoders[module].validate_result(inputs, result)
+            else:
+                self.readout_decoders[module].validate_result(inputs, result)
             frames.apply(result.correction)
+            updated = frames.interpreted_measurements
             if kind == "boundary":
                 sectors[:, self.sector_slots[module]] = result.net_sector
+            elif not np.array_equal(parity(request.view.project_raw_measurements(updated),
+                                           self.readout_decoders[module].checks), expected):
+                raise ValueError("readout correction was omitted or its applied sector is stale")
             if trace:
-                traces.append(StageTrace(kind, module, inputs, result, current, frames.interpreted_measurements))
-        corrected = frames.interpreted_measurements
+                traces.append(StageTrace(kind, module, inputs, result, current, updated))
+            current = updated
+        return CausalReplay(frames, sectors, tuple(traces))
+
+
+class KnillDecoder(CausalDecoder):
+    def __init__(self, compiled):
+        super().__init__(compiled)
+        observable, = compiled.observables
+        if observable.basis != "Z" or observable.logical_id != "D":
+            raise ValueError("Knill memory needs one deterministic terminal D/Z observable")
+        self.observable = observable
+
+    def replay(self, raw, **options):
+        replay = self.replay_prefix(raw, **options)
+        corrected = replay.frames.interpreted_measurements
         value = np.logical_xor.reduce(corrected[:, self.observable.readout_measurement_indices], axis=1)
-        return KnillReplay(frames, sectors, value ^ bool(self.observable.expected_value), tuple(traces))
+        return KnillReplay(replay.frames, replay.sectors, value ^ bool(self.observable.expected_value), replay.stages)

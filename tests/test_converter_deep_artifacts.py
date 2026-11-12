@@ -48,7 +48,7 @@ def test_compile_cli_exports_probe_and_signed_state_without_sampling_or_decoder(
     path = Path(capsys.readouterr().out.strip())
     meta = json.loads((path/"metadata.json").read_text())
     assert meta["artifact_schema"] == "converter_generation_v1" and meta["status"] == "generated"
-    assert meta["purpose"] == "circuit_generation_only" and meta["decoder_status"] == "not_implemented_phase4"
+    assert meta["purpose"] == "circuit_generation_only" and meta["decoder_status"] == "not_constructed_generation_only"
     assert meta["config"]["workers"] == 1 and b"original input SHA256" in (path/"config.yaml").read_bytes()
     assert not list(path.rglob("*.parquet"))
     assert "logical_errors" not in json.dumps(meta)
@@ -81,14 +81,10 @@ def test_exact_native_probe_artifacts_full_gate_sequence_and_physical_support(ge
     assert entry["model"] == model["execution"]
 
 
-def test_scientific_run_and_resume_still_refuse_before_output_or_cleanup(tmp_path,generated):
-    doc = document(tmp_path)
-    with pytest.raises(NotImplementedError,match="scientific runner"):
-        dispatch(doc.source_path)
-    assert not (tmp_path/"artifacts").exists()
+def test_generation_bundle_cannot_resume_as_scientific_data(generated):
     path,_ = generated
     before = {str(p.relative_to(path)):hashlib.sha256(p.read_bytes()).hexdigest() for p in path.rglob("*") if p.is_file()}
-    with pytest.raises(NotImplementedError,match="scientific runner"):resume(path)
+    with pytest.raises(ValueError,match="generation-only"):resume(path)
     after = {str(p.relative_to(path)):hashlib.sha256(p.read_bytes()).hexdigest() for p in path.rglob("*") if p.is_file()}
     assert before == after
 

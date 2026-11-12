@@ -7,7 +7,9 @@ commits and additional runtime packages without changing numerical pins. With
 provenance/prepare without Git on the target. Existing four-wheel Hex bundles
 are unchanged. Converter SE and Phase 2 Knill memory support run/resume from
 the same optional wheel bundle. Phase 3 deep `compile` exports native physical/
-terminal-probe artifacts from that bundle; noisy deep decoding remains Phase 4.
+terminal-probe artifacts from that bundle. Phase 4 also runs/resumes noisy deep
+circuits and summarizes saved labels from the same optional wheels; see
+[deep decoding](converter_deep_decoding.md).
 See [installation and cluster details](converter_integration.md).
 
 研究用環境は **knill_system**、Python は **3.12.15** です。数値・解析・

@@ -1,4 +1,4 @@
-# Generation only: knill-bench-v2 compile THIS_FILE (no sampling or LER).
+# run/resume: seven-shot local-MWPM smoke; compile exports artifacts only.
 schema_version: 2
 kind: converter_deep_clifford
 name: converter_deep_clifford
@@ -17,6 +17,9 @@ r_plus: d
 input_preparation: ideal
 resource_preparation: ideal
 p_st_multiplier: 1.0
+shots: 7
+batch_size: 3
+buffer_shot: 3
 workers: 1
 master_seed: 12345
 output_root: results

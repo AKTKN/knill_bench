@@ -117,7 +117,7 @@ class RunStore:
             if (config.kind in {"knill_sim", "knill_ec_memory"}
                     and value.get("final_readout") != next(config.points()).final_readout):
                 raise ValueError("saved Knill final readout changed")
-            if config.kind in {"converter_se_memory", "converter_knill_memory"} and (
+            if config.kind in CONVERTER_KINDS and (
                     value.get("kind") != config.kind or value.get("gap_units") is not None
                     or value.get("final_readout") != next(config.points()).final_readout):
                 raise ValueError("saved converter memory kind/readout/score contract changed")

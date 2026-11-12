@@ -1893,3 +1893,90 @@ threshold, performance/paper-agreement result, production sweep or Phase 4
 implementation is included. Existing simulation schemas/runners, user files,
 branches and dependency sources are preserved. See
 docs/converter_deep_clifford.md and docs/converter_deep_clifford_report.md.
+
+## 2026-11-12 — converter noisy deep Clifford decoding, Phase 4
+
+Environment: Conda knill_system/Python 3.12.15, Stim 1.16.0, PyMatching 2.4.0;
+converter 457dc519adec6a11b38843a03e1c8fbbd6495f5a and stimflow
+ffe0d043598ed5df0851a3e6b4920359a23fafbd. Branch feature/converter-simulations
+starts from Phase 3 edee43a211229b7dbacf53a1db0db2eda77477c3. Source checkouts
+and numerical pins are unchanged. All newly sampled physical batches are d3
+and <=7 shots. Existing deep d5/depth-32 tests remain compilation-only.
+
+- Baseline:
+  `bash scripts/python.sh -m pytest -q tests/test_converter_knill_config.py tests/test_converter_knill_physics.py tests/test_converter_knill_execution.py tests/test_converter_local_matching.py --disable-warnings`
+  — **70 passed, 87.50 s**; /tmp/knill-converter-phase4-baseline.log.
+- Shared replay/artifact/routing regression:
+  `bash scripts/python.sh -m pytest -q tests/test_converter_knill_physics.py tests/test_converter_knill_execution.py tests/test_converter_infrastructure.py tests/test_converter_deep_artifacts.py tests/test_converter_provenance.py --disable-warnings --tb=short`
+  — **88 passed, 99.61 s**; /tmp/knill-converter-phase4-shared.log.
+  Synthetic seven-row storage tests explicitly mock new physics validators;
+  actual native scientific runs exercise them without mocks. Historical run
+  refusal tests now verify lazy scientific routing and generation-only resume
+  refusal before cleanup. Generation compile still forbids matching/sampling.
+- Initial dedicated decoder gate:
+  `bash scripts/python.sh -m pytest -q tests/test_converter_deep_decoding.py --disable-warnings --tb=short`
+  — **14 passed, 2 failed, 85.32 s**;
+  /tmp/knill-converter-phase4-decoding.log. Both failures were test-only logical
+  X injection supports taken from preparation metadata before a later Hadamard
+  changed orientation. Use all-data X/Z on the odd rotated CSS patch, valid in
+  either orientation, to inject a declared logical Pauli. Production remains
+  converter-owned; no physical lifting/schedule change was made.
+- Initial dedicated execution gate:
+  `bash scripts/python.sh -m pytest -q tests/test_converter_deep_execution.py --disable-warnings --tb=short`
+  — **17 passed, 1 failed, 113.82 s**;
+  /tmp/knill-converter-phase4-execution.log. One test used the wrong filename
+  terminal_stabilizers.json; corrected to logical_stabilizers.json.
+- Corrected fault/artifact subset:
+  `bash scripts/python.sh -m pytest -q tests/test_converter_deep_decoding.py -k 'logical_and_single or teleportation' tests/test_converter_deep_execution.py -k 'logical_and_single or teleportation or rejects_inconsistent' --disable-warnings --tb=short`
+  — **8 passed, 26 deselected, 27.88 s**;
+  /tmp/knill-converter-phase4-fixes.log. The final full gate below retains every
+  test and adds further saved-policy corruption cases.
+- `bash scripts/python.sh /tmp/knill_converter_phase4_smoke.py`
+  — actual installed validate-config/run/completed-resume/summarize-deep pass
+  for noisy/fixed and ideal-M9/auto policies, d3/depth 1/p=.03, three shots,
+  two workers. Exact sidecar hashes, contiguous IDs/counts and byte-identical
+  completed resume pass. Saved summary rates/Wilson endpoints match labels.
+  Counts are 2/3 and 3/3 respectively: tiny software checks, no scientific
+  precision/performance claim. All 22 pre-change physical identities/seeds match;
+  all but the explicitly seven-shot deep example retain canonical config hashes.
+  /tmp/knill-converter-phase4-cli.log; ignored results/converter_phase4_smoke.
+- `bash scripts/python.sh scripts/build_cluster_bundle.py --with-converter --output results/converter_phase4_smoke/bundle`
+  and
+  `bash scripts/python.sh -m pip install --no-deps --no-compile --target results/converter_phase4_smoke/installed results/converter_phase4_smoke/bundle/wheels/*.whl`
+  — six project wheels build/install, with converter grammar and all 72 Hex
+  matrix resources. Dependency repos and environment installations stay intact.
+  /tmp/knill-converter-phase4-bundle.log and wheel-install.log.
+- `bash scripts/python.sh /tmp/knill_converter_phase4_wheel_smoke.py`
+  — verified installed bench/converter/stimflow imports with PATH empty and Git
+  unavailable. Both policies run/resume/summarize at d3/depth 1/p=.03, three
+  shots/two workers; saved counts 2/3 and 3/3, exact completed bytes preserved.
+  Existing Conda numerical dependencies are used; no new offline Python env.
+  /tmp/knill-converter-phase4-wheel.log and ignored wheel_smoke.json.
+- `bash scripts/python.sh -m pip check` — no broken requirements.
+  `bash scripts/python.sh -m compileall -q src tests/test_converter_deep_decoding.py tests/test_converter_deep_execution.py`
+  and `git diff --check` pass. No private converter imports or dependency edits.
+
+- Read-only Hex gate:
+  `bash scripts/python.sh -m pytest -q external/Hex/tests/test_codecapacity_public.py external/Hex/tests/test_knill_noise.py --disable-warnings`
+  — **41 passed, 188 inherited warnings, 15.60 s**;
+  /tmp/knill-converter-phase4-hex.log. Native code-capacity/noise sources stay clean.
+- AST import audit of src/knill_bench/converter passes: converter imports use only
+  logical_to_stim_converter and logical_to_stim_converter.decoding public APIs.
+- Final complete bench regression:
+  `bash scripts/python.sh -m pytest -q --disable-warnings`
+  — **940 passed, 1356 inherited warnings, 800.07 s (13:20)**;
+  /tmp/knill-converter-phase4-full.log. No exclusions or warning-policy changes.
+  All 38 new deep decoder/execution cases and existing converter SE/Knill,
+  deep generation/depth-32, Hex-adapter and v1 regressions pass. This includes
+  corrected fault/artifact fixtures, all additional metadata corruption cases,
+  same-batch independent projection/MWPM/symplectic checks and finite-p output.
+
+Phase 4 is complete: both physical resource policies produce validated saved
+per-shot deep logical-error labels. The local decoder retains deterministic
+Clifford transport without correlated/joint inference. Reported rates use any
+corrected terminal signed-stabilizer flip per whole circuit; tiny validation
+runs support no threshold or paper-curve claim. No production sweep or noisy
+depth-32 run was launched. Only intended bench source/tests/docs/examples are
+committed; no dependency source, pins, environment, user notebook, experiment
+output or other branch was changed. See docs/converter_deep_decoding.md and
+docs/converter_deep_decoding_report.md.

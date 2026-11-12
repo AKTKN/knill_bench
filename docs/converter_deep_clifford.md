@@ -3,7 +3,8 @@
 `converter_deep_clifford` now generates and compiles logical Clifford circuits
 with parallel Knill EC, validates their logical stabilizers and appends native
 terminal probes. No noisy deep-circuit decoder or logical error rate is
-implemented in this phase. Existing converter SE/Knill memory and Hex runners
+implemented by this generation model. Phase 4 now adds a separate
+[scientific runner and local decoder](converter_deep_decoding.md). Existing converter SE/Knill memory and Hex runners
 are unchanged.
 
 The circuit family uses ideal plus-state input, single-qubit H/X/Y/Z gates,
@@ -30,8 +31,9 @@ knill-bench-v2 compile configs/converter_deep_clifford_v2_example.yaml
 
 `compile` creates a fresh artifact-only directory and prints its path. It
 does not sample, create a matching decoder, write an error Parquet table or
-mark a scientific run complete. Deep `run` and `resume` still raise before
-creating or cleaning data. `prepare` retains the Phase 0 empty-run contract.
+mark a scientific run complete. Phase 4 `run` and `resume` use a separate
+scientific dataset; see [deep decoding](converter_deep_decoding.md).
+`prepare` retains the Phase 0 empty-run contract.
 A generated bundle is inspected through its files; it is not a resumable
 simulation dataset. Repeating `compile` always creates a new directory.
 
@@ -190,5 +192,6 @@ the native physical PARALLEL operations.
 See [the implementation report](converter_deep_clifford_report.md) and
 [TEST.md](../TEST.md) for deterministic, signed-state, parallel/resource,
 probe-isolation and depth-32 checks. All sampled fixtures are noiseless d3
-with at most seven shots. Finite-p models are compiled but are not decoded or
-used to report deep-circuit LER.
+with at most seven shots. These generation-only tests compile finite-p models without decoding. Phase 4
+[scientific validation](converter_deep_decoding_report.md) separately exercises
+finite-p labels; no noisy depth-32 run is included.
